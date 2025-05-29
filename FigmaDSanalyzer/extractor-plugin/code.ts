@@ -41,15 +41,40 @@ async function extractDesignSystemData() {
   };
 
   // Extrair componentes principais
-  const components = figma.root.findAll(node => node.type === 'COMPONENT') as ComponentNode[];
-  for (const component of components) {
-    componentsFile.components[component.name] = {
-      key: component.key,
-      id: component.id,
-      description: component.description || '',
-      type: component.type
-    };
-  }
+const isVisibleComponent = (name: string) => !name.startsWith('.') && !name.startsWith('_');
+
+const componentEntries: Record<string, { key: string }> = {};
+
+// Componentes independentes
+const components = figma.root.findAll(node =>
+  node.type === 'COMPONENT' &&
+  node.parent?.type !== 'COMPONENT_SET' &&
+  isVisibleComponent(node.name)
+);
+
+// Component Sets (agrupam variantes)
+const componentSets = figma.root.findAll(node =>
+  node.type === 'COMPONENT_SET' &&
+  isVisibleComponent(node.name)
+);
+
+// Adiciona componentes independentes
+for (const component of components) {
+  componentEntries[component.name] = {
+    key: component.key
+  };
+}
+
+// Adiciona component sets
+for (const set of componentSets) {
+  componentEntries[set.name] = {
+    key: set.key
+  };
+}
+
+// Salvar no arquivo final
+componentsFile.components = componentEntries;
+
 
   // Extrair estilos de cor
   const paintStyles = figma.getLocalPaintStyles();
