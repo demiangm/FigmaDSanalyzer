@@ -14,7 +14,7 @@ figma.ui.onmessage = async (msg) => {
         });
       }
       break;
-      
+
     case 'close':
       figma.closePlugin();
       break;
@@ -22,7 +22,10 @@ figma.ui.onmessage = async (msg) => {
 };
 
 async function extractDesignSystemData() {
-  const componentsFile: any = {
+  const componentsFile: {
+    metadata: { extractedAt: string; fileName: string };
+    components: Record<string, { key: string }>;
+  } = {
     metadata: {
       extractedAt: new Date().toISOString(),
       fileName: figma.root.name
@@ -30,7 +33,12 @@ async function extractDesignSystemData() {
     components: {}
   };
 
-  const stylesFile: any = {
+  const stylesFile: {
+    metadata: { extractedAt: string; fileName: string };
+    colorStyles: Record<string, string>;
+    textStyles: Record<string, string>;
+    effectStyles: Record<string, string>;
+  } = {
     metadata: {
       extractedAt: new Date().toISOString(),
       fileName: figma.root.name
@@ -40,64 +48,58 @@ async function extractDesignSystemData() {
     effectStyles: {}
   };
 
-  // Extrair componentes principais
-const isVisibleComponent = (name: string) => !name.startsWith('.') && !name.startsWith('_');
+  const isVisibleComponent = (name: string): boolean =>
+    !name.startsWith('.') && !name.startsWith('_');
 
-const componentEntries: Record<string, { key: string }> = {};
+  const componentEntries: Record<string, { key: string }> = {};
 
-// Componentes independentes
-const components = figma.root.findAll(node =>
-  node.type === 'COMPONENT' &&
-  node.parent?.type !== 'COMPONENT_SET' &&
-  isVisibleComponent(node.name)
-);
+  const components = figma.root.findAll(node =>
+    node.type === 'COMPONENT' &&
+    node.parent?.type !== 'COMPONENT_SET' &&
+    isVisibleComponent(node.name)
+  );
 
-// Component Sets (agrupam variantes)
-const componentSets = figma.root.findAll(node =>
-  node.type === 'COMPONENT_SET' &&
-  isVisibleComponent(node.name)
-);
+  const componentSets = figma.root.findAll(node =>
+    node.type === 'COMPONENT_SET' &&
+    isVisibleComponent(node.name)
+  );
 
-// Adiciona componentes independentes
-for (const component of components) {
-  componentEntries[component.name] = {
-    key: component.key
-  };
-}
+  for (const component of components) {
+    componentEntries[component.name] = {
+      key: component.key
+    };
+  }
 
-// Adiciona component sets
-for (const set of componentSets) {
-  componentEntries[set.name] = {
-    key: set.key
-  };
-}
+  for (const set of componentSets) {
+    componentEntries[set.name] = {
+      key: set.key
+    };
+  }
 
-// Salvar no arquivo final
-componentsFile.components = componentEntries;
+  componentsFile.components = componentEntries;
 
+  for (const style of figma.getLocalPaintStyles()) {
+    stylesFile.colorStyles[style.name] = `VariableID:${style.key}`;
+  }
 
-  // Extrair estilos de cor
-const paintStyles = figma.getLocalPaintStyles();
-for (const style of paintStyles) {
-  stylesFile.colorStyles[style.name] = `VariableID:${style.key}`;
-}
+  for (const style of figma.getLocalTextStyles()) {
+    stylesFile.textStyles[style.name] = `S:${style.id}`;
+  }
 
-  // Extrair estilos de texto
-const textStyles = figma.getLocalTextStyles();
-for (const style of textStyles) {
-  stylesFile.textStyles[style.name] = `S:${style.id}`;
-}
+  for (const style of figma.getLocalEffectStyles()) {
+    stylesFile.effectStyles[style.name] = `S:${style.id}`;
+  }
 
-  // Extrair estilos de efeito
-const effectStyles = figma.getLocalEffectStyles();
-for (const style of effectStyles) {
-  stylesFile.effectStyles[style.name] = `S:${style.id}`;
-}
+  const baseFileName = figma.root.name.trim().replace(/\s+/g, '-');
 
   figma.ui.postMessage({
     type: 'extraction-complete',
     componentsFile,
     stylesFile,
+    fileNames: {
+      components: `${baseFileName}.components.json`,
+      styles: `${baseFileName}.styles.json`
+    },
     summary: {
       components: Object.keys(componentsFile.components).length,
       colorStyles: Object.keys(stylesFile.colorStyles).length,
