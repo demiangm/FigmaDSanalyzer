@@ -12,6 +12,7 @@ figma.ui.onmessage = async (msg) => {
         });
       }
       break;
+
     case 'close':
       figma.closePlugin();
       break;
@@ -37,16 +38,20 @@ async function extractDesignSystemData() {
     effectStyles: {}
   };
 
-  const isVisibleComponent = (name) => !name.startsWith('.') && !name.startsWith('_');
+  // Função utilitária para ocultos
+  const isVisibleComponent = name =>
+    !name.startsWith('.') && !name.startsWith('_');
 
   const componentEntries = {};
 
+  // Componentes independentes
   const components = figma.root.findAll(node =>
     node.type === 'COMPONENT' &&
     node.parent?.type !== 'COMPONENT_SET' &&
     isVisibleComponent(node.name)
   );
 
+  // Component sets
   const componentSets = figma.root.findAll(node =>
     node.type === 'COMPONENT_SET' &&
     isVisibleComponent(node.name)
@@ -66,31 +71,22 @@ async function extractDesignSystemData() {
 
   componentsFile.components = componentEntries;
 
+  // Estilos de cor
   const paintStyles = figma.getLocalPaintStyles();
   for (const style of paintStyles) {
-    stylesFile.colorStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
+    stylesFile.colorStyles[style.name] = `VariableID:${style.key}`;
   }
 
+  // Estilos de texto
   const textStyles = figma.getLocalTextStyles();
   for (const style of textStyles) {
-    stylesFile.textStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
+    stylesFile.textStyles[style.name] = `S:${style.id}`;
   }
 
+  // Estilos de efeito
   const effectStyles = figma.getLocalEffectStyles();
   for (const style of effectStyles) {
-    stylesFile.effectStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
+    stylesFile.effectStyles[style.name] = `S:${style.id}`;
   }
 
   figma.ui.postMessage({
