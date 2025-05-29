@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Design System Extractor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      background: #ffffff;
+      color: #333333;
+      padding: 16px;
+    }
+
+    .header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .main-button {
+      width: 100%;
+      height: 40px;
+      background: #0d99ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: background-color 0.2s;
+    }
+
+    .main-button:hover {
+      background: #0b8ce8;
+    }
+
+    .main-button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .results-container {
+      margin-top: 16px;
+    }
+
+    .results-card {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .results-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #000;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .summary-item {
+      background: white;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #e1e5e9;
+      text-align: center;
+    }
+
+    .summary-number {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0d99ff;
+    }
+
+    .summary-label {
+      font-size: 10px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .download-button {
+      width: 100%;
+      height: 32px;
+      background: #00c851;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .download-button:hover {
+      background: #00a844;
+    }
+
+    .error-message {
+      background: #ff4757;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      display: none;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border: 1px solid #bbdefb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .info-box h4 {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #1976d2;
+    }
+
+    .info-box p {
+      font-size: 11px;
+      color: #424242;
+      line-height: 1.4;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔍 Design System Extractor</h1>
+    <p>Extraia chaves de componentes e estilos das suas bibliotecas de design system</p>
+  </div>
+
+  <div class="info-box">
+    <h4>Como usar:</h4>
+    <p>1. Abra este plugin em arquivos que contêm bibliotecas de design system<br>
+    2. Clique em "Extrair Dados" para gerar os arquivos JSON<br>
+    3. Use os arquivos gerados no plugin analisador</p>
+  </div>
+
+  <div id="errorMessage" class="error-message"></div>
+
+  <button id="extractBtn" class="main-button">
+    🔍 Extrair Dados do Design System
+  </button>
+
+  <div id="resultsContainer" class="results-container hidden"></div>
+
+  <script>
+    const extractBtn = document.getElementById('extractBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    extractBtn.addEventListener('click', extractData);
+
+    function extractData() {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'extract-data'
+        }
+      }, '*');
+      
+      extractBtn.textContent = '🔍 Extraindo...';
+      extractBtn.disabled = true;
+      hideError();
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+    }
+
+    function hideError() {
+      errorMessage.style.display = 'none';
+    }
+
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadComponents() {
+      if (window.componentsData) {
+        const content = JSON.stringify(window.componentsData, null, 2);
+        downloadFile(content, 'components.json');
+      }
+    }
+
+    function downloadStyles() {
+      if (window.stylesData) {
+        const content = JSON.stringify(window.stylesData, null, 2);
+        downloadFile(content, 'styles.json');
+      }
+    }
+
+    // Escutar mensagens do plugin
+    window.addEventListener('message', (event) => {
+      const message = event.data.pluginMessage;
+      
+      switch (message.type) {
+        case 'extraction-complete':
+          extractBtn.textContent = '🔍 Extrair Dados do Design System';
+          extractBtn.disabled = false;
+          hideError();
+          
+          // Salvar dados para download
+          window.componentsData = message.componentsFile;
+          window.stylesData = message.stylesFile;
+          
+          // Mostrar resultados
+          resultsContainer.innerHTML = `
+            <div class="results-card">
+              <h3>✅ Extração Concluída</h3>
+              
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <div class="summary-number">${message.summary.components}</div>
+                  <div class="summary-label">Componentes</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-number">${message.summary.colorStyles}</div>
+                  <div class="summary-label">Estilos de Cor</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-number">${message.summary.textStyles}</div>
+                  <div class="summary-label">Estilos de Texto</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-number">${message.summary.variables}</div>
+                  <div class="summary-label">Variáveis</div>
+                </div>
+              </div>
+              
+              <button class="download-button" onclick="downloadComponents()">
+                📦 Baixar components.json
+              </button>
+              <button class="download-button" onclick="downloadStyles()">
+                🎨 Baixar styles.json
+              </button>
+            </div>
+          `;
+          resultsContainer.classList.remove('hidden');
+          break;
+          
+        case 'extraction-error':
+          extractBtn.textContent = '🔍 Extrair Dados do Design System';
+          extractBtn.disabled = false;
+          showError(message.message);
+          break;
+      }
+    });
+  </script>
+</body>
+</html>
