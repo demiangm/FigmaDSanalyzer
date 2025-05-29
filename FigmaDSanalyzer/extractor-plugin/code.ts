@@ -77,34 +77,22 @@ componentsFile.components = componentEntries;
 
 
   // Extrair estilos de cor
-  const paintStyles = figma.getLocalPaintStyles();
-  for (const style of paintStyles) {
-    stylesFile.colorStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
-  }
+const paintStyles = figma.getLocalPaintStyles();
+for (const style of paintStyles) {
+  stylesFile.colorStyles[style.name] = `VariableID:${style.key}`;
+}
 
   // Extrair estilos de texto
-  const textStyles = figma.getLocalTextStyles();
-  for (const style of textStyles) {
-    stylesFile.textStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
-  }
+const textStyles = figma.getLocalTextStyles();
+for (const style of textStyles) {
+  stylesFile.textStyles[style.name] = `S:${style.id}`;
+}
 
   // Extrair estilos de efeito
-  const effectStyles = figma.getLocalEffectStyles();
-  for (const style of effectStyles) {
-    stylesFile.effectStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
-  }
+const effectStyles = figma.getLocalEffectStyles();
+for (const style of effectStyles) {
+  stylesFile.effectStyles[style.name] = `S:${style.id}`;
+}
 
   figma.ui.postMessage({
     type: 'extraction-complete',
