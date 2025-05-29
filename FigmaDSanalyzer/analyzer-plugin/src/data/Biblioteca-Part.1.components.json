@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "extractedAt": "2025-05-29T20:38:26.897Z",
+    "fileName": "Biblioteca Part.1"
+  },
+  "components": {
+    "Modal ": {
+      "key": "da7a0425f4d2987ea7ed22fc37adbe3972d2bd18"
+    },
+    "Stepper/App": {
+      "key": "a7b1c9b155357a4faacfe1922cff42e32b2c9b29"
+    },
+    "Stepper/Web/MSite": {
+      "key": "69b7a298b51a4fd8148274a6a174f7de3103d989"
+    },
+    "Auto complete (Loading state)": {
+      "key": "422e2b18bcb95af3f96ae284c56613beffcb5f63"
+    },
+    "Select dropdown": {
+      "key": "0a7d90e8feafe9c3cf929ddb44b647b52f9a9ba4"
+    },
+    "Select Bottom sheet": {
+      "key": "7d4ab433bc04a081e280ec76cf31d07ff3e7b0ca"
+    },
+    "Bottom sheet": {
+      "key": "d845f5a7395f86b0d8e14cfcbb1a4335acc4be36"
+    },
+    "Button": {
+      "key": "f8d6f9e4ef3771d62e816ede00de7eb3ff9370e1"
+    },
+    "Button.Icon": {
+      "key": "19ad6ceeec554c67bb8ee01f8b46ed1070cec651"
+    },
+    "Item list": {
+      "key": "15b96dbf09ff2cc9052bfa779a742a60b8a817c1"
+    },
+    "Link": {
+      "key": "dde6ace155d9a150644091a82bb6d72adb23a040"
+    },
+    "Menu item": {
+      "key": "166a1ab1e97788a12fba8008854e5a50b4744ef9"
+    },
+    "Menu subitem": {
+      "key": "61bb8e01560bf81c05286c300bf0e2b08e4e434a"
+    },
+    "Stepper/Web": {
+      "key": "4b627deadc85f6427d431235e3e4c18c22df96b2"
+    },
+    "Checkbox": {
+      "key": "c1928326689042c3633904784e6be6e64ba0f71c"
+    },
+    "Radio": {
+      "key": "bafb78c5ab6e8159b320116f2abe0514b3a2a20b"
+    },
+    "Dialog": {
+      "key": "3cc889d28c08d099d47fcfadae680d87ad28dfc8"
+    },
+    "Search ": {
+      "key": "56e164cfb52c2b77d16844e523d8f04d53f3b94b"
+    },
+    "Select": {
+      "key": "341353e87e2a85f81c6063363ac70878b0b04e1d"
+    },
+    "Switch": {
+      "key": "421d15abc1cd2d4775e97989903ace48a619fa85"
+    },
+    "Textfield": {
+      "key": "d62e6d54ac6458cbe0e30cfc6968eccf599982c1"
+    },
+    "Mobile/Sub-Accordion": {
+      "key": "bc6242bf476dc27526a7b30407a4b4691be8a65e"
+    },
+    "Mobile/Accordion": {
+      "key": "15bb75c8f6151f527c4823ec4681a09993a09760"
+    },
+    "Desktop/Sub-Accordion": {
+      "key": "fa4c5b81af4a57227742593435239ff583fba056"
+    },
+    "Desktop/Accordion": {
+      "key": "2502479b4d6d6876ceff84986e27cbe61badbb76"
+    },
+    "Alert": {
+      "key": "220e7a3930e1df260e6860d2fda1286f8c194366"
+    },
+    "Badge": {
+      "key": "1b87f30859aa7b27617ad924e9ebb1193d61ed45"
+    },
+    "Loading": {
+      "key": "664766a16f05356f97a7f3ae94b14240d9463b3d"
+    },
+    "Tags - Read-only": {
+      "key": "568abebae390bb24e2f612293ec3a90907d58d83"
+    },
+    "Tags - Toggleable": {
+      "key": "d63857057e7f9cac24727e971d75d9701b22a289"
+    },
+    "Tags - Removable": {
+      "key": "9af16225c034c6c8e5fabddddcd291cf5b2ad32e"
+    },
+    "Seleção": {
+      "key": "ec171a4d0464e4fc05d901c7b8d0f947500f4143"
+    }
+  }
+}

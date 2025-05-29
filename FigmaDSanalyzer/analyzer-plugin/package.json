@@ -1,0 +1,13 @@
+{
+  "name": "extractor-plugin",
+  "version": "1.0.0",
+  "prebuild": "ts-node scripts/generate-json-imports.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.113.0",
+    "@types/node": "^22.15.24",
+    "typescript": "^5.0.0"
+  }
+}
