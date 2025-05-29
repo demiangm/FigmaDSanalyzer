@@ -89,10 +89,16 @@ async function extractDesignSystemData() {
     stylesFile.effectStyles[style.name] = `S:${style.id}`;
   }
 
+  const baseFileName = figma.root.name.trim().replace(/\s+/g, '-');
+
   figma.ui.postMessage({
     type: 'extraction-complete',
     componentsFile,
     stylesFile,
+    fileNames: {
+      components: `${baseFileName}.components.json`,
+      styles: `${baseFileName}.styles.json`
+    },
     summary: {
       components: Object.keys(componentsFile.components).length,
       colorStyles: Object.keys(stylesFile.colorStyles).length,
