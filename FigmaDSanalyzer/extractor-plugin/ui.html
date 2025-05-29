@@ -181,116 +181,121 @@
 
   <div id="resultsContainer" class="results-container hidden"></div>
 
-  <script>
-    const extractBtn = document.getElementById('extractBtn');
-    const errorMessage = document.getElementById('errorMessage');
-    const resultsContainer = document.getElementById('resultsContainer');
+<script>
+  const extractBtn = document.getElementById('extractBtn');
+  const errorMessage = document.getElementById('errorMessage');
+  const resultsContainer = document.getElementById('resultsContainer');
 
-    extractBtn.addEventListener('click', extractData);
+  extractBtn.addEventListener('click', extractData);
 
-    function extractData() {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'extract-data'
-        }
-      }, '*');
-      
-      extractBtn.textContent = '🔍 Extraindo...';
-      extractBtn.disabled = true;
-      hideError();
-    }
-
-    function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.style.display = 'block';
-    }
-
-    function hideError() {
-      errorMessage.style.display = 'none';
-    }
-
-    function downloadFile(content, filename) {
-      const blob = new Blob([content], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function downloadComponents() {
-      if (window.componentsData) {
-        const content = JSON.stringify(window.componentsData, null, 2);
-        downloadFile(content, 'components.json');
+  function extractData() {
+    parent.postMessage({
+      pluginMessage: {
+        type: 'extract-data'
       }
-    }
+    }, '*');
+    
+    extractBtn.textContent = '🔍 Extraindo...';
+    extractBtn.disabled = true;
+    hideError();
+  }
 
-    function downloadStyles() {
-      if (window.stylesData) {
-        const content = JSON.stringify(window.stylesData, null, 2);
-        downloadFile(content, 'styles.json');
-      }
-    }
+  function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+  }
 
-    // Escutar mensagens do plugin
-    window.addEventListener('message', (event) => {
-      const message = event.data.pluginMessage;
-      
-      switch (message.type) {
-        case 'extraction-complete':
-          extractBtn.textContent = '🔍 Extrair Dados do Design System';
-          extractBtn.disabled = false;
-          hideError();
-          
-          // Salvar dados para download
-          window.componentsData = message.componentsFile;
-          window.stylesData = message.stylesFile;
-          
-          // Mostrar resultados
-          resultsContainer.innerHTML = `
-            <div class="results-card">
-              <h3>✅ Extração Concluída</h3>
-              
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <div class="summary-number">${message.summary.components}</div>
-                  <div class="summary-label">Componentes</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-number">${message.summary.colorStyles}</div>
-                  <div class="summary-label">Estilos de Cor</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-number">${message.summary.textStyles}</div>
-                  <div class="summary-label">Estilos de Texto</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-number">${message.summary.variables}</div>
-                  <div class="summary-label">Variáveis</div>
-                </div>
+  function hideError() {
+    errorMessage.style.display = 'none';
+  }
+
+  function downloadFile(content, filename) {
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  let componentsData = null;
+  let stylesData = null;
+  let fileNames = null;
+
+  window.onmessage = (event) => {
+    const message = event.data.pluginMessage;
+
+    if (!message) return;
+
+    switch (message.type) {
+      case 'extraction-complete':
+        extractBtn.textContent = '🔍 Extrair Dados do Design System';
+        extractBtn.disabled = false;
+        hideError();
+
+        componentsData = message.componentsFile;
+        stylesData = message.stylesFile;
+        fileNames = message.fileNames;
+
+        resultsContainer.innerHTML = `
+          <div class="results-card">
+            <h3>✅ Extração Concluída</h3>
+
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-number">${message.summary.components}</div>
+                <div class="summary-label">Componentes</div>
               </div>
-              
-              <button class="download-button" onclick="downloadComponents()">
-                📦 Baixar components.json
-              </button>
-              <button class="download-button" onclick="downloadStyles()">
-                🎨 Baixar styles.json
-              </button>
+              <div class="summary-item">
+                <div class="summary-number">${message.summary.colorStyles}</div>
+                <div class="summary-label">Estilos de Cor</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-number">${message.summary.textStyles}</div>
+                <div class="summary-label">Estilos de Texto</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-number">${message.summary.variables}</div>
+                <div class="summary-label">Variáveis</div>
+              </div>
             </div>
-          `;
-          resultsContainer.classList.remove('hidden');
-          break;
-          
-        case 'extraction-error':
-          extractBtn.textContent = '🔍 Extrair Dados do Design System';
-          extractBtn.disabled = false;
-          showError(message.message);
-          break;
-      }
-    });
-  </script>
+
+            <button class="download-button" onclick="downloadComponents()">
+              📦 Baixar ${fileNames.components}
+            </button>
+            <button class="download-button" onclick="downloadStyles()">
+              🎨 Baixar ${fileNames.styles}
+            </button>
+          </div>
+        `;
+
+        resultsContainer.classList.remove('hidden');
+        break;
+
+      case 'extraction-error':
+        extractBtn.textContent = '🔍 Extrair Dados do Design System';
+        extractBtn.disabled = false;
+        showError(message.message);
+        break;
+    }
+  };
+
+  function downloadComponents() {
+    if (componentsData && fileNames?.components) {
+      const content = JSON.stringify(componentsData, null, 2);
+      downloadFile(content, fileNames.components);
+    }
+  }
+
+  function downloadStyles() {
+    if (stylesData && fileNames?.styles) {
+      const content = JSON.stringify(stylesData, null, 2);
+      downloadFile(content, fileNames.styles);
+    }
+  }
+</script>
 </body>
 </html>

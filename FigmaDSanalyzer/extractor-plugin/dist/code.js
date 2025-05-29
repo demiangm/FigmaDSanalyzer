@@ -1,95 +1,102 @@
+"use strict";
 // Plugin para extrair chaves de componentes e estilos das bibliotecas do design system
-
-figma.showUI(__html__, { width: 360, height: 500 });
-
-figma.ui.onmessage = async (msg) => {
-  switch (msg.type) {
-    case 'extract-data':
-      try {
-        await extractDesignSystemData();
-      } catch (error) {
-        figma.ui.postMessage({
-          type: 'extraction-error',
-          message: error instanceof Error ? error.message : 'Erro ao extrair dados'
-        });
-      }
-      break;
-      
-    case 'close':
-      figma.closePlugin();
-      break;
-  }
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-
-async function extractDesignSystemData() {
-  const componentsFile = {
-    metadata: {
-      extractedAt: new Date().toISOString(),
-      fileName: figma.root.name
-    },
-    components: {}
-  };
-
-  const stylesFile = {
-    metadata: {
-      extractedAt: new Date().toISOString(),
-      fileName: figma.root.name
-    },
-    colorStyles: {},
-    textStyles: {},
-    effectStyles: {}
-  };
-
-  // Extrair componentes principais
-  const components = figma.root.findAll(node => node.type === 'COMPONENT');
-  for (const component of components) {
-    componentsFile.components[component.name] = {
-      key: component.key,
-      id: component.id,
-      description: component.description || '',
-      type: component.type
-    };
-  }
-
-  // Extrair estilos de cor
-  const paintStyles = figma.getLocalPaintStyles();
-  for (const style of paintStyles) {
-    stylesFile.colorStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
-  }
-
-  // Extrair estilos de texto
-  const textStyles = figma.getLocalTextStyles();
-  for (const style of textStyles) {
-    stylesFile.textStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
-  }
-
-  // Extrair estilos de efeito
-  const effectStyles = figma.getLocalEffectStyles();
-  for (const style of effectStyles) {
-    stylesFile.effectStyles[style.name] = {
-      id: style.id,
-      key: style.key,
-      description: style.description || ''
-    };
-  }
-
-  figma.ui.postMessage({
-    type: 'extraction-complete',
-    componentsFile,
-    stylesFile,
-    summary: {
-      components: Object.keys(componentsFile.components).length,
-      colorStyles: Object.keys(stylesFile.colorStyles).length,
-      textStyles: Object.keys(stylesFile.textStyles).length,
-      effectStyles: Object.keys(stylesFile.effectStyles).length
+figma.showUI(__html__, { width: 360, height: 500 });
+figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
+    switch (msg.type) {
+        case 'extract-data':
+            try {
+                yield extractDesignSystemData();
+            }
+            catch (error) {
+                figma.ui.postMessage({
+                    type: 'extraction-error',
+                    message: error instanceof Error ? error.message : 'Erro ao extrair dados'
+                });
+            }
+            break;
+        case 'close':
+            figma.closePlugin();
+            break;
     }
-  });
+});
+function extractDesignSystemData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const componentsFile = {
+            metadata: {
+                extractedAt: new Date().toISOString(),
+                fileName: figma.root.name
+            },
+            components: {}
+        };
+        const stylesFile = {
+            metadata: {
+                extractedAt: new Date().toISOString(),
+                fileName: figma.root.name
+            },
+            colorStyles: {},
+            textStyles: {},
+            effectStyles: {}
+        };
+        const isVisibleComponent = (name) => !name.startsWith('.') && !name.startsWith('_');
+        const componentEntries = {};
+        const components = figma.root.findAll(node => {
+            var _a;
+            return node.type === 'COMPONENT' &&
+                ((_a = node.parent) === null || _a === void 0 ? void 0 : _a.type) !== 'COMPONENT_SET' &&
+                isVisibleComponent(node.name);
+        });
+        const componentSets = figma.root.findAll(node => node.type === 'COMPONENT_SET' &&
+            isVisibleComponent(node.name));
+        // Adiciona componentes independentes
+        for (const component of components) {
+            componentEntries[component.name] = {
+                key: component.key
+            };
+        }
+        // Adiciona component sets
+        for (const set of componentSets) {
+            componentEntries[set.name] = {
+                key: set.key
+            };
+        }
+        componentsFile.components = componentEntries;
+        for (const style of figma.getLocalPaintStyles()) {
+            stylesFile.colorStyles[style.name] = `Key:${style.key}`;
+        }
+        for (const style of figma.getLocalTextStyles()) {
+            const cleanId = style.id.replace(/,+$/, '');
+            console.log(`TextStyle: ${style.name} => "${cleanId}"`);
+            stylesFile.textStyles[style.name] = cleanId;
+        }
+        for (const style of figma.getLocalEffectStyles()) {
+            const cleanId = style.id.trim().replace(/,+$/, '');
+            console.log(`EffectStyle: ${style.name} => "${cleanId}"`);
+            stylesFile.effectStyles[style.name] = cleanId;
+        }
+        const baseFileName = figma.root.name.trim().replace(/\s+/g, '-');
+        figma.ui.postMessage({
+            type: 'extraction-complete',
+            componentsFile,
+            stylesFile,
+            fileNames: {
+                components: `${baseFileName}.components.json`,
+                styles: `${baseFileName}.styles.json`
+            },
+            summary: {
+                components: Object.keys(componentsFile.components).length,
+                colorStyles: Object.keys(stylesFile.colorStyles).length,
+                textStyles: Object.keys(stylesFile.textStyles).length,
+                effectStyles: Object.keys(stylesFile.effectStyles).length
+            }
+        });
+    });
 }

@@ -1,0 +1,11 @@
+{
+  "name": "extractor-plugin",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.113.0",
+    "typescript": "^5.0.0"
+  }
+}
