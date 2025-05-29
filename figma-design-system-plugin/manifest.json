@@ -1,0 +1,24 @@
+{
+  "name": "Design System Compliance Analyzer",
+  "id": "design-system-compliance-analyzer",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+
+  "menu": [
+    {
+      "name": "Analyze Design System Compliance",
+      "command": "analyze"
+    },
+    {
+      "name": "Configure Design System",
+      "command": "configure"
+    }
+  ]
+}
