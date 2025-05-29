@@ -2,7 +2,7 @@
   "name": "Design System Extractor",
   "id": "designsystem-extractor",
   "api": "1.0.0",
-  "main": "code.js",
+  "main": "dist/code.js",
   "ui": "ui.html",
   "capabilities": [],
   "enableProposedApi": false,
