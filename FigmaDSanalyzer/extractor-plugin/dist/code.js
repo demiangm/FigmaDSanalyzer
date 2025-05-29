@@ -1,5 +1,3 @@
-// Plugin para extrair chaves de componentes e estilos das bibliotecas do design system
-
 figma.showUI(__html__, { width: 360, height: 500 });
 
 figma.ui.onmessage = async (msg) => {
@@ -14,7 +12,6 @@ figma.ui.onmessage = async (msg) => {
         });
       }
       break;
-      
     case 'close':
       figma.closePlugin();
       break;
@@ -40,18 +37,35 @@ async function extractDesignSystemData() {
     effectStyles: {}
   };
 
-  // Extrair componentes principais
-  const components = figma.root.findAll(node => node.type === 'COMPONENT');
+  const isVisibleComponent = (name) => !name.startsWith('.') && !name.startsWith('_');
+
+  const componentEntries = {};
+
+  const components = figma.root.findAll(node =>
+    node.type === 'COMPONENT' &&
+    node.parent?.type !== 'COMPONENT_SET' &&
+    isVisibleComponent(node.name)
+  );
+
+  const componentSets = figma.root.findAll(node =>
+    node.type === 'COMPONENT_SET' &&
+    isVisibleComponent(node.name)
+  );
+
   for (const component of components) {
-    componentsFile.components[component.name] = {
-      key: component.key,
-      id: component.id,
-      description: component.description || '',
-      type: component.type
+    componentEntries[component.name] = {
+      key: component.key
     };
   }
 
-  // Extrair estilos de cor
+  for (const set of componentSets) {
+    componentEntries[set.name] = {
+      key: set.key
+    };
+  }
+
+  componentsFile.components = componentEntries;
+
   const paintStyles = figma.getLocalPaintStyles();
   for (const style of paintStyles) {
     stylesFile.colorStyles[style.name] = {
@@ -61,7 +75,6 @@ async function extractDesignSystemData() {
     };
   }
 
-  // Extrair estilos de texto
   const textStyles = figma.getLocalTextStyles();
   for (const style of textStyles) {
     stylesFile.textStyles[style.name] = {
@@ -71,7 +84,6 @@ async function extractDesignSystemData() {
     };
   }
 
-  // Extrair estilos de efeito
   const effectStyles = figma.getLocalEffectStyles();
   for (const style of effectStyles) {
     stylesFile.effectStyles[style.name] = {
