@@ -1,54 +1,283 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>FigmaDS Analyzer</title>
+  <meta charset="utf-8">
+  <title>Design System Compliance Analyzer</title>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 16px;
       margin: 0;
-      background: #f9f9f9;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #ffffff;
+      color: #333;
     }
-
-    h1 {
-      margin-top: 0;
-    }
-
-    .results {
-      background: white;
-      border-radius: 8px;
+    .container {
       padding: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-height: 80vh;
+      height: calc(100vh - 32px);
       overflow-y: auto;
     }
-
-    pre {
-      background: #eee;
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e5e5;
+      margin-bottom: 16px;
+    }
+    .title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+    }
+    /* .nav e .nav button foram removidos, pois as abas não existem mais */
+    .hero {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .hero h2 {
+      font-size: 18px;
+      margin: 0 0 8px;
+    }
+    .hero p {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+    .analyze-button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 24px 0;
+    }
+    .analyze-button:hover {
+      background: #0056b3;
+    }
+    .error {
+      background: #fee2e2;
+      color: #dc2626;
       padding: 12px;
       border-radius: 6px;
-      white-space: pre-wrap;
+      margin: 16px 0;
+      font-size: 12px;
+    }
+    .hidden {
+      display: none;
+    }
+    /* As classes .config-section, .input-group e suas subclasses foram removidas */
+    .results-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 8px 0;
+      border: 1px solid #e5e5e5;
+    }
+    .results-card h3 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #333;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #666;
+    }
+    .metric-value {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .metric-good { background: #d1fae5; color: #065f46; }
+    .metric-warning { background: #fef3c7; color: #92400e; }
+    .metric-error { background: #fee2e2; color: #991b1b; }
+    .download-button {
+      background: #28CD41;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      margin: 4px;
     }
   </style>
 </head>
 <body>
-  <h1>Resultado da Análise</h1>
-  <div class="results" id="results">
-    <p>Carregando dados...</p>
-  </div>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Design System Compliance</h1>
+      </div>
+
+    <div id="analyzePanel">
+      <div class="hero">
+        <h2>Analisar Conformidade do Design System</h2>
+        <p>Selecione frames ou componentes e execute uma análise para verificar a conformidade com os padrões do seu design system.</p>
+      </div>
+
+      <button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
+
+      <div id="errorMessage" class="error hidden"></div>
+      <div id="resultsContainer" class="hidden"></div>
+
+      <div id="dataSummary" class="hidden" style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px 0;">
+        <h4 style="margin: 0 0 8px; font-size: 12px; color: #0369a1;">Design System Carregado:</h4>
+        <div id="summaryContent" style="font-size: 11px; color: #0369a1;"></div>
+      </div>
+
+      <p style="font-size: 12px; color: #666; text-align: center;">
+        Selecione um ou mais frames no Figma, depois clique em "Iniciar Análise" para começar a verificação de conformidade.
+      </p>
+    </div>
+
+    </div>
 
   <script>
-    window.onmessage = (event) => {
-      const message = event.data.pluginMessage;
-      if (message.type === 'analysis-result') {
-        const resultsContainer = document.getElementById('results');
-        resultsContainer.innerHTML = `<pre>${JSON.stringify(message.data, null, 2)}</pre>`;
-      }
+    // Estado da aplicação
+    // currentView e designSystem podem ser mantidos ou movidos para o código do plugin se forem configuráveis
+    let designSystem = {
+      colors: ['#000000', '#FFFFFF', '#F5F5F5', '#007AFF', '#FF3B30'],
+      fonts: ['Inter', 'SF Pro Display', 'Roboto'],
+      componentPrefixes: ['DS/', 'Component/', 'UI/']
     };
 
-    // Solicita os dados ao código principal
-    parent.postMessage({ pluginMessage: { type: 'run-analysis' } }, '*');
+    // Elementos do DOM
+    // analyzeTab, configTab e configPanel foram removidos
+    const startAnalysisBtn = document.getElementById('startAnalysis');
+    const errorMessage = document.getElementById('errorMessage');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    // Event listeners
+    // Event listeners para analyzeTab e configTab foram removidos
+    startAnalysisBtn.addEventListener('click', startAnalysis);
+
+    // Funções
+    // switchView, renderConfig, renderColors, renderFonts, renderPrefixes,
+    // addColor, addFont, addPrefix, removeColor, removeFont, removePrefix e saveConfig
+    // foram removidos
+    function startAnalysis() {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'analyze-selection'
+          // Você pode incluir a configuração do designSystem aqui se for estática ou carregada de outro lugar
+          // config: designSystem 
+        }
+      }, '*');
+
+      startAnalysisBtn.textContent = 'Analisando...';
+      startAnalysisBtn.disabled = true;
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove('hidden');
+    }
+
+    function hideError() {
+      errorMessage.classList.add('hidden');
+    }
+
+    // Escutar mensagens do plugin
+    window.addEventListener('message', (event) => {
+      const message = event.data.pluginMessage;
+
+      switch (message.type) {
+        case 'analysis-complete':
+          startAnalysisBtn.textContent = 'Iniciar Análise';
+          startAnalysisBtn.disabled = false;
+          hideError();
+          showResults(message.reports);
+          break;
+
+        case 'analysis-error':
+          startAnalysisBtn.textContent = 'Iniciar Análise';
+          startAnalysisBtn.disabled = false;
+          showError(message.message);
+          break;
+
+        case 'design-system-loaded':
+          if (message.summary) {
+            updateDataSummary(message.summary);
+          }
+          break;
+      }
+    });
+
+    function showResults(reports) {
+      if (!reports || reports.length === 0) {
+        showError('Nenhum resultado encontrado');
+        return;
+      }
+
+      resultsContainer.classList.remove('hidden');
+      resultsContainer.innerHTML = reports.map(report => createResultCard(report)).join('');
+    }
+
+    function updateDataSummary(summary) {
+      const dataSummary = document.getElementById('dataSummary');
+      const summaryContent = document.getElementById('summaryContent');
+
+      summaryContent.innerHTML = `
+        <div>• ${summary.components} componentes</div>
+        <div>• ${summary.colorStyles} estilos de cor</div>
+        <div>• ${summary.textStyles} estilos de texto</div>
+        <div>• ${summary.effectStyles} estilos de efeito</div>
+      `;
+
+      dataSummary.classList.remove('hidden');
+    }
+
+    function createResultCard(report) {
+      const getMetricClass = (value) => {
+        if (value >= 90) return 'metric-good';
+        if (value >= 70) return 'metric-warning';
+        return 'metric-error';
+      };
+
+      return `
+        <div class="results-card">
+          <h3>${report.frameName}</h3>
+          <div class="metric-row">
+            <span class="metric-label">Conformidade Geral</span>
+            <span class="metric-value ${getMetricClass(report.overallCompliance)}">${report.overallCompliance}%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Cores do Design System</span>
+            <span class="metric-value ${getMetricClass(report.colorCompliance)}">${report.colorCompliance}% (${report.analysis.colors.compliant}/${report.analysis.colors.total})</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Fontes do Design System</span>
+            <span class="metric-value ${getMetricClass(report.fontCompliance)}">${report.fontCompliance}% (${report.analysis.fonts.compliant}/${report.analysis.fonts.total})</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Sombras do Design System</span>
+            <span class="metric-value ${getMetricClass(report.shadowCompliance)}">${report.shadowCompliance}% (${report.analysis.shadows.compliant}/${report.analysis.shadows.total})</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Componentes do Design System</span>
+            <span class="metric-value ${getMetricClass(report.componentCompliance)}">${report.componentCompliance}% (${report.analysis.components.compliant}/${report.analysis.components.total})</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Inicialização
+    parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
   </script>
 </body>
 </html>

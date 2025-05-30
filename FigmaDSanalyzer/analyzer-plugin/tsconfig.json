@@ -1,16 +1,21 @@
+// tsconfig.json (para o código do plugin Figma)
 {
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
-    "types": ["node"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "outDir": "dist",
-    "types": ["@figma/plugin-typings"]
+    "types": ["@figma/plugin-typings"], // REMOVA "node" daqui
+    "lib": ["esnext"] // Manter esta configuração para ambiente moderno sem DOM padrão
   },
-  "include": [
+ "include": [
     "src",
-    "scripts"
+    "code.ts"
+ ],
+  "exclude": [
+    "node_modules",
+    "scripts" // EXCLUA a pasta 'scripts' para que este tsconfig não a processe
   ]
 }

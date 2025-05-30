@@ -1,13 +1,19 @@
 {
   "name": "extractor-plugin",
   "version": "1.0.0",
-  "prebuild": "ts-node scripts/generate-json-imports.ts",
+  "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "generate-imports": "ts-node --project tsconfig.scripts.json scripts/generate-json-imports.ts",
+    "prebuild": "npm run generate-imports",
+    "build": "npm run generate-imports && tsc --project tsconfig.json"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.113.0",
-    "@types/node": "^22.15.24",
-    "typescript": "^5.0.0"
+    "@figma/plugin-typings": "^1.81.0",
+    "@types/node": "^20.12.12",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

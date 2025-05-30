@@ -1,0 +1,15 @@
+// tsconfig.scripts.json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "dist-scripts", // Diretório de saída temporário para os scripts, se necessário
+    "types": ["node"] // APENAS tipos Node.js aqui
+  },
+  "include": [
+    "scripts" // Inclua APENAS a pasta de scripts aqui
+  ]
+}
