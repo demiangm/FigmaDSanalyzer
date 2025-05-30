@@ -1,16 +1,21 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "types": ["node"],
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "target": "ES6",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2020", "DOM"],
     "outDir": "dist",
-    "types": ["@figma/plugin-typings"]
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "types": ["@figma/plugin-typings", "node"]
   },
-  "include": [
-    "src",
-    "scripts"
-  ]
+  "include": ["src/**/*", "scripts/**/*"],
+  "exclude": ["node_modules"]
 }

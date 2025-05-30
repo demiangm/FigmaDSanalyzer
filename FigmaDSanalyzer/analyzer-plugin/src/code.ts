@@ -1,13 +1,41 @@
 // Main plugin code that runs in Figma's sandbox
-import { AnalysisResult, ComplianceReport, DesignSystemConfig } from './src/types';
-import { analyzeNode } from './src/analyzer';
-import { getDefaultDesignSystem } from './src/designSystem';
+import { AnalysisResult, ComplianceReport, DesignSystemConfig } from './types';
+import { analyzeNode } from './analyzer';
+import { getDefaultDesignSystem } from './designSystem';
+import { jsonDataFiles, DesignSystemFile } from './imports';
 
 // Show the plugin UI
 figma.showUI(__html__, { width: 400, height: 600 });
 
 // Store design system configuration
 let designSystemConfig: DesignSystemConfig = getDefaultDesignSystem();
+
+// Load design system data from imported JSON files
+const designSystemData = {
+  components: {},
+  styles: {
+    colors: {},
+    text: {},
+    effects: {}
+  }
+};
+
+// Process imported JSON files
+jsonDataFiles.forEach((file: DesignSystemFile) => {
+  if (file.type === 'components') {
+    Object.assign(designSystemData.components, file.data.components);
+  } else if (file.type === 'styles') {
+    if (file.data.colorStyles) {
+      Object.assign(designSystemData.styles.colors, file.data.colorStyles);
+    }
+    if (file.data.textStyles) {
+      Object.assign(designSystemData.styles.text, file.data.textStyles);
+    }
+    if (file.data.effectStyles) {
+      Object.assign(designSystemData.styles.effects, file.data.effectStyles);
+    }
+  }
+});
 
 // Handle messages from the UI
 figma.ui.onmessage = async (msg) => {
@@ -18,7 +46,7 @@ figma.ui.onmessage = async (msg) => {
     
     case 'update-design-system':
       designSystemConfig = msg.config;
-      figma.clientStorage.setAsync('designSystemConfig', designSystemConfig);
+      await figma.clientStorage.setAsync('designSystemConfig', designSystemConfig);
       break;
     
     case 'get-design-system':
@@ -28,7 +56,8 @@ figma.ui.onmessage = async (msg) => {
       }
       figma.ui.postMessage({
         type: 'design-system-loaded',
-        config: designSystemConfig
+        config: designSystemConfig,
+        data: designSystemData
       });
       break;
     
@@ -103,8 +132,12 @@ async function analyzeNodeRecursively(node: SceneNode, analysis: AnalysisResult)
   // Skip sections, vectors, and groups for component analysis as requested
   const skipComponentAnalysis = ['SECTION', 'VECTOR', 'GROUP'].includes(node.type);
   
-  // Analyze current node
-  const nodeAnalysis = analyzeNode(node, designSystemConfig, skipComponentAnalysis);
+  // Analyze current node using imported design system data
+  const nodeAnalysis = analyzeNode(node, {
+    ...designSystemConfig,
+    components: designSystemData.components,
+    styles: designSystemData.styles
+  }, skipComponentAnalysis);
   
   // Aggregate results
   analysis.colors.compliant += nodeAnalysis.colors.compliant;
@@ -132,7 +165,6 @@ async function analyzeNodeRecursively(node: SceneNode, analysis: AnalysisResult)
 
   // Special handling for local instances - analyze their internal structure
   if (node.type === 'INSTANCE') {
-    // This is a local instance, analyze its internal structure
     const instanceAnalysis: AnalysisResult = {
       colors: { compliant: 0, total: 0, violations: [] },
       fonts: { compliant: 0, total: 0, violations: [] },
@@ -140,35 +172,33 @@ async function analyzeNodeRecursively(node: SceneNode, analysis: AnalysisResult)
       components: { compliant: 0, total: 0, violations: [] }
     };
     
-    // Analyze the instance's children recursively
     if ('children' in node && node.children) {
       for (const child of node.children) {
         await analyzeNodeRecursively(child, instanceAnalysis);
       }
     }
     
-    // Add local instance analysis to main analysis
-    analysis.colors.violations.push({
-      nodeId: node.id,
-      nodeName: node.name,
-      issue: `Local instance contains ${instanceAnalysis.colors.violations.length} color violations`,
-      currentValue: 'Local Instance',
-      expectedValue: 'Design System Component'
-    });
+    if (instanceAnalysis.colors.violations.length > 0) {
+      analysis.colors.violations.push({
+        nodeId: node.id,
+        nodeName: node.name,
+        issue: `Local instance contains ${instanceAnalysis.colors.violations.length} color violations`,
+        currentValue: 'Local Instance',
+        expectedValue: 'Design System Component'
+      });
+    }
   }
 }
 
 async function generateConfigurationFiles() {
   try {
-    // Extrair componentes principais
-    const components: any = {};
-    const colorStyles: any = {};
-    const textStyles: any = {};
-    const effectStyles: any = {};
+    const components: Record<string, { key: string }> = {};
+    const colorStyles: Record<string, string> = {};
+    const textStyles: Record<string, string> = {};
+    const effectStyles: Record<string, string> = {};
 
-    // Buscar todos os componentes principais na página atual
+    // Extract main components from current page
     const mainComponents = figma.currentPage.findAll(node => node.type === 'COMPONENT');
-    
     mainComponents.forEach(component => {
       const comp = component as ComponentNode;
       components[comp.name] = {
@@ -176,35 +206,57 @@ async function generateConfigurationFiles() {
       };
     });
 
-    // Buscar estilos de cor locais
+    // Extract local styles
     figma.getLocalPaintStyles().forEach(style => {
       colorStyles[style.name] = style.id;
     });
 
-    // Buscar estilos de texto locais  
     figma.getLocalTextStyles().forEach(style => {
       textStyles[style.name] = style.id;
     });
 
-    // Buscar estilos de efeito locais
     figma.getLocalEffectStyles().forEach(style => {
       effectStyles[style.name] = style.id;
     });
 
-    // Enviar arquivos para a UI
+    const timestamp = new Date().toISOString();
+    const fileName = figma.root.name;
+
+    // Create component and style files
+    const componentsFile = {
+      metadata: {
+        extractedAt: timestamp,
+        fileName: fileName
+      },
+      components
+    };
+
+    const stylesFile = {
+      metadata: {
+        extractedAt: timestamp,
+        fileName: fileName
+      },
+      colorStyles,
+      textStyles,
+      effectStyles
+    };
+
     figma.ui.postMessage({
       type: 'config-files-generated',
-      componentsFile: { components },
-      stylesFile: { colorStyles, textStyles, effectStyles }
+      componentsFile,
+      stylesFile
     });
 
   } catch (error: any) {
     figma.ui.postMessage({
       type: 'config-generation-error',
-      message: 'Erro ao gerar arquivos de configuração: ' + error.message
+      message: 'Error generating configuration files: ' + error.message
     });
   }
 }
 
 // Initialize the plugin
-figma.ui.postMessage({ type: 'plugin-initialized' });
+figma.ui.postMessage({ 
+  type: 'plugin-initialized',
+  designSystemData
+});

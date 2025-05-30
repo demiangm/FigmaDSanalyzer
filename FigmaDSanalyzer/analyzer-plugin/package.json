@@ -1,13 +1,18 @@
 {
   "name": "extractor-plugin",
   "version": "1.0.0",
-  "prebuild": "ts-node scripts/generate-json-imports.ts",
+  "description": "Figma Design System Extractor Plugin",
   "scripts": {
-    "build": "tsc"
+    "build": "npm run generate-imports && tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "generate-imports": "ts-node scripts/generate-json-imports.ts"
+  },
+  "dependencies": {
+    "@types/node": "^18.15.11"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.113.0",
-    "@types/node": "^22.15.24",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.4",
+    "ts-node": "^10.9.1"
   }
 }

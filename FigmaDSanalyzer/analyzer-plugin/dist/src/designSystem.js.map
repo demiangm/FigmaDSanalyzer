@@ -1,0 +1,1 @@
+{"version":3,"file":"designSystem.js","sourceRoot":"","sources":["../../src/designSystem.ts"],"names":[],"mappings":";;AAEA,wDASC;AATD,SAAgB,sBAAsB;IACpC,OAAO;QACL,UAAU,EAAE,EAAE;QACd,MAAM,EAAE;YACN,MAAM,EAAE,EAAE;YACV,IAAI,EAAE,EAAE;YACR,OAAO,EAAE,EAAE;SACZ;KACF,CAAC;AACJ,CAAC"}
