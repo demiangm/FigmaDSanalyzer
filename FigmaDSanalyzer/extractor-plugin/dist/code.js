@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-figma.showUI(__html__, { width: 360, height: 500 });
+const pluginInitialWidth = 520;
+figma.showUI(__html__, { width: pluginInitialWidth, height: 480 }); // A altura inicial pode ser um padrão ou mínima
 figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
     switch (msg.type) {
         case 'extract-data':
@@ -25,6 +26,12 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
             break;
         case 'close':
             figma.closePlugin();
+            break;
+        case 'resize-plugin-window': // Novo tipo de mensagem vindo da UI
+            if (msg.height && typeof msg.height === 'number' && msg.height > 0) {
+                // Você pode querer adicionar validações para altura mínima/máxima aqui
+                figma.ui.resize(pluginInitialWidth, msg.height);
+            }
             break;
     }
 });
