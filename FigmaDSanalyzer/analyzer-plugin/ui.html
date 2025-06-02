@@ -116,6 +116,38 @@
       cursor: pointer;
       margin: 4px;
     }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    
+    .metric-label {
+      color: #666;
+    }
+    
+    .metric-value {
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    
+    .metric-good {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .metric-warning {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    
+    .metric-error {
+      background: #fee2e2;
+      color: #dc2626;
+    }
   </style>
 </head>
 <body>
@@ -249,28 +281,64 @@
         return 'metric-error';
       };
 
+      const getCoverageClass = (level) => {
+        switch (level) {
+          case 'Boa': return 'metric-good';
+          case 'Baixa': return 'metric-warning';
+          case 'Muito Baixa': return 'metric-error';
+          default: return 'metric-error';
+        }
+      };
+
       return `
         <div class="results-card">
           <h3>${report.frameName}</h3>
+          
           <div class="metric-row">
-            <span class="metric-label">Conformidade Geral</span>
-            <span class="metric-value ${getMetricClass(report.overallCompliance)}">${report.overallCompliance}%</span>
+            <span class="metric-label">Cobertura do Design System</span>
+            <span class="metric-value ${getCoverageClass(report.coverageLevel)}">
+              ${report.coverageLevel} (${report.coveragePercentage}%)
+            </span>
           </div>
+
           <div class="metric-row">
-            <span class="metric-label">Cores do Design System</span>
-            <span class="metric-value ${getMetricClass(report.colorCompliance)}">${report.colorCompliance}% (${report.analysis.colors.compliant}/${report.analysis.colors.total})</span>
+            <span class="metric-label">Total de Camadas</span>
+            <span class="metric-value">${report.totalLayers}</span>
           </div>
+
           <div class="metric-row">
-            <span class="metric-label">Fontes do Design System</span>
-            <span class="metric-value ${getMetricClass(report.fontCompliance)}">${report.fontCompliance}% (${report.analysis.fonts.compliant}/${report.analysis.fonts.total})</span>
+            <span class="metric-label">Componentes do DS</span>
+            <span class="metric-value">${report.dsComponentsUsed}</span>
           </div>
+
+          <h4 style="margin: 16px 0 8px; font-size: 12px;">Itens fora do Design System:</h4>
+          
           <div class="metric-row">
-            <span class="metric-label">Sombras do Design System</span>
-            <span class="metric-value ${getMetricClass(report.shadowCompliance)}">${report.shadowCompliance}% (${report.analysis.shadows.compliant}/${report.analysis.shadows.total})</span>
+            <span class="metric-label">Componentes</span>
+            <span class="metric-value ${report.nonCompliantItems.components > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.components}
+            </span>
           </div>
+
           <div class="metric-row">
-            <span class="metric-label">Componentes do Design System</span>
-            <span class="metric-value ${getMetricClass(report.componentCompliance)}">${report.componentCompliance}% (${report.analysis.components.compliant}/${report.analysis.components.total})</span>
+            <span class="metric-label">Cores</span>
+            <span class="metric-value ${report.nonCompliantItems.colors > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.colors}
+            </span>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-label">Fontes</span>
+            <span class="metric-value ${report.nonCompliantItems.fonts > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.fonts}
+            </span>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-label">Efeitos</span>
+            <span class="metric-value ${report.nonCompliantItems.effects > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.effects}
+            </span>
           </div>
         </div>
       `;

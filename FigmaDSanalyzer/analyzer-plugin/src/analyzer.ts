@@ -1,222 +1,290 @@
+import { AnalysisResult, ComponentData, StylesData } from './types';
 
-import { AnalysisResult, ComponentData, StylesData, Violation } from './types';
+// Set to track processed nodes and avoid duplicates
+const processedNodes = new Set<string>();
+
+function analyzeNodeColors(
+  node: SceneNode, 
+  stylesData: StylesData[]
+): number {
+  let nonCompliantColors = 0;
+  console.log(`\nAnalisando cores do nó: ${node.name} (${node.id})`);
+
+  // Check fillStyleId
+  if ('fillStyleId' in node) {
+    const fillStyleId = (node as any).fillStyleId;
+    if (fillStyleId) {
+      console.log(`  Fill Style:`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        styleId: fillStyleId,
+        hasStyle: true
+      });
+      
+      if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+        nonCompliantColors++;
+        console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+          nodeId: node.id,
+          nodeName: node.name,
+          reason: 'Estilo não encontrado no DS'
+        });
+      } else {
+        console.log(`  ✅ Cor conforme (fill)`);
+      }
+    } else if (hasFills(node)) {
+      // If node has fills but no style, count as non-compliant
+      nonCompliantColors++;
+      console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        reason: 'Sem estilo vinculado'
+      });
+    }
+  }
+
+  // Check strokeStyleId
+  if ('strokeStyleId' in node) {
+    const strokeStyleId = (node as any).strokeStyleId;
+    if (strokeStyleId) {
+      console.log(`  Stroke Style:`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        styleId: strokeStyleId,
+        hasStyle: true
+      });
+      
+      if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+        nonCompliantColors++;
+        console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+          nodeId: node.id,
+          nodeName: node.name,
+          reason: 'Estilo não encontrado no DS'
+        });
+      } else {
+        console.log(`  ✅ Cor conforme (stroke)`);
+      }
+    } else if (hasStrokes(node)) {
+      // If node has strokes but no style, count as non-compliant
+      nonCompliantColors++;
+      console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        reason: 'Sem estilo vinculado'
+      });
+    }
+  }
+
+  return nonCompliantColors;
+}
+
+// Helper function to check if node has visible fills
+function hasFills(node: SceneNode): boolean {
+  if ('fills' in node) {
+    const fills = (node as any).fills;
+    if (Array.isArray(fills)) {
+      return fills.some(fill => fill && fill.visible !== false);
+    }
+  }
+  return false;
+}
+
+// Helper function to check if node has visible strokes
+function hasStrokes(node: SceneNode): boolean {
+  if ('strokes' in node) {
+    const strokes = (node as any).strokes;
+    if (Array.isArray(strokes)) {
+      return strokes.some(stroke => stroke && stroke.visible !== false);
+    }
+  }
+  return false;
+}
+
+function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
+  let nonCompliantFonts = 0;
+  
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    const textStyleId = textNode.textStyleId as string;
+    if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
+      nonCompliantFonts++;
+    }
+  }
+  
+  return nonCompliantFonts;
+}
+
+function analyzeNodeEffects(node: SceneNode, stylesData: StylesData[]): number {
+  let nonCompliantEffects = 0;
+  
+  if ('effectStyleId' in node) {
+    const effectStyleId = (node as any).effectStyleId;
+    if (effectStyleId) {
+      console.log(`  Effect Style:`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        styleId: effectStyleId,
+        hasStyle: true
+      });
+      
+      if (!isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData)) {
+        nonCompliantEffects++;
+        console.log(`  ❌ Efeito não conforme encontrado:`, {
+          nodeId: node.id,
+          nodeName: node.name,
+          reason: 'Estilo não encontrado no DS'
+        });
+      } else {
+        console.log(`  ✅ Efeito conforme`);
+      }
+    } else if (hasEffects(node)) {
+      // If node has effects but no style, count as non-compliant
+      nonCompliantEffects++;
+      console.log(`  ❌ Efeito não conforme encontrado:`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        reason: 'Sem estilo vinculado'
+      });
+    }
+  }
+  
+  return nonCompliantEffects;
+}
+
+// Helper function to check if node has visible effects
+function hasEffects(node: SceneNode): boolean {
+  if ('effects' in node) {
+    const effects = (node as any).effects;
+    if (Array.isArray(effects)) {
+      return effects.some(effect => effect && effect.visible !== false);
+    }
+  }
+  return false;
+}
+
+function isComponentFromDS(node: SceneNode, componentsData: ComponentData[]): boolean {
+  if (node.type === 'INSTANCE') {
+    const instance = node as InstanceNode;
+    const mainComponent = instance.mainComponent;
+    
+    if (mainComponent) {
+      return componentsData.some(data => 
+        Object.values(data.components).some(comp => {
+          const matchVariant = comp.key === mainComponent.key;
+          const matchParent = mainComponent.parent?.type === 'COMPONENT_SET' && 
+                            comp.key === (mainComponent.parent as ComponentSetNode).key;
+          return matchVariant || matchParent;
+        })
+      );
+    }
+  }
+  return false;
+}
+
+function analyzeSingleNode(
+  node: SceneNode, 
+  componentsData: ComponentData[], 
+  stylesData: StylesData[],
+  isTopLevel: boolean = true
+): AnalysisResult {
+  // Skip if node was already processed
+  if (processedNodes.has(node.id)) {
+    return {
+      nonCompliantColors: 0,
+      nonCompliantFonts: 0,
+      nonCompliantEffects: 0,
+      nonDsComponents: 0,
+      totalLayers: 0,
+      dsComponentsUsed: 0
+    };
+  }
+  
+  processedNodes.add(node.id);
+  
+  // Analyze styles
+  const nonCompliantColors = analyzeNodeColors(node, stylesData);
+  const nonCompliantFonts = analyzeNodeFonts(node, stylesData);
+  const nonCompliantEffects = analyzeNodeEffects(node, stylesData);
+  
+  // Count this node as a layer if it's not a section, group, or vector
+  const shouldCountAsLayer = !['SECTION', 'GROUP', 'VECTOR'].includes(node.type) && !isTopLevel;
+  const totalLayers = shouldCountAsLayer ? 1 : 0;
+  
+  // Check if this node is a component instance
+  let dsComponentsUsed = 0;
+  let nonDsComponents = 0;
+  
+  if (node.type === 'INSTANCE') {
+    if (isComponentFromDS(node, componentsData)) {
+      dsComponentsUsed = 1;
+    } else {
+      nonDsComponents = 1;
+      console.log(`  ❌ Componente não conforme encontrado:`, {
+        nodeId: node.id,
+        nodeName: node.name,
+        reason: 'Componente não encontrado no DS'
+      });
+    }
+  }
+
+  return {
+    nonCompliantColors,
+    nonCompliantFonts,
+    nonCompliantEffects,
+    nonDsComponents,
+    totalLayers,
+    dsComponentsUsed
+  };
+}
 
 export function analyzeNode(
   node: SceneNode, 
   componentsData: ComponentData[], 
   stylesData: StylesData[],
-  skipComponentAnalysis: boolean = false
+  skipComponentAnalysis: boolean = false,
+  isTopLevel: boolean = true
 ): AnalysisResult {
-  const result: AnalysisResult = {
-    colors: { compliant: 0, total: 0, violations: [] },
-    fonts: { compliant: 0, total: 0, violations: [] },
-    shadows: { compliant: 0, total: 0, violations: [] },
-    components: { compliant: 0, total: 0, violations: [] }
-  };
-
-  // Análise de componentes
-  if (!skipComponentAnalysis) {
-    analyzeComponents(node, componentsData, result);
+  // Clear the processed nodes set at the start of a new analysis
+  if (isTopLevel) {
+    processedNodes.clear();
   }
 
-  // Análise de cores
-  analyzeColors(node, stylesData, result);
-
-  // Análise de fontes
-  analyzeFonts(node, stylesData, result);
-
-  // Análise de efeitos/sombras
-  analyzeEffects(node, stylesData, result);
+  // Analyze current node
+  const result = analyzeSingleNode(node, componentsData, stylesData, isTopLevel);
+  
+  // If this is a DS component instance, don't analyze its children
+  if (result.dsComponentsUsed > 0) {
+    return result;
+  }
+  
+  // Recursively analyze children
+  if ('children' in node && node.children) {
+    for (const child of node.children) {
+      const childResult = analyzeNode(child, componentsData, stylesData, skipComponentAnalysis, false);
+      result.nonCompliantColors += childResult.nonCompliantColors;
+      result.nonCompliantFonts += childResult.nonCompliantFonts;
+      result.nonCompliantEffects += childResult.nonCompliantEffects;
+      result.nonDsComponents += childResult.nonDsComponents;
+      result.totalLayers += childResult.totalLayers;
+      result.dsComponentsUsed += childResult.dsComponentsUsed;
+    }
+  }
 
   return result;
 }
 
-function analyzeComponents(
-  node: SceneNode, 
-  componentsData: ComponentData[], 
-  result: AnalysisResult
-): void {
-  // Verifica se o nó é um componente ou instância
-  if (node.type === 'COMPONENT' || node.type === 'INSTANCE') {
-    result.components.total++;
-    
-    // Para instâncias, verifica se é do design system
-    if (node.type === 'INSTANCE') {
-      const mainComponent = (node as InstanceNode).mainComponent;
-      if (mainComponent) {
-        const isFromDesignSystem = componentsData.some(data => 
-          Object.values(data.components).some(comp => comp.key === mainComponent.key)
-        );
-        
-        if (isFromDesignSystem) {
-          result.components.compliant++;
-        } else {
-          result.components.violations.push({
-            nodeId: node.id,
-            nodeName: node.name,
-            issue: 'Componente não encontrado no Design System',
-            currentValue: mainComponent.name,
-            expectedValue: 'Componente do Design System'
-          });
-        }
-      }
-    }
-    // Para componentes principais, verifica se estão no DS
-    else if (node.type === 'COMPONENT') {
-      const isFromDesignSystem = componentsData.some(data => 
-        Object.values(data.components).some(comp => comp.key === (node as ComponentNode).key)
-      );
-      
-      if (isFromDesignSystem) {
-        result.components.compliant++;
-      } else {
-        result.components.violations.push({
-          nodeId: node.id,
-          nodeName: node.name,
-          issue: 'Componente não encontrado no Design System',
-          currentValue: node.name,
-          expectedValue: 'Componente do Design System'
-        });
-      }
-    }
-  }
-}
-
-function analyzeColors(
-  node: SceneNode, 
-  stylesData: StylesData[], 
-  result: AnalysisResult
-): void {
-  // Verifica fills
-  if ('fills' in node && Array.isArray(node.fills)) {
-    for (const fill of node.fills) {
-      if (fill.type === 'SOLID' && fill.visible !== false) {
-        result.colors.total++;
-        
-        // Verifica se a cor usa um estilo do design system
-        const usesDesignSystemColor = stylesData.some(data => {
-          return Object.values(data.colorStyles).some(styleId => {
-            // Verifica se o fill tem um style ID que corresponde
-            return fill.boundStyleId === styleId;
-          });
-        });
-        
-        if (usesDesignSystemColor) {
-          result.colors.compliant++;
-        } else {
-          const color = fill.color;
-          const hexColor = rgbToHex(color.r, color.g, color.b);
-          result.colors.violations.push({
-            nodeId: node.id,
-            nodeName: node.name,
-            issue: 'Cor não encontrada no Design System',
-            currentValue: hexColor,
-            expectedValue: 'Cor do Design System'
-          });
-        }
-      }
-    }
-  }
-
-  // Verifica strokes
-  if ('strokes' in node && Array.isArray(node.strokes)) {
-    for (const stroke of node.strokes) {
-      if (stroke.type === 'SOLID' && stroke.visible !== false) {
-        result.colors.total++;
-        
-        const usesDesignSystemColor = stylesData.some(data => {
-          return Object.values(data.colorStyles).some(styleId => {
-            return stroke.boundStyleId === styleId;
-          });
-        });
-        
-        if (usesDesignSystemColor) {
-          result.colors.compliant++;
-        } else {
-          const color = stroke.color;
-          const hexColor = rgbToHex(color.r, color.g, color.b);
-          result.colors.violations.push({
-            nodeId: node.id,
-            nodeName: node.name,
-            issue: 'Cor de borda não encontrada no Design System',
-            currentValue: hexColor,
-            expectedValue: 'Cor do Design System'
-          });
-        }
-      }
-    }
-  }
-}
-
-function analyzeFonts(
-  node: SceneNode, 
-  stylesData: StylesData[], 
-  result: AnalysisResult
-): void {
-  if (node.type === 'TEXT') {
-    const textNode = node as TextNode;
-    result.fonts.total++;
-    
-    // Verifica se o texto usa um estilo do design system
-    const usesDesignSystemFont = stylesData.some(data => {
-      return Object.values(data.textStyles).some(styleId => {
-        return textNode.textStyleId === styleId;
-      });
+function isStyleInDesignSystem(
+  styleId: string,
+  styleType: 'colorStyles' | 'textStyles' | 'effectStyles',
+  stylesData: StylesData[]
+): boolean {
+  if (!styleId) return false;
+  
+  const cleanStyleId = styleId.replace('S:', '').split(',')[0];
+  
+  return stylesData.some(data => {
+    return Object.values(data[styleType] || {}).some(style => {
+      const cleanDsStyleId = (style as string).replace(/^(Key:|S:)/, '');
+      return cleanDsStyleId === cleanStyleId;
     });
-    
-    if (usesDesignSystemFont) {
-      result.fonts.compliant++;
-    } else {
-      const fontName = typeof textNode.fontName === 'object' ? 
-        textNode.fontName.family : 'Mixed';
-      result.fonts.violations.push({
-        nodeId: node.id,
-        nodeName: node.name,
-        issue: 'Fonte não encontrada no Design System',
-        currentValue: fontName,
-        expectedValue: 'Fonte do Design System'
-      });
-    }
-  }
-}
-
-function analyzeEffects(
-  node: SceneNode, 
-  stylesData: StylesData[], 
-  result: AnalysisResult
-): void {
-  if ('effects' in node && Array.isArray(node.effects)) {
-    for (const effect of node.effects) {
-      if (effect.visible !== false) {
-        result.shadows.total++;
-        
-        // Verifica se o efeito usa um estilo do design system
-        const usesDesignSystemEffect = stylesData.some(data => {
-          return Object.values(data.effectStyles).some(styleId => {
-            return effect.boundStyleId === styleId;
-          });
-        });
-        
-        if (usesDesignSystemEffect) {
-          result.shadows.compliant++;
-        } else {
-          result.shadows.violations.push({
-            nodeId: node.id,
-            nodeName: node.name,
-            issue: 'Efeito não encontrado no Design System',
-            currentValue: effect.type,
-            expectedValue: 'Efeito do Design System'
-          });
-        }
-      }
-    }
-  }
-}
-
-function rgbToHex(r: number, g: number, b: number): string {
-  const toHex = (value: number) => {
-    const hex = Math.round(value * 255).toString(16);
-    return hex.length === 1 ? '0' + hex : hex;
-  };
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+  });
 }

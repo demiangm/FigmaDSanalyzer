@@ -7,9 +7,15 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "outDir": "dist-scripts", // Diretório de saída temporário para os scripts, se necessário
-    "types": ["node"] // APENAS tipos Node.js aqui
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
+    "allowJs": true,
+    "strict": true
   },
   "include": [
-    "scripts" // Inclua APENAS a pasta de scripts aqui
-  ]
+    "scripts/**/*"
+  ],
+  "ts-node": {
+    "files": true
+  }
 }

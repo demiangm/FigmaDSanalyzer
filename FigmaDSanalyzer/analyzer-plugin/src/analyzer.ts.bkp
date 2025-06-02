@@ -1,0 +1,268 @@
+import { AnalysisResult, ComponentData, StylesData } from './types';
+
+interface StyleAnalysisResult {
+  nonCompliantColors: number;
+  nonCompliantFonts: number;
+  nonCompliantEffects: number;
+}
+
+interface ComponentAnalysisResult {
+  totalLayers: number;
+  dsComponentsUsed: number;
+}
+
+// Conjunto global de nós processados
+const globalProcessedNodes = new Set<string>();
+
+function analyzeNodeStyles(
+  node: SceneNode,
+  stylesData: StylesData[],
+  processedStyleNodes: Set<string>
+): StyleAnalysisResult {
+  const result: StyleAnalysisResult = {
+    nonCompliantColors: 0,
+    nonCompliantFonts: 0,
+    nonCompliantEffects: 0
+  };
+
+  // Se o nó já foi processado para estilos, retorna resultado vazio
+  if (processedStyleNodes.has(node.id)) {
+    return result;
+  }
+
+  processedStyleNodes.add(node.id);
+  console.log('Analisando estilos do nó:', node.name, node.id);
+
+  // Check colors in fills
+  if ('fills' in node) {
+    const fills = (node as any).fills;
+    if (Array.isArray(fills)) {
+      fills.forEach(fill => {
+        if (fill && fill.type === 'SOLID' && fill.visible !== false) {
+          const style = fill.boundVariableReferences?.fills?.[0]?.type === 'VARIABLE_ALIAS' 
+            ? fill.boundVariableReferences.fills[0] 
+            : figma.getStyleById(fill.boundStyleId as string);
+          
+          const styleId = style ? style.id : fill.boundStyleId;
+          
+          if (!styleId || !isStyleInDesignSystem(styleId, 'colorStyles', stylesData)) {
+            result.nonCompliantColors++;
+            console.log('Cor não conforme encontrada (fill):', {
+              nodeId: node.id,
+              nodeName: node.name,
+              totalNonCompliantColors: result.nonCompliantColors,
+              reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+            });
+          }
+        }
+      });
+    }
+  }
+
+  // Check colors in strokes
+  if ('strokes' in node) {
+    const strokes = (node as any).strokes;
+    if (Array.isArray(strokes)) {
+      strokes.forEach(stroke => {
+        if (stroke && stroke.type === 'SOLID' && stroke.visible !== false) {
+          const style = stroke.boundVariableReferences?.strokes?.[0]?.type === 'VARIABLE_ALIAS' 
+            ? stroke.boundVariableReferences.strokes[0] 
+            : figma.getStyleById(stroke.boundStyleId as string);
+          
+          const styleId = style ? style.id : stroke.boundStyleId;
+          
+          if (!styleId || !isStyleInDesignSystem(styleId, 'colorStyles', stylesData)) {
+            result.nonCompliantColors++;
+            console.log('Cor não conforme encontrada (stroke):', {
+              nodeId: node.id,
+              nodeName: node.name,
+              totalNonCompliantColors: result.nonCompliantColors,
+              reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+            });
+          }
+        }
+      });
+    }
+  }
+
+  // Check fonts
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    const textStyleId = textNode.textStyleId as string;
+    if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
+      result.nonCompliantFonts++;
+    }
+  }
+
+  // Check effects
+  if ('effects' in node) {
+    const effects = (node as any).effects;
+    if (Array.isArray(effects)) {
+      effects.forEach(effect => {
+        if (effect && effect.visible !== false) {
+          const style = figma.getStyleById(effect.boundStyleId as string);
+          const styleId = style ? style.id : effect.boundStyleId;
+          
+          if (!styleId || !isStyleInDesignSystem(styleId, 'effectStyles', stylesData)) {
+            result.nonCompliantEffects++;
+          }
+        }
+      });
+    }
+  }
+
+  // Analyze children
+  if ('children' in node) {
+    for (const child of node.children) {
+      const childResult = analyzeNodeStyles(child, stylesData, processedStyleNodes);
+      result.nonCompliantColors += childResult.nonCompliantColors;
+      result.nonCompliantFonts += childResult.nonCompliantFonts;
+      result.nonCompliantEffects += childResult.nonCompliantEffects;
+    }
+  }
+
+  return result;
+}
+
+function analyzeNodeComponents(
+  node: SceneNode,
+  componentsData: ComponentData[],
+  processedComponentNodes: Set<string>,
+  isTopLevel: boolean = true
+): ComponentAnalysisResult {
+  const result: ComponentAnalysisResult = {
+    totalLayers: 0,
+    dsComponentsUsed: 0
+  };
+
+  // Se o nó já foi processado para componentes, retorna resultado vazio
+  if (processedComponentNodes.has(node.id)) {
+    return result;
+  }
+
+  processedComponentNodes.add(node.id);
+  console.log('Analisando componentes do nó:', node.name, node.id);
+
+  // Count layer if applicable
+  if (!['SECTION', 'GROUP', 'VECTOR'].includes(node.type) && 
+      !isPartOfInstance(node) && 
+      node.type !== 'INSTANCE' &&
+      !isTopLevel) {
+    result.totalLayers++;
+    console.log('Contando layer:', {
+      nodeId: node.id,
+      nodeName: node.name,
+      totalLayers: result.totalLayers
+    });
+  }
+
+  // Check if it's a DS component
+  if (node.type === 'INSTANCE') {
+    const instance = node as InstanceNode;
+    const mainComponent = instance.mainComponent;
+    
+    if (mainComponent) {
+      const isFromDS = componentsData.some(data => 
+        Object.values(data.components).some(comp => {
+          const matchVariant = comp.key === mainComponent.key;
+          const matchParent = mainComponent.parent?.type === 'COMPONENT_SET' && 
+                            comp.key === (mainComponent.parent as ComponentSetNode).key;
+          return matchVariant || matchParent;
+        })
+      );
+      
+      if (isFromDS) {
+        result.dsComponentsUsed++;
+        console.log('Componente do DS encontrado:', instance.name);
+        return result; // Stop analyzing children if it's a DS component
+      }
+      console.log('Componente não encontrado no DS:', instance.name);
+    }
+  }
+
+  // Analyze children
+  if ('children' in node) {
+    for (const child of node.children) {
+      const childResult = analyzeNodeComponents(child, componentsData, processedComponentNodes, false);
+      result.totalLayers += childResult.totalLayers;
+      result.dsComponentsUsed += childResult.dsComponentsUsed;
+    }
+  }
+
+  return result;
+}
+
+export function analyzeNode(
+  node: SceneNode, 
+  componentsData: ComponentData[], 
+  stylesData: StylesData[],
+  skipComponentAnalysis: boolean = false,
+  isTopLevel: boolean = true
+): AnalysisResult {
+  // Se o nó já foi processado globalmente, retorna resultado vazio
+  if (globalProcessedNodes.has(node.id)) {
+    console.log('Nó já processado globalmente:', node.name, node.id);
+    return {
+      nonCompliantColors: 0,
+      nonCompliantFonts: 0,
+      nonCompliantEffects: 0,
+      totalLayers: 0,
+      dsComponentsUsed: 0
+    };
+  }
+
+  globalProcessedNodes.add(node.id);
+  console.log('Iniciando análise completa do nó:', node.name);
+
+  // Analyze styles first
+  const stylesResult = analyzeNodeStyles(node, stylesData, new Set());
+  
+  // Then analyze components
+  const componentsResult = analyzeNodeComponents(node, componentsData, new Set(), isTopLevel);
+
+  return {
+    nonCompliantColors: stylesResult.nonCompliantColors,
+    nonCompliantFonts: stylesResult.nonCompliantFonts,
+    nonCompliantEffects: stylesResult.nonCompliantEffects,
+    totalLayers: componentsResult.totalLayers,
+    dsComponentsUsed: componentsResult.dsComponentsUsed
+  };
+}
+
+// Função auxiliar para verificar se um nó é parte de uma instância
+function isPartOfInstance(node: SceneNode): boolean {
+  let parent = node.parent;
+  while (parent) {
+    if (parent.type === 'INSTANCE') {
+      return true;
+    }
+    parent = parent.parent;
+  }
+  return false;
+}
+
+function isStyleInDesignSystem(
+  styleId: string,
+  styleType: 'colorStyles' | 'textStyles' | 'effectStyles',
+  stylesData: StylesData[]
+): boolean {
+  if (!styleId) return false;
+  
+  const cleanStyleId = styleId.replace('S:', '').split(',')[0];
+  
+  const found = stylesData.some(data => {
+    return Object.values(data[styleType] || {}).some(style => {
+      const cleanDsStyleId = (style as string).replace(/^(Key:|S:)/, '');
+      return cleanDsStyleId === cleanStyleId;
+    });
+  });
+
+  if (!found) {
+    console.log('Estilo não encontrado no DS:', {
+      type: styleType,
+      styleId: cleanStyleId
+    });
+  }
+
+  return found;
+}

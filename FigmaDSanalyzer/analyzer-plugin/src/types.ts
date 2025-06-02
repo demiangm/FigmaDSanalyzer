@@ -1,4 +1,3 @@
-
 export interface DesignSystemConfig {
   colors: string[];
   fonts: FontConfig[];
@@ -46,35 +45,25 @@ export interface Violation {
 }
 
 export interface AnalysisResult {
-  colors: {
-    compliant: number;
-    total: number;
-    violations: Violation[];
-  };
-  fonts: {
-    compliant: number;
-    total: number;
-    violations: Violation[];
-  };
-  shadows: {
-    compliant: number;
-    total: number;
-    violations: Violation[];
-  };
-  components: {
-    compliant: number;
-    total: number;
-    violations: Violation[];
-  };
+  nonCompliantColors: number;
+  nonCompliantFonts: number;
+  nonCompliantEffects: number;
+  nonDsComponents: number;
+  totalLayers: number;
+  dsComponentsUsed: number;
 }
 
 export interface ComplianceReport {
   frameName: string;
   frameId: string;
-  overallCompliance: number;
-  colorCompliance: number;
-  fontCompliance: number;
-  shadowCompliance: number;
-  componentCompliance: number;
-  analysis: AnalysisResult;
+  totalLayers: number;
+  dsComponentsUsed: number;
+  coveragePercentage: number;
+  coverageLevel: 'Muito Baixa' | 'Baixa' | 'Boa';
+  nonCompliantItems: {
+    colors: number;
+    fonts: number;
+    effects: number;
+    components: number;
+  };
 }

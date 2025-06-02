@@ -1,19 +1,23 @@
-import * as fs from 'fs';
-import * as path from 'path';
+/// <reference types="node" />
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
-// Declare __dirname if necessary
-declare var __dirname: string;
-const dataDir = path.join(__dirname, '..', 'src', 'data');
-const outputFile = path.join(__dirname, '..', 'src', 'dataImports.ts');
+declare const __dirname: string;
 
-function generateImports() {
-  if (!fs.existsSync(dataDir)) {
+const dataDir = join(__dirname, '..', 'src', 'data');
+const outputFile = join(__dirname, '..', 'src', 'dataImports.ts');
+
+async function generateImports(): Promise<void> {
+  try {
+    const exists = await fs.access(dataDir).then(() => true).catch(() => false);
+    
+    if (!exists) {
     console.log('Data directory not found, creating empty imports');
-    fs.writeFileSync(outputFile, 'export const dataFiles: any[] = [];');
+      await fs.writeFile(outputFile, 'export const dataFiles: any[] = [];');
     return;
   }
 
-  const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
+    const files = (await fs.readdir(dataDir)).filter(file => file.endsWith('.json'));
 
   let imports = '';
   let exports = 'export const dataFiles = [\n';
@@ -28,8 +32,12 @@ function generateImports() {
   exports += '];';
 
   const content = imports + '\n' + exports;
-  fs.writeFileSync(outputFile, content);
+    await fs.writeFile(outputFile, content);
   console.log(`Generated imports for ${files.length} data files`);
+  } catch (error) {
+    console.error('Error generating imports:', error);
+    process.exit(1);
+  }
 }
 
 generateImports();

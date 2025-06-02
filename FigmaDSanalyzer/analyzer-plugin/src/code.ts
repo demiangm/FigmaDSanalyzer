@@ -1,9 +1,7 @@
-
-// Main plugin code that runs in Figma's sandbox
-import { AnalysisResult, ComplianceReport, DesignSystemConfig } from './types'; // Removed './src/'
-import { analyzeNode } from './analyzer';                         // Removed './src/'
-import { loadDesignSystem } from './dataLoader';                  // Removed './src/'
-
+/// <reference types="@figma/plugin-typings" />
+import { AnalysisResult, ComplianceReport, DesignSystemConfig, ComponentData, StylesData } from './types';
+import { analyzeNode } from './analyzer';
+import { loadDataFiles } from './dataLoader';
 
 // Show the plugin UI
 figma.showUI(__html__, { width: 400, height: 600 });
@@ -14,6 +12,7 @@ let stylesData: StylesData[] = [];
 
 // Handle messages from the UI
 figma.ui.onmessage = async (msg) => {
+  try {
   switch (msg.type) {
     case 'analyze-selection':
       await analyzeSelection();
@@ -26,29 +25,47 @@ figma.ui.onmessage = async (msg) => {
     case 'close-plugin':
       figma.closePlugin();
       break;
+    }
+  } catch (error) {
+    console.error('Erro na execução:', error);
+    figma.ui.postMessage({
+      type: 'analysis-error',
+      message: (error as Error).message
+    });
   }
 };
 
 async function loadDesignSystemData() {
   try {
     const data = await loadDataFiles();
+    
+    if (!data || !data.components || !data.styles) {
+      throw new Error('Dados do Design System inválidos ou incompletos');
+    }
+    
     componentsData = data.components;
     stylesData = data.styles;
+    
+    if (componentsData.length === 0 || stylesData.length === 0) {
+      throw new Error('Nenhum dado do Design System foi carregado');
+    }
     
     figma.ui.postMessage({
       type: 'design-system-loaded',
       summary: {
-        components: componentsData.reduce((total, data) => total + Object.keys(data.components).length, 0),
-        colorStyles: stylesData.reduce((total, data) => total + Object.keys(data.colorStyles).length, 0),
-        textStyles: stylesData.reduce((total, data) => total + Object.keys(data.textStyles).length, 0),
-        effectStyles: stylesData.reduce((total, data) => total + Object.keys(data.effectStyles).length, 0)
+        components: componentsData.reduce((total, data) => total + Object.keys(data.components || {}).length, 0),
+        colorStyles: stylesData.reduce((total, data) => total + Object.keys(data.colorStyles || {}).length, 0),
+        textStyles: stylesData.reduce((total, data) => total + Object.keys(data.textStyles || {}).length, 0),
+        effectStyles: stylesData.reduce((total, data) => total + Object.keys(data.effectStyles || {}).length, 0)
       }
     });
   } catch (error) {
+    console.error('Erro ao carregar dados:', error);
     figma.ui.postMessage({
       type: 'analysis-error',
       message: 'Erro ao carregar dados do Design System: ' + (error as Error).message
     });
+    throw error; // Re-throw para interromper a execução
   }
 }
 
@@ -77,6 +94,25 @@ async function analyzeSelection() {
       
       // Cria card visual no canvas
       await createAnalysisCard(report, node as FrameNode);
+      
+      // Envia dados detalhados para a UI
+      figma.ui.postMessage({
+        type: 'frame-analyzed',
+        report: {
+          ...report,
+          details: {
+            name: node.name,
+            type: node.type,
+            totalLayers: report.totalLayers,
+            dsComponents: report.dsComponentsUsed,
+            coverage: {
+              percentage: report.coveragePercentage,
+              level: report.coverageLevel
+            },
+            nonCompliant: report.nonCompliantItems
+          }
+        }
+      });
     }
   }
 
@@ -87,87 +123,47 @@ async function analyzeSelection() {
 }
 
 async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
-  const analysis: AnalysisResult = {
-    colors: { compliant: 0, total: 0, violations: [] },
-    fonts: { compliant: 0, total: 0, violations: [] },
-    shadows: { compliant: 0, total: 0, violations: [] },
-    components: { compliant: 0, total: 0, violations: [] }
-  };
+  // Analyze the frame and all its children
+  const analysis = analyzeNode(frame, componentsData, stylesData, false, true);
 
-  // Recursively analyze all child nodes
-  await analyzeNodeRecursively(frame, analysis);
+  // Calculate coverage percentage
+  const coveragePercentage = analysis.totalLayers > 0 
+    ? (analysis.dsComponentsUsed / analysis.totalLayers) * 100 
+    : 0;
 
-  // Calculate compliance percentages
-  const colorCompliance = analysis.colors.total > 0 ? (analysis.colors.compliant / analysis.colors.total) * 100 : 100;
-  const fontCompliance = analysis.fonts.total > 0 ? (analysis.fonts.compliant / analysis.fonts.total) * 100 : 100;
-  const shadowCompliance = analysis.shadows.total > 0 ? (analysis.shadows.compliant / analysis.shadows.total) * 100 : 100;
-  const componentCompliance = analysis.components.total > 0 ? (analysis.components.compliant / analysis.components.total) * 100 : 100;
-
-  const overallCompliance = (colorCompliance + fontCompliance + shadowCompliance + componentCompliance) / 4;
+  // Determine coverage level
+  let coverageLevel: 'Muito Baixa' | 'Baixa' | 'Boa';
+  if (coveragePercentage < 50) {
+    coverageLevel = 'Muito Baixa';
+  } else if (coveragePercentage < 70) {
+    coverageLevel = 'Baixa';
+  } else {
+    coverageLevel = 'Boa';
+  }
 
   return {
     frameName: frame.name,
     frameId: frame.id,
-    overallCompliance: Math.round(overallCompliance),
-    colorCompliance: Math.round(colorCompliance),
-    fontCompliance: Math.round(fontCompliance),
-    shadowCompliance: Math.round(shadowCompliance),
-    componentCompliance: Math.round(componentCompliance),
-    analysis
+    totalLayers: analysis.totalLayers,
+    dsComponentsUsed: analysis.dsComponentsUsed,
+    coveragePercentage: Math.round(coveragePercentage),
+    coverageLevel,
+    nonCompliantItems: {
+      colors: analysis.nonCompliantColors,
+      fonts: analysis.nonCompliantFonts,
+      effects: analysis.nonCompliantEffects,
+      components: analysis.nonDsComponents
+    }
   };
 }
 
-async function analyzeNodeRecursively(node: SceneNode, analysis: AnalysisResult) {
-  // Skip sections, vectors, and groups for component analysis as requested
-  const skipComponentAnalysis = ['SECTION', 'VECTOR', 'GROUP'].includes(node.type);
-  
-  // Analyze current node
-  const nodeAnalysis = analyzeNode(node, componentsData, stylesData, skipComponentAnalysis);
-  
-  // Aggregate results
-  analysis.colors.compliant += nodeAnalysis.colors.compliant;
-  analysis.colors.total += nodeAnalysis.colors.total;
-  analysis.colors.violations.push(...nodeAnalysis.colors.violations);
-  
-  analysis.fonts.compliant += nodeAnalysis.fonts.compliant;
-  analysis.fonts.total += nodeAnalysis.fonts.total;
-  analysis.fonts.violations.push(...nodeAnalysis.fonts.violations);
-  
-  analysis.shadows.compliant += nodeAnalysis.shadows.compliant;
-  analysis.shadows.total += nodeAnalysis.shadows.total;
-  analysis.shadows.violations.push(...nodeAnalysis.shadows.violations);
-  
-  analysis.components.compliant += nodeAnalysis.components.compliant;
-  analysis.components.total += nodeAnalysis.components.total;
-  analysis.components.violations.push(...nodeAnalysis.components.violations);
-
-  // Recursively analyze children
-  if ('children' in node && node.children) {
-    for (const child of node.children) {
-      await analyzeNodeRecursively(child, analysis);
-    }
-  }
-
-  // Special handling for local instances - analyze their internal structure
-  if (node.type === 'INSTANCE') {
-    const instance = node as InstanceNode;
-    const mainComponent = instance.mainComponent;
-    
-    // Se for um componente local ou de outra biblioteca, analisa internamente
-    if (mainComponent && !componentsData.some(data => 
-      Object.values(data.components).some(comp => comp.key === mainComponent.key)
-    )) {
-      // Analisa os filhos da instância local
-      if ('children' in node && node.children) {
-        for (const child of node.children) {
-          await analyzeNodeRecursively(child, analysis);
-        }
-      }
-    }
-  }
-}
-
 async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
+  // Carrega todas as fontes necessárias primeiro
+  await Promise.all([
+    figma.loadFontAsync({ family: "Inter", style: "Regular" }),
+    figma.loadFontAsync({ family: "Inter", style: "Medium" })
+  ]);
+
   const cardWidth = 300;
   const cardHeight = 200;
   
@@ -194,39 +190,28 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   
   // Título
   const title = figma.createText();
-  await figma.loadFontAsync({ family: "Inter", style: "Medium" });
-  title.characters = `DS Compliance: ${report.overallCompliance}%`;
+  title.characters = `Cobertura do Design System: ${report.coverageLevel}`;
   title.fontSize = 16;
   title.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
   title.x = 16;
   title.y = 16;
+  title.fontName = { family: "Inter", style: "Medium" };
   card.appendChild(title);
   
-  // Métricas
-  const metrics = [
-    { label: 'Cores', value: report.colorCompliance, count: `${report.analysis.colors.compliant}/${report.analysis.colors.total}` },
-    { label: 'Fontes', value: report.fontCompliance, count: `${report.analysis.fonts.compliant}/${report.analysis.fonts.total}` },
-    { label: 'Efeitos', value: report.shadowCompliance, count: `${report.analysis.shadows.compliant}/${report.analysis.shadows.total}` },
-    { label: 'Componentes', value: report.componentCompliance, count: `${report.analysis.components.compliant}/${report.analysis.components.total}` }
-  ];
-  
-  let yOffset = 50;
-  
-  for (const metric of metrics) {
-    // Label
-    const label = figma.createText();
-    await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-    label.characters = `${metric.label}: ${metric.value}% (${metric.count})`;
-    label.fontSize = 12;
-    label.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-    label.x = 16;
-    label.y = yOffset;
-    card.appendChild(label);
+  // Informações de camadas
+  const layersInfo = figma.createText();
+  layersInfo.characters = `Total de Camadas: ${report.totalLayers}\nComponentes DS: ${report.dsComponentsUsed}`;
+  layersInfo.fontSize = 12;
+  layersInfo.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
+  layersInfo.x = 16;
+  layersInfo.y = 50;
+  layersInfo.fontName = { family: "Inter", style: "Regular" };
+  card.appendChild(layersInfo);
     
     // Barra de progresso
     const progressBg = figma.createRectangle();
     progressBg.x = 16;
-    progressBg.y = yOffset + 20;
+  progressBg.y = 90;
     progressBg.resize(cardWidth - 32, 6);
     progressBg.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
     progressBg.cornerRadius = 3;
@@ -234,20 +219,39 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
     
     const progressFill = figma.createRectangle();
     progressFill.x = 16;
-    progressFill.y = yOffset + 20;
-    progressFill.resize((cardWidth - 32) * (metric.value / 100), 6);
+  progressFill.y = 90;
+  progressFill.resize((cardWidth - 32) * (report.coveragePercentage / 100), 6);
     progressFill.cornerRadius = 3;
     
-    // Cor baseada na porcentagem
-    let color = { r: 0.85, g: 0.2, b: 0.2 }; // Vermelho
-    if (metric.value >= 90) color = { r: 0.2, g: 0.7, b: 0.3 }; // Verde
-    else if (metric.value >= 70) color = { r: 1, g: 0.7, b: 0.2 }; // Amarelo
+  // Cor baseada no nível de cobertura
+  let color = { r: 0.85, g: 0.2, b: 0.2 }; // Vermelho para "Muito Baixa"
+  if (report.coverageLevel === 'Boa') {
+    color = { r: 0.2, g: 0.7, b: 0.3 }; // Verde
+  } else if (report.coverageLevel === 'Baixa') {
+    color = { r: 1, g: 0.7, b: 0.2 }; // Amarelo
+  }
     
     progressFill.fills = [{ type: 'SOLID', color }];
     card.appendChild(progressFill);
     
-    yOffset += 40;
-  }
+  // Itens fora do DS
+  const nonCompliantTitle = figma.createText();
+  nonCompliantTitle.characters = 'Itens fora do Design System:';
+  nonCompliantTitle.fontSize = 12;
+  nonCompliantTitle.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
+  nonCompliantTitle.x = 16;
+  nonCompliantTitle.y = 110;
+  nonCompliantTitle.fontName = { family: "Inter", style: "Regular" };
+  card.appendChild(nonCompliantTitle);
+  
+  const nonCompliantItems = figma.createText();
+  nonCompliantItems.characters = `Cores: ${report.nonCompliantItems.colors}\nFontes: ${report.nonCompliantItems.fonts}\nEfeitos: ${report.nonCompliantItems.effects}\nComponentes: ${report.nonCompliantItems.components}`;
+  nonCompliantItems.fontSize = 12;
+  nonCompliantItems.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
+  nonCompliantItems.x = 16;
+  nonCompliantItems.y = 130;
+  nonCompliantItems.fontName = { family: "Inter", style: "Regular" };
+  card.appendChild(nonCompliantItems);
   
   // Adiciona o card à página
   figma.currentPage.appendChild(card);

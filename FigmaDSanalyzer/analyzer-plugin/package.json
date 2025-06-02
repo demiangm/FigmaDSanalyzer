@@ -5,7 +5,7 @@
   "scripts": {
     "generate-imports": "ts-node --project tsconfig.scripts.json scripts/generate-json-imports.ts",
     "prebuild": "npm run generate-imports",
-    "build": "npm run generate-imports && tsc --project tsconfig.json"
+    "build": "webpack --mode=production"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +13,14 @@
   "devDependencies": {
     "@figma/plugin-typings": "^1.81.0",
     "@types/node": "^20.12.12",
+    "@types/webpack-env": "^1.18.8",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.6.0",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
   }
 }
