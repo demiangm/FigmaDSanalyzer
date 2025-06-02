@@ -1,104 +1,372 @@
 {
   "metadata": {
-    "extractedAt": "2025-05-29T20:38:26.897Z",
+    "extractedAt": "2025-06-02T17:10:58.850Z",
     "fileName": "Biblioteca Part.1"
   },
   "components": {
+    ".Title": {
+      "key": "b172e7b5d8c3a36520ac93607d5b7198df208c94",
+      "isHidden": true
+    },
+    ".Placeholder body": {
+      "key": "03c001795895688b41d490ec95a66cb6d14dcfa7",
+      "isHidden": true
+    },
+    ".Fixed container example": {
+      "key": "6186bcba19fbc9e572fbae5caa3da212659f3a86",
+      "isHidden": true
+    },
+    ".Image": {
+      "key": "48de5ea0334146adc98ba4ed7ae93e776dbe17da",
+      "isHidden": true
+    },
     "Modal ": {
-      "key": "da7a0425f4d2987ea7ed22fc37adbe3972d2bd18"
+      "key": "da7a0425f4d2987ea7ed22fc37adbe3972d2bd18",
+      "isHidden": false
     },
     "Stepper/App": {
-      "key": "a7b1c9b155357a4faacfe1922cff42e32b2c9b29"
+      "key": "a7b1c9b155357a4faacfe1922cff42e32b2c9b29",
+      "isHidden": false
     },
     "Stepper/Web/MSite": {
-      "key": "69b7a298b51a4fd8148274a6a174f7de3103d989"
+      "key": "69b7a298b51a4fd8148274a6a174f7de3103d989",
+      "isHidden": false
+    },
+    ".Example.Responsive": {
+      "key": "faee47d012bb7f2a593b63dff478c59e4339aff9",
+      "isHidden": true
     },
     "Auto complete (Loading state)": {
-      "key": "422e2b18bcb95af3f96ae284c56613beffcb5f63"
+      "key": "422e2b18bcb95af3f96ae284c56613beffcb5f63",
+      "isHidden": false
+    },
+    ".select-dropdown macro": {
+      "key": "b872327e9689764a734a1b6bc165c2ba4bcdd4d1",
+      "isHidden": true
     },
     "Select dropdown": {
-      "key": "0a7d90e8feafe9c3cf929ddb44b647b52f9a9ba4"
+      "key": "0a7d90e8feafe9c3cf929ddb44b647b52f9a9ba4",
+      "isHidden": false
     },
     "Select Bottom sheet": {
-      "key": "7d4ab433bc04a081e280ec76cf31d07ff3e7b0ca"
+      "key": "7d4ab433bc04a081e280ec76cf31d07ff3e7b0ca",
+      "isHidden": false
+    },
+    ".Root.Title.Sub-Accordion": {
+      "key": "072197057b09fe9a58977867f4dd15cd1c5376e8",
+      "isHidden": true
+    },
+    ".Macro.Content.Accordion": {
+      "key": "705eb06eaaab64173324e1d89fc510a6e5a9136e",
+      "isHidden": true
+    },
+    ".Macro.Content.Sub-Accordion": {
+      "key": "d94f345149efca41839599aafce588bfa98fd6e4",
+      "isHidden": true
+    },
+    ".(Placeholder) ": {
+      "key": "6c1d1ef95ba5e57dcb8817c13a4637d7c1a3cec7",
+      "isHidden": true
+    },
+    "_Alert.Macro": {
+      "key": "845e2ee696df407950df22d9cf8cc8527ac3d75c",
+      "isHidden": true
+    },
+    "_Alert.Root": {
+      "key": "9b55aa22fdfa47fec1cd3d1865e3a7c1a3122088",
+      "isHidden": true
+    },
+    ".Options": {
+      "key": "1a3c21316ef559a22d8739f1a99b4f042945e107",
+      "isHidden": true
+    },
+    ".Component 1": {
+      "key": "02d66077f2b4548fb5512e674f52d60e6cbe6e99",
+      "isHidden": true
+    },
+    ".Action": {
+      "key": "fdd920998cbea38e35969edef977a5f7873fc91c",
+      "isHidden": true
+    },
+    ".Auto fill": {
+      "key": "d44af7392ca32723c4adbdee8f6ca3e71cd3c01c",
+      "isHidden": true
     },
     "Bottom sheet": {
-      "key": "d845f5a7395f86b0d8e14cfcbb1a4335acc4be36"
+      "key": "d845f5a7395f86b0d8e14cfcbb1a4335acc4be36",
+      "isHidden": false
+    },
+    ".Header content": {
+      "key": "ffc87753d0693994dbeabe0d3772d5225e5af909",
+      "isHidden": true
+    },
+    "_itens.example": {
+      "key": "7723dacfe3a1a04038ae90afdc9e6ba3ecd5d28d",
+      "isHidden": true
     },
     "Button": {
-      "key": "f8d6f9e4ef3771d62e816ede00de7eb3ff9370e1"
+      "key": "f8d6f9e4ef3771d62e816ede00de7eb3ff9370e1",
+      "isHidden": false
     },
     "Button.Icon": {
-      "key": "19ad6ceeec554c67bb8ee01f8b46ed1070cec651"
+      "key": "19ad6ceeec554c67bb8ee01f8b46ed1070cec651",
+      "isHidden": false
     },
     "Item list": {
-      "key": "15b96dbf09ff2cc9052bfa779a742a60b8a817c1"
+      "key": "15b96dbf09ff2cc9052bfa779a742a60b8a817c1",
+      "isHidden": false
+    },
+    ".BackgroundInterection": {
+      "key": "b76bf82f3ab686c0320fb7571e6f48db5b795448",
+      "isHidden": true
+    },
+    ".Text line": {
+      "key": "c12845ee86c2efd713e7d0bc714a1879c5b5ea9c",
+      "isHidden": true
+    },
+    ".Status": {
+      "key": "2a18cf38826fd9789e2707ee626cecae489df1bf",
+      "isHidden": true
+    },
+    ".Text line.disabled": {
+      "key": "5dd36e54f5f05661e354de36ce39e9d9b8bcd5f6",
+      "isHidden": true
+    },
+    ".Badge": {
+      "key": "d45b567c7ad0d2cdab74c2a469d5549b1f70610f",
+      "isHidden": true
+    },
+    ".Items": {
+      "key": "08d57390dd1c55c34bd534241dff795b74e448b1",
+      "isHidden": true
+    },
+    ".Link Inline": {
+      "key": "3325d4cfc034ae0d32b732106e331cbe5052961b",
+      "isHidden": true
     },
     "Link": {
-      "key": "dde6ace155d9a150644091a82bb6d72adb23a040"
+      "key": "dde6ace155d9a150644091a82bb6d72adb23a040",
+      "isHidden": false
     },
     "Menu item": {
-      "key": "166a1ab1e97788a12fba8008854e5a50b4744ef9"
+      "key": "166a1ab1e97788a12fba8008854e5a50b4744ef9",
+      "isHidden": false
+    },
+    ".🚧 - Menu item - button ": {
+      "key": "e43545bc3783c46e00a47d8aa9c2366122de4f7b",
+      "isHidden": true
     },
     "Menu subitem": {
-      "key": "61bb8e01560bf81c05286c300bf0e2b08e4e434a"
+      "key": "61bb8e01560bf81c05286c300bf0e2b08e4e434a",
+      "isHidden": false
+    },
+    ".🚧 - Menu subitem - button": {
+      "key": "02c4b646bb867fe5b06ac07d2792d13e46953342",
+      "isHidden": true
+    },
+    ".footer.modal": {
+      "key": "32df44833e1331b21d1511542c66ac4361bbe129",
+      "isHidden": true
+    },
+    ".Step": {
+      "key": "42e4498b019aa04ac3b6ddf3e6c6bb223bc75104",
+      "isHidden": true
     },
     "Stepper/Web": {
-      "key": "4b627deadc85f6427d431235e3e4c18c22df96b2"
+      "key": "4b627deadc85f6427d431235e3e4c18c22df96b2",
+      "isHidden": false
+    },
+    ".Step.ellipse": {
+      "key": "3eea0661f482d9bcda37333f1890d9ca7fb68a3c",
+      "isHidden": true
+    },
+    ".Steps": {
+      "key": "955f770ddad2f80377097ba1f5177437e4fddd4a",
+      "isHidden": true
     },
     "Checkbox": {
-      "key": "c1928326689042c3633904784e6be6e64ba0f71c"
+      "key": "c1928326689042c3633904784e6be6e64ba0f71c",
+      "isHidden": false
+    },
+    ".Macro - chekbox": {
+      "key": "71d105ae91b7a0537f8fd05f245be549f3ab38c3",
+      "isHidden": true
+    },
+    ".Macro - label - chekbox": {
+      "key": "966ac75b9a53fae7714d75018981cfeedb947d4c",
+      "isHidden": true
     },
     "Radio": {
-      "key": "bafb78c5ab6e8159b320116f2abe0514b3a2a20b"
+      "key": "bafb78c5ab6e8159b320116f2abe0514b3a2a20b",
+      "isHidden": false
+    },
+    ".Macro.radio": {
+      "key": "253a0e8883f703c37a8fc00421b36c7fa33b44bc",
+      "isHidden": true
+    },
+    ".Macro.label.radio": {
+      "key": "1764fe968efbe57135a3923e21dd7ba3fe974091",
+      "isHidden": true
     },
     "Dialog": {
-      "key": "3cc889d28c08d099d47fcfadae680d87ad28dfc8"
+      "key": "3cc889d28c08d099d47fcfadae680d87ad28dfc8",
+      "isHidden": false
+    },
+    ".footer.dialog": {
+      "key": "dd4652bf6352008083cd2d50a1ad51b3a83423af",
+      "isHidden": true
     },
     "Search ": {
-      "key": "56e164cfb52c2b77d16844e523d8f04d53f3b94b"
+      "key": "56e164cfb52c2b77d16844e523d8f04d53f3b94b",
+      "isHidden": false
+    },
+    ".Search_bottom.sheet": {
+      "key": "24d0c45ddcc1c686cc7f4ec745212e4736768799",
+      "isHidden": true
+    },
+    ".select-macro": {
+      "key": "e62c27e290f6a7755f66782a82cd7b60540c66da",
+      "isHidden": true
     },
     "Select": {
-      "key": "341353e87e2a85f81c6063363ac70878b0b04e1d"
+      "key": "341353e87e2a85f81c6063363ac70878b0b04e1d",
+      "isHidden": false
+    },
+    ".itens.example": {
+      "key": "6d5b45384d81abc22b909da1b4b2defa379082ff",
+      "isHidden": true
     },
     "Switch": {
-      "key": "421d15abc1cd2d4775e97989903ace48a619fa85"
+      "key": "421d15abc1cd2d4775e97989903ace48a619fa85",
+      "isHidden": false
+    },
+    ".Macro - switch": {
+      "key": "64fce67d49ebbd26e927eca44471cf7c2f21953c",
+      "isHidden": true
+    },
+    ".Macro - label - switch": {
+      "key": "67d0eb68172c840d1b7063fad12f85fba838e070",
+      "isHidden": true
     },
     "Textfield": {
-      "key": "d62e6d54ac6458cbe0e30cfc6968eccf599982c1"
+      "key": "d62e6d54ac6458cbe0e30cfc6968eccf599982c1",
+      "isHidden": false
     },
     "Mobile/Sub-Accordion": {
-      "key": "bc6242bf476dc27526a7b30407a4b4691be8a65e"
+      "key": "bc6242bf476dc27526a7b30407a4b4691be8a65e",
+      "isHidden": false
     },
     "Mobile/Accordion": {
-      "key": "15bb75c8f6151f527c4823ec4681a09993a09760"
+      "key": "15bb75c8f6151f527c4823ec4681a09993a09760",
+      "isHidden": false
     },
     "Desktop/Sub-Accordion": {
-      "key": "fa4c5b81af4a57227742593435239ff583fba056"
+      "key": "fa4c5b81af4a57227742593435239ff583fba056",
+      "isHidden": false
     },
     "Desktop/Accordion": {
-      "key": "2502479b4d6d6876ceff84986e27cbe61badbb76"
+      "key": "2502479b4d6d6876ceff84986e27cbe61badbb76",
+      "isHidden": false
+    },
+    ".Macro.Title.Accordion": {
+      "key": "891b5a4dac120be1783b513a0ed1f4c0bcdf6cd1",
+      "isHidden": true
+    },
+    ".Root.Title.Accordion": {
+      "key": "fd5512250202c4a5917d66d30029baafbaaab39d",
+      "isHidden": true
     },
     "Alert": {
-      "key": "220e7a3930e1df260e6860d2fda1286f8c194366"
+      "key": "220e7a3930e1df260e6860d2fda1286f8c194366",
+      "isHidden": false
+    },
+    "_Alert.Content": {
+      "key": "1ab5602828b361cdb365e887c14b7e163443983c",
+      "isHidden": true
     },
     "Badge": {
-      "key": "1b87f30859aa7b27617ad924e9ebb1193d61ed45"
+      "key": "1b87f30859aa7b27617ad924e9ebb1193d61ed45",
+      "isHidden": false
     },
     "Loading": {
-      "key": "664766a16f05356f97a7f3ae94b14240d9463b3d"
+      "key": "664766a16f05356f97a7f3ae94b14240d9463b3d",
+      "isHidden": false
+    },
+    ".Loading.button": {
+      "key": "8cda8eaa076c57c6713fa5d5eaf5bfb5f7a99dcf",
+      "isHidden": true
+    },
+    ".Macro - label - loading": {
+      "key": "9cc6282ae17e43d9ffb489c7c1466b757aa83e06",
+      "isHidden": true
+    },
+    ".Macro - loading": {
+      "key": "806631f6889b9719fb4c538bdf6fb489ec8e2383",
+      "isHidden": true
     },
     "Tags - Read-only": {
-      "key": "568abebae390bb24e2f612293ec3a90907d58d83"
+      "key": "568abebae390bb24e2f612293ec3a90907d58d83",
+      "isHidden": false
     },
     "Tags - Toggleable": {
-      "key": "d63857057e7f9cac24727e971d75d9701b22a289"
+      "key": "d63857057e7f9cac24727e971d75d9701b22a289",
+      "isHidden": false
     },
     "Tags - Removable": {
-      "key": "9af16225c034c6c8e5fabddddcd291cf5b2ad32e"
+      "key": "9af16225c034c6c8e5fabddddcd291cf5b2ad32e",
+      "isHidden": false
+    },
+    ".Tags-Macro_Toggleable": {
+      "key": "08e38e0bfc2740f9ff3b68bd445338d209d0f94b",
+      "isHidden": true
+    },
+    ".Tags-Macro_removable": {
+      "key": "8be0ee5aeeb91621b1e56c4e1f5cbc894e815b19",
+      "isHidden": true
+    },
+    ".Tags - Toggleable teste": {
+      "key": "ef13c5c15c8c6f0fdf59a3ded913a9ff360dfb0b",
+      "isHidden": true
     },
     "Seleção": {
-      "key": "ec171a4d0464e4fc05d901c7b8d0f947500f4143"
+      "key": "ec171a4d0464e4fc05d901c7b8d0f947500f4143",
+      "isHidden": false
+    },
+    "_Collapse simples": {
+      "key": "f70b3e9a89d917f6265e72ac2201254fe2203e30",
+      "isHidden": true
+    },
+    "_Multi": {
+      "key": "608a5f4f2f40996edc039b18484aff776d2917c8",
+      "isHidden": true
+    },
+    "_Direcional": {
+      "key": "98bd6ce6c2c95098d7a525a1c41a1af0afc6e7d9",
+      "isHidden": true
+    },
+    ".Macro.radios*": {
+      "key": "eafcfc9283f5f318d7830335c5dfcbb1dc1502c0",
+      "isHidden": true
+    },
+    "_Checkbox": {
+      "key": "9522e6ade29e385fe156904ce113983a9111c2a4",
+      "isHidden": true
+    },
+    "_Frame joão": {
+      "key": "2222727522e85de1e553f81393402f4814c7d5de",
+      "isHidden": true
+    },
+    "_Textfields.teste": {
+      "key": "c861fa25c451dbb8c5609b0ffc3918f316936ce4",
+      "isHidden": true
+    },
+    ".List menu.teste ": {
+      "key": "07aea6df64d2c7d657395fe8cfffe29b9726fa97",
+      "isHidden": true
+    },
+    ".List menu.cascata.teste": {
+      "key": "5d71d880e5d5642bfcd2b7383cbb088c0a08cd4a",
+      "isHidden": true
     }
   }
 }

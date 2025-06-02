@@ -23,7 +23,10 @@ export interface ComponentData {
     extractedAt: string;
     fileName: string;
   };
-  components: Record<string, { key: string }>;
+  components: Record<string, { 
+    key: string;
+    isHidden?: boolean;
+  }>;
 }
 
 export interface StylesData {
@@ -51,6 +54,7 @@ export interface AnalysisResult {
   nonDsComponents: number;
   totalLayers: number;
   dsComponentsUsed: number;
+  hiddenComponentsUsed: number;
 }
 
 export interface ComplianceReport {
@@ -58,6 +62,7 @@ export interface ComplianceReport {
   frameId: string;
   totalLayers: number;
   dsComponentsUsed: number;
+  hiddenComponentsUsed: number;
   coveragePercentage: number;
   coverageLevel: 'Muito Baixa' | 'Baixa' | 'Boa';
   nonCompliantItems: {

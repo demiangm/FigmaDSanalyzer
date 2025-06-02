@@ -126,9 +126,9 @@ async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
   // Analyze the frame and all its children
   const analysis = analyzeNode(frame, componentsData, stylesData, false, true);
 
-  // Calculate coverage percentage
+  // Calculate coverage percentage - exclude hidden components from the calculation
   const coveragePercentage = analysis.totalLayers > 0 
-    ? (analysis.dsComponentsUsed / analysis.totalLayers) * 100 
+    ? ((analysis.dsComponentsUsed) / analysis.totalLayers) * 100 
     : 0;
 
   // Determine coverage level
@@ -146,6 +146,7 @@ async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
     frameId: frame.id,
     totalLayers: analysis.totalLayers,
     dsComponentsUsed: analysis.dsComponentsUsed,
+    hiddenComponentsUsed: analysis.hiddenComponentsUsed,
     coveragePercentage: Math.round(coveragePercentage),
     coverageLevel,
     nonCompliantItems: {
@@ -165,7 +166,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   ]);
 
   const cardWidth = 300;
-  const cardHeight = 200;
+  const cardHeight = 220; // Aumentado para acomodar a nova informação
   
   // Posiciona o card ao lado do frame
   const cardX = frame.x + frame.width + 50;
@@ -200,7 +201,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   
   // Informações de camadas
   const layersInfo = figma.createText();
-  layersInfo.characters = `Total de Camadas: ${report.totalLayers}\nComponentes DS: ${report.dsComponentsUsed}`;
+  layersInfo.characters = `Total de Camadas: ${report.totalLayers}\nComponentes DS: ${report.dsComponentsUsed}\nComponentes Ocultos: ${report.hiddenComponentsUsed}`;
   layersInfo.fontSize = 12;
   layersInfo.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
   layersInfo.x = 16;
@@ -208,21 +209,21 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   layersInfo.fontName = { family: "Inter", style: "Regular" };
   card.appendChild(layersInfo);
     
-    // Barra de progresso
-    const progressBg = figma.createRectangle();
-    progressBg.x = 16;
-  progressBg.y = 90;
-    progressBg.resize(cardWidth - 32, 6);
-    progressBg.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
-    progressBg.cornerRadius = 3;
-    card.appendChild(progressBg);
-    
-    const progressFill = figma.createRectangle();
-    progressFill.x = 16;
-  progressFill.y = 90;
+  // Barra de progresso
+  const progressBg = figma.createRectangle();
+  progressBg.x = 16;
+  progressBg.y = 100;
+  progressBg.resize(cardWidth - 32, 6);
+  progressBg.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
+  progressBg.cornerRadius = 3;
+  card.appendChild(progressBg);
+  
+  const progressFill = figma.createRectangle();
+  progressFill.x = 16;
+  progressFill.y = 100;
   progressFill.resize((cardWidth - 32) * (report.coveragePercentage / 100), 6);
-    progressFill.cornerRadius = 3;
-    
+  progressFill.cornerRadius = 3;
+  
   // Cor baseada no nível de cobertura
   let color = { r: 0.85, g: 0.2, b: 0.2 }; // Vermelho para "Muito Baixa"
   if (report.coverageLevel === 'Boa') {
@@ -230,17 +231,17 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   } else if (report.coverageLevel === 'Baixa') {
     color = { r: 1, g: 0.7, b: 0.2 }; // Amarelo
   }
-    
-    progressFill.fills = [{ type: 'SOLID', color }];
-    card.appendChild(progressFill);
-    
+  
+  progressFill.fills = [{ type: 'SOLID', color }];
+  card.appendChild(progressFill);
+  
   // Itens fora do DS
   const nonCompliantTitle = figma.createText();
   nonCompliantTitle.characters = 'Itens fora do Design System:';
   nonCompliantTitle.fontSize = 12;
   nonCompliantTitle.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
   nonCompliantTitle.x = 16;
-  nonCompliantTitle.y = 110;
+  nonCompliantTitle.y = 120;
   nonCompliantTitle.fontName = { family: "Inter", style: "Regular" };
   card.appendChild(nonCompliantTitle);
   
@@ -249,7 +250,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   nonCompliantItems.fontSize = 12;
   nonCompliantItems.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
   nonCompliantItems.x = 16;
-  nonCompliantItems.y = 130;
+  nonCompliantItems.y = 140;
   nonCompliantItems.fontName = { family: "Inter", style: "Regular" };
   card.appendChild(nonCompliantItems);
   

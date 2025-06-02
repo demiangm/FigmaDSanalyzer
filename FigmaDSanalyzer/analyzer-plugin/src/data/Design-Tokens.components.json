@@ -1,0 +1,2168 @@
+{
+  "metadata": {
+    "extractedAt": "2025-06-02T14:09:03.179Z",
+    "fileName": "Design Tokens"
+  },
+  "components": {
+    "Squish/3XS": {
+      "key": "19105d64b244f82550ec60b688a74a9e7e497ca2"
+    },
+    "Squish/2XS": {
+      "key": "6e7e818dfbbd0951d1441ae8161b8411f94bfa70"
+    },
+    "Squish/XS": {
+      "key": "4f7c0d1f121a8737d3e220f3a231d3259dc2fbf8"
+    },
+    "Squish/SM": {
+      "key": "48d654447930f08342751b64a8eb59af72107e9b"
+    },
+    "Squish/MD": {
+      "key": "32ad6b6e1e86099f99142b3c94bf932e65d23f2d"
+    },
+    "Inset/3XS": {
+      "key": "73e2d2fcb65f1bc87950b9aab0adf97df0151281"
+    },
+    "Inset/2XS": {
+      "key": "6a3e1750577650356750be5724b62396edae845c"
+    },
+    "Inset/1XS": {
+      "key": "0de24cb61a9a9be2e7d2fed6dc525ca679e4c8d1"
+    },
+    "Inset/XS": {
+      "key": "00f0915b4fb687e598f2ae6efe44b0bb3ae6c647"
+    },
+    "Inset/SM": {
+      "key": "3b677b7a15503803a0aba88ff9601322c488e952"
+    },
+    "Inset/MD": {
+      "key": "497a3fff3c3180d635aed6053028b4ff79539fc6"
+    },
+    "Inset/LG": {
+      "key": "bd00cb88796c0a2a21902c8638af158b18d328c3"
+    },
+    "Troca-de-pontos": {
+      "key": "980ddbc869b72b66e3a16f9fe5f015e89c744e9b"
+    },
+    "Transferencia": {
+      "key": "3b3c90ab9719d7386b5f7826723d7c16c3213d8c"
+    },
+    "Shopping-Livelo": {
+      "key": "ed6eab66327019dce48f659a51226934da24408c"
+    },
+    "Resgate-Pix-Online": {
+      "key": "e9d37db290a0feb7893430b52a19abcefb75ae07"
+    },
+    "Resgate-Pix-Fisico": {
+      "key": "be93e558fe6ddffa25401a1113f560e1c7d1f8d3"
+    },
+    "Resgate-de-produtos": {
+      "key": "6cda49e2291b75fa4575b22c83785e28ff5ed79f"
+    },
+    "Resgate De Serviço": {
+      "key": "44efe263eff5924f5797d0e0d6dd33ac9e2ffe62"
+    },
+    "Resgate De Serviço_full": {
+      "key": "8f6dd4a1ea4ebe3432de35bf3b86dd81105b6df8"
+    },
+    "Pontos+Dinheiro": {
+      "key": "4b4021b6033d8bbac903ee21f1eee17de5566488"
+    },
+    "Pagamento-em-parceiro-online": {
+      "key": "971a35f38f851f9410dfbca31f8376e61802ee72"
+    },
+    "Hospedagens": {
+      "key": "df9665167badee069fc3a26f13911b3b3d8f25a1"
+    },
+    "Hospedagens_pessoa": {
+      "key": "c29cbe86806f761ff0a9570795bdc291ad483c67"
+    },
+    "Doacao maos": {
+      "key": "1c3e65e38ca52987057b8fb2836d32d77bea3277"
+    },
+    "Doacao": {
+      "key": "30216ae72e1be70bb491f357a04990367157bf4d"
+    },
+    "Disputas de Recompensas": {
+      "key": "84e5bbd83138a1b3bbdda9b68ab5e796552257d9"
+    },
+    "Cashback": {
+      "key": "45191c9eda4635369c4664c97df92cb60c20e392"
+    },
+    "Aluguel de Carro": {
+      "key": "a9f42538da576abff2948a40edf2b3d2b0f8db4e"
+    },
+    "Carro": {
+      "key": "5ab0ef2c2f54ada5a42fd2700d61b3e017517eb7"
+    },
+    "Pagamento-em-parceiro-fisico": {
+      "key": "baa95d29ada42180d768b24c5490fa949c001a9c"
+    },
+    "Empty_state_mobile": {
+      "key": "6af1f76e4cab4722f38b75956c57e782bd267901"
+    },
+    "Ativar_notificação": {
+      "key": "a220e14dc69b23011bba7ef7aa10b5ce8b897b71"
+    },
+    "Empty_state_desk": {
+      "key": "8fb33c3c9efa433e5b7efe8ebcaf38677dd275c8"
+    },
+    "Carregando": {
+      "key": "be94aa27b5d0a9ec112729ac809bb9311e650a87"
+    },
+    "Carregando_bar": {
+      "key": "d79a2b3b1ccd52c52c316a466345743e1bf16a3d"
+    },
+    "Sem_internet": {
+      "key": "7189445f73b09d911a88a59a3db399ceab7c1d31"
+    },
+    "Error_alert": {
+      "key": "d6b6e5b7002db9c8d74179e4bee4121c0c08a3fd"
+    },
+    "Error": {
+      "key": "bb72f15cf738af7238de33dc5a17a1d68dd6134f"
+    },
+    "Confirmação 2": {
+      "key": "47ae741d77bf8c8e59275f8f7498587d3c6405ad"
+    },
+    "Confirmação": {
+      "key": "bfeda87d4248f845f9137e8832e8a43a7afa9bdd"
+    },
+    "Seu-tempo-acabou": {
+      "key": "e46f7f73f064a73b8e7b178cc103e2dcc0031fe2"
+    },
+    "Perdeu-prazo": {
+      "key": "9259f1238fb87f68963c02361dbe2a12765a8188"
+    },
+    "Manutencao": {
+      "key": "6eab04153dc00e75c025300d6b7d76a323d6e078"
+    },
+    "Erro": {
+      "key": "0ab7d85d3d500ac00e437e24a2032cd073d780d0"
+    },
+    "Cachorro-Livelo 2": {
+      "key": "2bf80e3be314036056ee73b63920765a64c90f66"
+    },
+    "Cachorro-Livelo": {
+      "key": "f9c629ad36ae6d30d8b10280ff78739a74a5ad0c"
+    },
+    "Gato-Livelo": {
+      "key": "adbfa691bed7853180d52c8d61664c69e1122f90"
+    },
+    "Gato-Livelo 2": {
+      "key": "2ad89753217dab589e4c0c56e13a94d04855b892"
+    },
+    "Personagem50+": {
+      "key": "5b43306a484405d1ba22bf25aac4fa59a0506bc4"
+    },
+    "Personagem50+ 2": {
+      "key": "0d589c1c72bf09fd09a8ea29d7e338a374e831c8"
+    },
+    "Personagem-ruiva 2": {
+      "key": "aa9f58bdcfaadac2749ff275b0b8d8834c9e9e99"
+    },
+    "Personagem-ruiva": {
+      "key": "4f4b6dbc43200a19530ce81261c84f05382fdbf6"
+    },
+    "Personagem-PCD 2": {
+      "key": "e6b9d01aeefd393e935d53ca6465eab9ed6836ae"
+    },
+    "Personagem-PCD": {
+      "key": "7804d13405a01312160cd56d7d56e6e6b1d74555"
+    },
+    "Personagem-loira 2": {
+      "key": "d310c3f7f0e24952833a0fcb9255765a28d17b9d"
+    },
+    "Personagem-loira": {
+      "key": "6ee46bd9bf072eedabb9bcc43212ea54f2e93dcd"
+    },
+    "Personagem-asiatico": {
+      "key": "b103dd53702d049fc3b38e0db8aa11ec563d8caf"
+    },
+    "Personagem-asiatico 2": {
+      "key": "d6785094caeb9740fc6350e6d84d730770974356"
+    },
+    "Familia": {
+      "key": "533ab0372539bcce2ecb0a017430352e71112370"
+    },
+    "Personagem-negro": {
+      "key": "fd9a843d748e4dd727f2dbc17643b8fe240044fa"
+    },
+    "Personagem-negro 2": {
+      "key": "acefb27747e7bb63637789b5b6e90c55e0519c53"
+    },
+    "Esportistas": {
+      "key": "026110f8a853a9294c49a22e22f5d13775f2de99"
+    },
+    "Turbo Livelo": {
+      "key": "309390f287587d2ac4f0a1cd2b3848ce29f8224d"
+    },
+    "Transferencia para livelo 2": {
+      "key": "6ddf2307283ba8f2543d38b98d12ffcd60545009"
+    },
+    "Transferencia para livelo": {
+      "key": "ae53508886d36013c48e02be8c6572b85fd0d7a2"
+    },
+    "Transferencia para livelo celular": {
+      "key": "879d4ea536a72fd7a2cbb14e3d3ce2b22a70134f"
+    },
+    "Nota-Fiscal": {
+      "key": "ee08f7ee191354550b1c0cb2244f67e5cb9d7366"
+    },
+    "Compre-e-pontue": {
+      "key": "12bd0209298d02ee6aa59f51b83fa46184083a9e"
+    },
+    "Compra-de-pontos": {
+      "key": "93959e3597e96cb871b279eacfb260c9178866a9"
+    },
+    "Acumulo-Cartao": {
+      "key": "a45187621a78c1f31cb4347a4e441317f8c3e155"
+    },
+    "Acumulo-de-pontos": {
+      "key": "2f10ce301c6b9c83d97af80e728bfad8df3929b5"
+    },
+    "Turismo": {
+      "key": "a5c467488e1f607e3459c6e9474260b580610f7d"
+    },
+    "Clube-Livelo": {
+      "key": "710b7d2e4a75dc0ae777ea478c5c6ad6b58af992"
+    },
+    "Casal-Moto": {
+      "key": "28a35ee9da539632ba1eb252662f95fd4139f555"
+    },
+    "Viagens": {
+      "key": "53824a1e40acdccaafd5932372aa64fa0e4b3cc7"
+    },
+    "Amigos": {
+      "key": "e606d66beb08d1595e52cd884819be01f17875e1"
+    },
+    "Sacola-de-compras 2": {
+      "key": "54d6c42f752b44824d1cf9b7bfa5d4af966b5c92"
+    },
+    "Sacola-de-compras": {
+      "key": "f870a8d7ef66654cba74cd180d07740f40304c04"
+    },
+    "TV": {
+      "key": "ed9504f32355b754f90b29ffe277f268e63b07dd"
+    },
+    "Notebook": {
+      "key": "980c6d973a62639713c4f9b74def99323d597e55"
+    },
+    "Maos-segurando-celular": {
+      "key": "a139e0cbca48607b00f6b738fcc7315fd155bbc4"
+    },
+    "Maos-segurando-celular 3": {
+      "key": "0896c56c3597fc7e8a02c3b8b395a10f1863ced6"
+    },
+    "Maos-segurando-celular 2": {
+      "key": "4968988255517d62859fdb0858ff48d83010949c"
+    },
+    "Liquidificador": {
+      "key": "5666be758e79e4b8100f4470659d14299d50c8e8"
+    },
+    "Headphone1": {
+      "key": "f9c31ef589ac234ada1587e196b5fbecf0ef3471"
+    },
+    "Headhone2": {
+      "key": "3404430fb8cc4cc73be6a89d3b36e53c9f887fe8"
+    },
+    "Fone": {
+      "key": "d7d0c66c54a2b247da9671ae49b8534623fafe39"
+    },
+    "Celular": {
+      "key": "9b4197e76a4edbe8ecdc163253af3c27efc108fc"
+    },
+    "Aviao": {
+      "key": "990f5c69835f31edaa066763f2fdee4ca49692f3"
+    },
+    "Aviao-Nuvens": {
+      "key": "78c3aa3c7647dff7ce13eed84749c518c0cca9e8"
+    },
+    "AirFryer2": {
+      "key": "dbbf8340d551a22576486137e1e307787809b1dc"
+    },
+    "Airfryer1": {
+      "key": "26bab011f9814602546da0635ef7eb44768b91c2"
+    },
+    "Caixas e Etiquetas 3": {
+      "key": "cc6c0091ee65ba1324374295672581c1d48fd0ba"
+    },
+    "Caixas e Etiquetas": {
+      "key": "ae2d7d979575c11690751a400c77d7b030d4a95e"
+    },
+    "Caixas e Etiquetas 2": {
+      "key": "84c7f27eb81e2e0fc950e1aacbc4046a84da2dbe"
+    },
+    "Shapes-3D": {
+      "key": "374cae049b43272518780a1187cfdb9ba36e47c4"
+    },
+    "Moedas-3D": {
+      "key": "ce24275d67d86c474c71f3fd19661db81cc4bd44"
+    },
+    "Itens Pessoais/Mochila": {
+      "key": "8c14d17e0e03ed4aca6142dbf46c6ce809c47504"
+    },
+    "Itens Pessoais/Sacola": {
+      "key": "f3b1741e94382d0595fc712077fe96462b12d777"
+    },
+    "Itens Pessoais/Camiseta": {
+      "key": "ace2943c7f394a1d83627e89ab8e4c05dea5b9f8"
+    },
+    "Itens Pessoais/Tenis": {
+      "key": "1acabae15ea507d6e78fef4d1aff363a6099e360"
+    },
+    "Itens Pessoais/Bolsa": {
+      "key": "5efa025d92d8bd7921721c4ee8f4648d28e00e94"
+    },
+    "Itens Pessoais/Tamanco": {
+      "key": "647120659d6b269d4e3200703087c54563cb5cd4"
+    },
+    "Itens Pessoais/Camisa": {
+      "key": "d2ea80de97ff9a860f99f869f29852b4e1692e8c"
+    },
+    "Itens Pessoais/Pincel": {
+      "key": "26365c8d98de518bf5360d8e7fefa9d3247eae11"
+    },
+    "Itens Pessoais/Batom": {
+      "key": "cf50d3aecca640c92efc695a4a58b33fc6f52151"
+    },
+    "Itens Pessoais/Perfume": {
+      "key": "b2c72e4b29b6905fb61402af0f3e22268fa86193"
+    },
+    "Itens Pessoais/Shorts": {
+      "key": "42b18589fd906c8187ca4e21e2c1c7dda18c67ee"
+    },
+    "Itens Pessoais/Esmalte": {
+      "key": "8fe1ae132ca8214c1d0cce09afc67415e30a5e90"
+    },
+    "Itens Pessoais/Sapato": {
+      "key": "5b80c3d41d16720f17248edbbc4f9d50ae867afb"
+    },
+    "Spacing": {
+      "key": "1896bebf93e1ecd84a849ca9d1918ce719bee941"
+    },
+    "Mastercard": {
+      "key": "273d62e4efcca026ae8b3226d1faf894b2b2baea"
+    },
+    "MastercardAlt": {
+      "key": "975390b7720bc3940fd92a7aeff0f7805c5eab80"
+    },
+    "Visa": {
+      "key": "133e6bcaa7642300c5849c084db9287474820191"
+    },
+    "VisaAlt": {
+      "key": "9cf0308ac4e8c3a1261f9983e83fe05eea229214"
+    },
+    "Amex": {
+      "key": "481e499f57b8a7ac4a18f7a76d6402b2b8a40c97"
+    },
+    "AmexAlt": {
+      "key": "71ea51b4d38b29f155454a4cb17366d08abc2b3d"
+    },
+    "Elo": {
+      "key": "9c950749c32ce1d048412bb313fae647a108ce57"
+    },
+    "EloAlt": {
+      "key": "2b0a350274c89a6463e60845bbdee09cdc057acb"
+    },
+    "Discover": {
+      "key": "77ffe7bb90cbb0854caebc7ae917358000c36266"
+    },
+    "DiscoverAlt": {
+      "key": "575a9cdbd008b03d08681d6a003a56d940b4c611"
+    },
+    "AuraAlt": {
+      "key": "e0bbcd45c44894003395147c95d33262e4574a32"
+    },
+    "Aura": {
+      "key": "7bd32dd93d5ed01055df042517af500bed4830af"
+    },
+    "Hipercard": {
+      "key": "d3cef9595f0e3453372ec60ae43e914f36ca4849"
+    },
+    "HipercardAlt": {
+      "key": "3483a9d5af7cbf3aee2252ecc6e5bb65461ab3f0"
+    },
+    "Pix": {
+      "key": "5af34c5370d28978a2644c4231acca7bac288ac6"
+    },
+    "PixOutline": {
+      "key": "2d7292dd42610f8d9436e15c67ef88d555f95659"
+    },
+    "DinersAlt": {
+      "key": "cc3cb6c9be82996760ac50644472e28273ee712a"
+    },
+    "Diners": {
+      "key": "cfa155e4411e80970a61a590b9dbc7ef1d2ba87c"
+    },
+    "GoodCardAlt": {
+      "key": "aae97a51f071bd8987a5b8eb43bd99cf42ed9700"
+    },
+    "GoodCard": {
+      "key": "279a2f815496a3db17e673857fc77926edc81294"
+    },
+    "CabalAlt": {
+      "key": "404adf6a949cae4f1589abe6f8ef48c686c910e1"
+    },
+    "Cabal": {
+      "key": "0d65b6507291a5b08b43247cac515700890232b9"
+    },
+    "Bradesco": {
+      "key": "b3d8a0eab6a9f8e8e75de1322bfa7b7a63cff092"
+    },
+    "BancoBrasil": {
+      "key": "0bcdabaa010350599ba1e319a300d38fa071fe91"
+    },
+    "BancoBrasilAlt": {
+      "key": "972e5333d10dd192b6f5bdfbd3d31602a066df89"
+    },
+    "Nubank": {
+      "key": "4a3ab5f46573f92c1fd55c06440145eb1c868475"
+    },
+    "Nubank alt": {
+      "key": "3aba497914738c127ebe6aa60949c82b4eef1389"
+    },
+    "ClickToPlay": {
+      "key": "ad24f6a7a2e8f9bd4217f04725205e815ebd22c7"
+    },
+    "ClickToPlayAlt": {
+      "key": "7fe2f01d5033c0aa536b132511aa185fe3e17e1f"
+    },
+    "Facebook": {
+      "key": "e41919a4974408860fee8202e6899f169f4e0f60"
+    },
+    "Instagram": {
+      "key": "c611cb72f9376d39331f54c6946dadf1ade624d0"
+    },
+    "X": {
+      "key": "8b82c145e51a84af05b363203804e3366b4edafa"
+    },
+    "XAlt": {
+      "key": "eea3baeb2ef9b042a232d57e939ddb72845e8639"
+    },
+    "TwitterOld": {
+      "key": "0af238a3488725ee9ff67159881e55a6ca926651"
+    },
+    "TwitterOldAlt": {
+      "key": "0ad5d1faf04289648f86c3e0d670662bc12489b2"
+    },
+    "Telegram": {
+      "key": "d7ba4c93c8484ee7a3db79489392b4f00c9abd82"
+    },
+    "Youtube": {
+      "key": "55c2cd992a486eefd367ea6d5b92a8163ac7ec8f"
+    },
+    "FacebookAlt": {
+      "key": "8fa4610a452bbb9c0ddc7d195048904962fb70f9"
+    },
+    "Messenger": {
+      "key": "953aa7d1db62e3da59856cbef5a206b6a653f345"
+    },
+    "Whatsapp": {
+      "key": "a923b3318f49386da3b652a7ffdfd65aad17aa6f"
+    },
+    "Skype": {
+      "key": "2b6734075b2bbcc450a3d67b840f5371edbaeeba"
+    },
+    "Tiktok": {
+      "key": "e2aa961eee17a420568b4b4624a785553c6def5d"
+    },
+    "Slack": {
+      "key": "16fdeef8a866743fa18780f4aa776c457f4a668b"
+    },
+    "PlayStore": {
+      "key": "dc470288ee1fb17177356efb6325889f543316f2"
+    },
+    "AppleStore": {
+      "key": "eb8a72c91c03c535f7c67b58b3ef218ce3681419"
+    },
+    "InstagramAlt": {
+      "key": "eab7c285f7725c81ae02b4527f36baf84c512853"
+    },
+    "Google": {
+      "key": "0242b277b5b79df91343e575f004fe7f5ac7e0a0"
+    },
+    "Linkedin": {
+      "key": "70a0e0b45b76edec398552b0a4053b76fa4efe38"
+    },
+    "Livelo": {
+      "key": "77b64dc59ee55fe5c236f57b196bf0f33e937d8e"
+    },
+    "TransferPoints": {
+      "key": "a6b1c07eb9536e177c57df724bb3305bd96da47f"
+    },
+    "LiveloDouble": {
+      "key": "b9e97e3d6311f6f157a8c271b513724248bf2ed1"
+    },
+    "LiveloUse": {
+      "key": "660c5e3808f93292873477e9867a479bf25dfe3d"
+    },
+    "LiveloCampaign": {
+      "key": "7c96704a9ac66da3291977b008ab2a1ca42b2763"
+    },
+    "LiveloCampaingMgm": {
+      "key": "7d791c23ccbf2c60f93d54739a9be94114d8ca29"
+    },
+    "LiveloSendMgm": {
+      "key": "a8efd93e1a5670ff502d8e9fcab7c884ec646642"
+    },
+    "LiveloMoneyAlt": {
+      "key": "e78f3cb91d2006b83a96f8cef4bd6a84cdd0f8fc"
+    },
+    "LiveloAdd": {
+      "key": "339212dc450e340bdaad5c7128466736669a163a"
+    },
+    "LiveloInfinite": {
+      "key": "24c29be0d6d7ae7b5dfb82c9d2e1fdd6f361bf41"
+    },
+    "LiveloChangePlan": {
+      "key": "0f419aae7af9a3419383dd2543d95619328dbe9d"
+    },
+    "LiveloPoints": {
+      "key": "8faf69c4bd970945bd0e2356bf7df58c7fe04e56"
+    },
+    "LiveloBonification": {
+      "key": "7dd77936966f3d5373b98659153a47b74a101067"
+    },
+    "LiveloCashback": {
+      "key": "d02482ddbce056e9ca80adc08e201029c237e635"
+    },
+    "LiveloMoney": {
+      "key": "6b8283a6e07ab5015615d7173958a9373a280865"
+    },
+    "LiveloUser": {
+      "key": "e65ada6f37842864acfdc5a21e9a4d6252558e2b"
+    },
+    "LiveloDiscount": {
+      "key": "c0115477333caf75b11be91e74a3df024b60f263"
+    },
+    "LiveloCart": {
+      "key": "ca27fd6a7cae9993e40f83097c958799c698d93e"
+    },
+    "LiveloCupom": {
+      "key": "aee96bca30c92e4ab558b66e7658e8212fdeeb33"
+    },
+    "LiveloOfferPoints": {
+      "key": "38d7bfa2f29f54b8f4bfa877be2d1fc8647f1425"
+    },
+    "LiveloPartners": {
+      "key": "cc57fc38ded49a3dc040f628a2edaf791ee0708d"
+    },
+    "LiveloGift": {
+      "key": "f680041903413f512ac59d3056eccddfa60ef0b7"
+    },
+    "LiveloDonation": {
+      "key": "69e9a31dd29feecb88cc8469a18f4d5533b344ff"
+    },
+    "LiveloPhone": {
+      "key": "4181f90c7f1c3d8057636c50226e3816f5b60f98"
+    },
+    "LiveloProdutos": {
+      "key": "3d83d23049635c05632f14988905f079f5bb128b"
+    },
+    "LiveloRecharge": {
+      "key": "5b53122bc5a153368a0eb51562668e1b61583a0d"
+    },
+    "LiveloNoBonification": {
+      "key": "7edb0b3d0673870c86bba898ed04d5409033606c"
+    },
+    "LiveloShopping": {
+      "key": "0fd1924267d521311cd719ea58deaa0f2538e0d1"
+    },
+    "Livelo.HubDeInovacao": {
+      "key": "a78e0d8f9387750382b9dd8bf1e7482acb6619a5"
+    },
+    "Wine": {
+      "key": "66ac70d192439d98ddc568fbfdb8e29f7fd284ad"
+    },
+    "Kitchenware": {
+      "key": "879008333ee058c861365b9bc899b11c5bf8b1ed"
+    },
+    "Purse": {
+      "key": "2c138a8f51de744b1e60da25706520acc79ca215"
+    },
+    "Refrigerator": {
+      "key": "9516a46f2866e2a67321f3b25097e4b727eae5fd"
+    },
+    "LightBulb": {
+      "key": "d1285784845a3cbf201b390caf81ecec4ab8235d"
+    },
+    "Sunglasses": {
+      "key": "aa11f7c9f2d2144520d0cfd1c407a29437dddb0e"
+    },
+    "Towel": {
+      "key": "bcfa9a952ea06ec877a93fd308b8557a0f158a02"
+    },
+    "Robe": {
+      "key": "107cc7a2bd8d208f15ddf196bd31cd9421c9a0e8"
+    },
+    "ToyBlocks": {
+      "key": "12ad7f66fde11b6059d605e11e156fe0a5dd440a"
+    },
+    "TeddyBear": {
+      "key": "1615165f2db3151481adbd4b95952a453ed11da8"
+    },
+    "Lipstick": {
+      "key": "48ddbc993efd934f7038df9c357fc932f3e37447"
+    },
+    "Key": {
+      "key": "3c60f423b113a035ad26212f2d6b78e99a7afdca"
+    },
+    "Puzzle": {
+      "key": "92566e17836648eddece0eac2c516e5663161bdc"
+    },
+    "Pool": {
+      "key": "5746464a4533a4bbe1106c004be83d96679bb3ec"
+    },
+    "Soup": {
+      "key": "16dfa07b95d0b8cc3deb6debd270d635ed414efc"
+    },
+    "Box": {
+      "key": "593787660cc9495c246f0f92762304a6e6ba81e3"
+    },
+    "Comparison": {
+      "key": "1ec93248c08dc76f52614762a43899f3a5113b12"
+    },
+    "Ticket": {
+      "key": "ede1939f524868724ce3748f2e2906a58ff7997e"
+    },
+    "Confetti": {
+      "key": "eaa94344484f1e41b69570ea785b01595cadaf82"
+    },
+    "Guitar": {
+      "key": "86dc906824d75f8fbd7d32944e470fd1efbdad7a"
+    },
+    "CookingPot": {
+      "key": "12c7de07e4ed473825c0872818f212f03e361e40"
+    },
+    "Cupcake": {
+      "key": "7078db5f169c1440e5ec9238edea169105bc801b"
+    },
+    "Pet": {
+      "key": "25e884ab63c985cb3d37220f271605338d0751b3"
+    },
+    "Hairdryer": {
+      "key": "b879f1db9d04a065e6cb515b3516e7a6f464e5f8"
+    },
+    "Handbag": {
+      "key": "64b2da50522b7e2c6ffe982f5c735b3153b4f05d"
+    },
+    "Backpack": {
+      "key": "5709cb992fe433a6957724e8dd06d217207961ac"
+    },
+    "SmallLuggage": {
+      "key": "ce80fdb1f90e118fb706ed3b9271c55eb871ae26"
+    },
+    "NoSmallLuggage": {
+      "key": "bef096c84a55ba4cc35d9457d94e0a42705a7d37"
+    },
+    "BigLuggage": {
+      "key": "9d91003ca03ae12b565ff5b45a191adae8f982bd"
+    },
+    "NoBigLuggage": {
+      "key": "0888db23dd198afb0f9920b81bc1d4cbb18e1697"
+    },
+    "Luggage": {
+      "key": "0d84deb5ced4149bae72691e0f580c03062623a6"
+    },
+    "TwoBigLuggage": {
+      "key": "06aae93cb158f1b477b24435c3eb3b805b9dcd6c"
+    },
+    "Hanger": {
+      "key": "cc91b0948e6816dda0ca162c7a31f69684951820"
+    },
+    "Fan": {
+      "key": "15b1ea98f158703ca9533ec3928084a6be3146db"
+    },
+    "FanAlt": {
+      "key": "55394cc8eff4ca1efdd58891da9a7468de37e6c4"
+    },
+    "Gift": {
+      "key": "9c4d9b83e3fd024a4a0d54242f92cb4a4f1ec472"
+    },
+    "Book": {
+      "key": "88665999369251f4df4651713bac4805d40c7e05"
+    },
+    "CarDoor": {
+      "key": "574b765bee281216826e4e2013cd6f18b5e34855"
+    },
+    "Bike": {
+      "key": "589f08a8016af65588de9bc25d4b0e3c55d752f5"
+    },
+    "Hairdresser": {
+      "key": "3041af1010275eb81773a0b305e9a1863265d546"
+    },
+    "Sofa": {
+      "key": "b457d758c849eba79517d3b74609a894f40f2e22"
+    },
+    "AirConditioner": {
+      "key": "22572f5148c2143eca9ff0428000aaf6320920f3"
+    },
+    "Dress": {
+      "key": "1b8c77b21bed11eac7f5244235e4dc44a9687a9a"
+    },
+    "Shirt": {
+      "key": "4d3eca121e05c3f6fd5e8525bb47d4a72a0dd871"
+    },
+    "Pants": {
+      "key": "9c4e0545adf445d9d9f57c1ce10aec9477ba7090"
+    },
+    "Baggage": {
+      "key": "e98438c18c8ff38a06dc62011aa45648c09f6837"
+    },
+    "NoBaggage": {
+      "key": "d2a9db11015a0ac65a92076de3c5b8ee16743da0"
+    },
+    "LostBaggage": {
+      "key": "8575d8e9d470389a3c3566407231166c57e0e8ca"
+    },
+    "Cookie": {
+      "key": "d345e5c58a129d03622ea410d0d9f68ff369f8c2"
+    },
+    "Plant": {
+      "key": "7158a40098d4d9f01a379564ce90ce53b660bab4"
+    },
+    "Sun": {
+      "key": "64d868bf9e8f563891065ff5be3afd15696fcf9d"
+    },
+    "Moon": {
+      "key": "e304ab5f53ac46afb7d5c843d063362d6cf93e11"
+    },
+    "Cd": {
+      "key": "87443870aad3e468214b019084c7deba72359000"
+    },
+    "Game": {
+      "key": "8dbcf6abd4fb8dd18c11c2c6e774b0f04d742c1b"
+    },
+    "Restaurant": {
+      "key": "6103adf95e3bd94fd6dd9eb3f3d14e25d2d156d8"
+    },
+    "RestaurantAlt": {
+      "key": "7366d60adc89ca022e88aaa3143edb32044e3ccf"
+    },
+    "Tenis": {
+      "key": "4ffdd9118e13661edd8843d76493caa257a50b39"
+    },
+    "EventTicket": {
+      "key": "74ce9e077f180ed5889fe2cd0e4c9c3b68c841a6"
+    },
+    "Tickets": {
+      "key": "a0f581ae3e544b824aa74398d7949b5b736e4500"
+    },
+    "SoccerBall": {
+      "key": "eccd157489defeeb4338c6a931aafba15faee994"
+    },
+    "Drink": {
+      "key": "5a6ce9f702c2dd2a769c80fbea76716a90f0ba56"
+    },
+    "Donation": {
+      "key": "1b1639302ff5c7c065571df9b349ea5a9fbf2559"
+    },
+    "Snow": {
+      "key": "18697205e32fea52ab28bf1cc19285c727e334ba"
+    },
+    "Blender": {
+      "key": "09adf41f56a1ddf9ebc414531d2333164ae287fb"
+    },
+    "User": {
+      "key": "02f808c6d5cc6fcd271ed662a6ccbb6fef98542d"
+    },
+    "People": {
+      "key": "677b842d8e6e96a9a672192ac456dc03478f44fe"
+    },
+    "AddUser": {
+      "key": "1bb617e109daa1a878eb2f8e00e91ac15eae590a"
+    },
+    "PercentUser": {
+      "key": "5c0cc9691498c1356b557bc0e0e189a0c64ef7db"
+    },
+    "Child": {
+      "key": "569f448957e4bfa37c3a2d2ffc7f918a88b50997"
+    },
+    "Baby": {
+      "key": "3a65ccecfaa2ed3784e00af66aeba2f30c925639"
+    },
+    "Group": {
+      "key": "ed33816ffabfbd01dec9a52de5a8448e2da6cb94"
+    },
+    "UserCheck": {
+      "key": "44c27257b267158f271240675ead770f0d701518"
+    },
+    "AddGroup": {
+      "key": "6c00ad73cc84de85e575d3345aeb30183c63d2f0"
+    },
+    "UserShop": {
+      "key": "29b126e19d01baa37a3a68b99d6d1f884dd84dfc"
+    },
+    "Man": {
+      "key": "34a857298162d8fb8ce3e6897543f5b949c917c6"
+    },
+    "Woman": {
+      "key": "b131cfdf5a337e91c7f99a600d9013eb89295673"
+    },
+    "Wc": {
+      "key": "80f83abaa1c5dda4343934d75d416137e0143758"
+    },
+    "Stoller": {
+      "key": "fd21b46348f64ee0521ae13918094028b117821c"
+    },
+    "Passport": {
+      "key": "41b2601425d7dbf5e8f3a1c4d97aad1f0e3c9402"
+    },
+    "Accessible": {
+      "key": "cbc5d87a5697fdad53613964f073dbe0d15afe42"
+    },
+    "Walking": {
+      "key": "3d0ae95f1603295e9912b64a14d91453f755ecf1"
+    },
+    "Bot": {
+      "key": "cf25b8118ac6a5e63445ae9648dfa0fab8b69786"
+    },
+    "Rank": {
+      "key": "2045db66fe6e8d9e62acdc127e81c547f7190306"
+    },
+    "Medal": {
+      "key": "4cf31a68fbfb4c1d1ee0cda13fc3915e3c462af3"
+    },
+    "Trophy": {
+      "key": "9b85ae1225e63ca5f656addf494d49ee92ec7a5f"
+    },
+    "Prize": {
+      "key": "92a14c96e7b1942c5ed6bc25f31d8eacd0a80c7b"
+    },
+    "Airplane": {
+      "key": "e8aedf46a111025e1a52aef6a95cc0894fe1e383"
+    },
+    "AirplaneAlt": {
+      "key": "2867f3bbd5548807f845f3b2e8e7bae140353f2c"
+    },
+    "FlightLand": {
+      "key": "af4a56f175b2043a7fa7a4b0aa5fa6dae226b6a1"
+    },
+    "FlightTakeoff": {
+      "key": "886519808f1411b16bcd647cb340915f00871b14"
+    },
+    "AirplaneSeats": {
+      "key": "4b5171feaf7ad1ef7cf1112c1c6b44d4f2823629"
+    },
+    "Shop": {
+      "key": "1fb6b0dd05594401cead50aa9baa3906201046ad"
+    },
+    "ShopAlt": {
+      "key": "918965b57d79a80ab92c248561abe8d582efe5df"
+    },
+    "Store": {
+      "key": "50e91afbc2af61b70897ec3c962407ad5d37cfad"
+    },
+    "Home": {
+      "key": "95caaf138963003daa4275e94f8ea28ad2330acc"
+    },
+    "HomeAlt": {
+      "key": "f02980deac7581c02a16f80845e761c76623b9f2"
+    },
+    "Location": {
+      "key": "b5174026db5008d0ad863ccef1a083f4e2b506ae"
+    },
+    "Map": {
+      "key": "92e89534c22cc4532a88243d8c548b0cb523507f"
+    },
+    "ElevatorAlt": {
+      "key": "af1341d00630ef2fa38fd1011355457cb568a12b"
+    },
+    "Elevator": {
+      "key": "08e6af6519acbb3b4134492cc73254cc969a8316"
+    },
+    "SteeringWheel": {
+      "key": "61b0e1508d0f93c89afa4c8d201ea954bb79de9c"
+    },
+    "Transmission": {
+      "key": "890ad0d630e2ade9a62eac4f186170d49472f2b6"
+    },
+    "TransmissionManual": {
+      "key": "721646e9d486f80715ae7d3b4ae7e8366e4182e0"
+    },
+    "TransmissionAutomatic": {
+      "key": "40ea002d55c32fa81c15e160ac49e8872f30056a"
+    },
+    "CarOut": {
+      "key": "4ea324af895ce478969767e047810ae94ede053c"
+    },
+    "CarIn": {
+      "key": "0241a9d68f783d3c2e2f22ec017595d75d496126"
+    },
+    "GarageOut": {
+      "key": "b12a2d8aed8f6a17bc7c3c3501f4c1d66407e907"
+    },
+    "GarageIn": {
+      "key": "61266c263cc5b9e136754846812a541370403506"
+    },
+    "RouteStart": {
+      "key": "e6ed3b51cd87cdf2ecc8654a2305061f99700c28"
+    },
+    "RouteEnd": {
+      "key": "a8113f63976f8a08912809bc0302f2c6f5f3908a"
+    },
+    "Basket": {
+      "key": "2cee465ffc7c71d1bfc0cd58b9a33cb8f4adc031"
+    },
+    "ShoppingBag": {
+      "key": "410c53c5fa687d0cd9f812de9e5626ecbd8bb9be"
+    },
+    "Food": {
+      "key": "95846a435014b90978f12614718bf21422149934"
+    },
+    "Hotel": {
+      "key": "3a097e690aa71a0184557c41d31716d2454bed0e"
+    },
+    "HotelAlt": {
+      "key": "4755ffa6be6b34638bf60a2c16c3b5d2e339860b"
+    },
+    "Bed": {
+      "key": "563c72baea194d03e2cf9cd188c7f664bd5bcdaf"
+    },
+    "SingleBed": {
+      "key": "ead38b906facf013d941156e2095c031f8062756"
+    },
+    "Coffee": {
+      "key": "78b02ee563c3eae1d7af602de9bcda1f2dde8b8d"
+    },
+    "Hospital": {
+      "key": "e7f09ab55c0bf22df698f726b97378e190040a4a"
+    },
+    "Fuel": {
+      "key": "2559de0dd73c628057cc59bce5549ccb25d70d7a"
+    },
+    "Cart": {
+      "key": "28da53a829f89d5de7e9a735abb6285395c9bee7"
+    },
+    "Navigation": {
+      "key": "ce5ea01b99fc03d594a813928a8450f7d1286a3c"
+    },
+    "Car": {
+      "key": "04c057b72ed335c621cfeb0208ef860f7b09b12d"
+    },
+    "Van": {
+      "key": "183943a404fb24b14958f05775953a2cc43e24bb"
+    },
+    "Bus": {
+      "key": "9158ca43fcbf44f972f4ba2df0b5c6b25b779674"
+    },
+    "Truck": {
+      "key": "1f5a32838b1865e2170f4f5c54057bc27f251f76"
+    },
+    "CarSettings": {
+      "key": "0d10cd14425541baea211e1963a4b1eb1105c61e"
+    },
+    "CarSideLeft": {
+      "key": "be4b98c83fcb6e914fe17a810c3cb0d1894a3587"
+    },
+    "CarSideRight": {
+      "key": "08b12dfea0788c687d0845a51d7da60201ccd2bb"
+    },
+    "CarClockLeft": {
+      "key": "9f3115378d6be030a2b953bea2013020ba1f49c9"
+    },
+    "CarClockRight": {
+      "key": "6c0957de4828dce31b9c902e3bb24a06c66dff8a"
+    },
+    "Flag": {
+      "key": "0fee9a9c3e814e22f1f7c1698211cce01016e091"
+    },
+    "FlagFinish": {
+      "key": "95ee174382e5c2fc3ab09cf132f0c561ea9379cf"
+    },
+    "CarWindow": {
+      "key": "80fefd0ac6c1dd0dc3dbb84ab64a2ab9f086dc8e"
+    },
+    "Boat": {
+      "key": "a36008d78ee4cca87c43efc1e3dd655d4226e823"
+    },
+    "Anchor": {
+      "key": "af2ae76acc247dfd4b9739d79523b378a076cf67"
+    },
+    "Cruise": {
+      "key": "a489e256abe4a00261481a2e4a122ffdfa182cfb"
+    },
+    "ChatAlt": {
+      "key": "2759a35d3aac3854b067f1214f8cee0336a15a68"
+    },
+    "Chat": {
+      "key": "c183d7d9252bb5c2276d1c145af00b650ae6a42a"
+    },
+    "Comments": {
+      "key": "6c3f3f227823c0c37542de94b1bde03cc83ccce6"
+    },
+    "Message": {
+      "key": "c8d497eae7988e8f7bf3e793a3492ecbc6704481"
+    },
+    "MessageAlt": {
+      "key": "54de04fcdae7ce87255a66a4b0bd0ffaeab26071"
+    },
+    "EmailAlt": {
+      "key": "d7c66c9a24b8c1ad56a480547b6826106f7eb0d6"
+    },
+    "EMail": {
+      "key": "b2080b59369d03e9aa00b43bbefb2d6f06698354"
+    },
+    "Phone": {
+      "key": "9a4faa1c51deb9dc30302672f1db5161210c480d"
+    },
+    "Support": {
+      "key": "cf5a52dacfd5a5e2309019a3241b2ed60a77d58d"
+    },
+    "CellPhone": {
+      "key": "cb3bc67846b97e84e1e328054c3a60cc470cbb0a"
+    },
+    "Monitor": {
+      "key": "250ec61cbc7fc9aa9fffacdd7582b391f60cac43"
+    },
+    "OldTv": {
+      "key": "322137cfc9d6ae1d7f6cdfaaffe866082d237224"
+    },
+    "Tv": {
+      "key": "a7612e390dbc54440434563f717082d08ed39966"
+    },
+    "Devices": {
+      "key": "40c1573f11ec608813026cca6c935fafa0201020"
+    },
+    "Smartwatch": {
+      "key": "742128198569221d26e195efce5a1875d404cc3b"
+    },
+    "AppleWatch": {
+      "key": "a844a0e4f48cf28d246e64cbf057366eb41172aa"
+    },
+    "Watch": {
+      "key": "6582d9da1fc26fceb2838f43395d4f7179d10bf7"
+    },
+    "QrCode": {
+      "key": "e2317638a89cbc81b793e5df3ef4a558a42b0ce6"
+    },
+    "ScanQrCode": {
+      "key": "47ab567e4238cb363151f05c328a16c8467023b8"
+    },
+    "QrCodePix": {
+      "key": "1dbfd70e39a945ea228ceeb1ddd5797ec37f7365"
+    },
+    "QrCodePixAlt": {
+      "key": "c3abfa271165dd7c55d17e4b7abaa698c0aa1fda"
+    },
+    "ScanQrCodePix": {
+      "key": "36d835846adbbcf96f668aef182de9df0759d1ab"
+    },
+    "Settings": {
+      "key": "cb6cb51243eb26f5b8de8ea4e4e1f14650c4eb5e"
+    },
+    "Wifi": {
+      "key": "0f0a212138549412f2535812cceb73201466f8b7"
+    },
+    "Fingerprint": {
+      "key": "af57e4856e384c988abbcbfa80813753440ac0f8"
+    },
+    "Plug": {
+      "key": "987ef80849bed6e44fd75f929316af868833345e"
+    },
+    "Usb": {
+      "key": "1092ffb069dde2c3e26031057addf2d78659d178"
+    },
+    "Bolt": {
+      "key": "19198c6261abc2606d8df98592a34145532e260a"
+    },
+    "BoltAlt": {
+      "key": "84cad40dec05d59b03539fe0f06e8577f8982b32"
+    },
+    "Speaker": {
+      "key": "69d5ee4403fb518fe35ede96ac0723e2fd4c8501"
+    },
+    "Camera": {
+      "key": "0b83bd50072355fd8aca474e23e4f9dd52610e49"
+    },
+    "Videocam": {
+      "key": "cdb77fdcc63466ef6bc948642fc1197b7835e0ac"
+    },
+    "Music": {
+      "key": "6333adba1e3346c6b13e96aaf4f4255273aa3607"
+    },
+    "Headphone": {
+      "key": "8fa4b547df21794371423f7dd0977ded51057635"
+    },
+    "ScrollVert": {
+      "key": "92459c4118852a7361c35245d18334a3d9829983"
+    },
+    "ScrollHorz": {
+      "key": "d2129d0e30dc5c547b12cae16f3c1018b307380b"
+    },
+    "SwipeLeft": {
+      "key": "a2bd76397448176d979b949e22e6ec49d853ff77"
+    },
+    "SwipeRight": {
+      "key": "9bc9e35b42776ac284384a6afcd113309ce55771"
+    },
+    "TouchDrag": {
+      "key": "9787b168389e9a5011f9e409e8f3ebcbe5480884"
+    },
+    "OneFinger": {
+      "key": "fb0c7d6849de87194d4e64fad6b475a15f4af388"
+    },
+    "TwoFinger": {
+      "key": "4972167e09df4d1fd4ebf74a31841ebe2d3b2f97"
+    },
+    "ThreeFinger": {
+      "key": "72a715e2e60cdbec298f26f8b36fbadd85dcdee4"
+    },
+    "Hand": {
+      "key": "7ea07c06c899c3fd1e5e3a717b76d65f713c057a"
+    },
+    "Notifications": {
+      "key": "5ad74dd6a7d2222333ff57dbc8bf21dfc955ce39"
+    },
+    "NotificationsTrue": {
+      "key": "4e30d4ab4d1cc0ab9cef71461615c5364b9bab4f"
+    },
+    "NotificationsFalse": {
+      "key": "ea1572018f5fd2a2fa8f7f90a569301d9cd4ef37"
+    },
+    "Barcode": {
+      "key": "e1ebff5a1db8ad9290e54e833964aeee2394af84"
+    },
+    "MicOn": {
+      "key": "37522d355b57c1ea2cb6693c4f5f5e0fe18cfc4f"
+    },
+    "MicOff": {
+      "key": "c425476a9a6d2eb76516ddc3a68c3c679fedb9aa"
+    },
+    "Headset": {
+      "key": "89240e3b11ea930630273a010ec03daa25fcbe02"
+    },
+    "MoneyBill": {
+      "key": "c612a1cf5754e0ce6a1de3e2d689249963e357d2"
+    },
+    "Money": {
+      "key": "669ef3b3027bfb9e906bfc85b39202918497b854"
+    },
+    "Payment": {
+      "key": "daffd625097e590798ee9d3c9840b547e99fa2e9"
+    },
+    "CreditCard": {
+      "key": "460bfc5125c03b62b123e1e49c7535f9ab16508b"
+    },
+    "Coin": {
+      "key": "9234078c8e3cb4d4d7a2f76e299176731b8ffdf5"
+    },
+    "Content": {
+      "key": "bb69328353bd1116b2df15ab6637ec1474773cf3"
+    },
+    "Coins": {
+      "key": "8c6e412f40225de2222d09f94e44b0975a3c8229"
+    },
+    "Atm": {
+      "key": "8ed665f771426ebb00e0ea1f65886596b7f3ea2d"
+    },
+    "MoneyBillAlt": {
+      "key": "5cc81ec213a60bb9a449ad05731500ddad027350"
+    },
+    "MoneyAlt": {
+      "key": "bd984812844b8a95a6e07bf5df3b277fbd2f8ece"
+    },
+    "PaymentAlt": {
+      "key": "8510d5882b00a4a722da742c2f88b9b7eb4baf68"
+    },
+    "PosTerminal": {
+      "key": "07b63a735f2c13e490cb3c9778d04ea3761c05b2"
+    },
+    "AtmAlt": {
+      "key": "02c486fa848f672dd72097083edb65b4121f82e1"
+    },
+    "Calculator": {
+      "key": "7f480891db9b7cc28d27210ea71a19ccba70ac38"
+    },
+    "PigCoin": {
+      "key": "e4f2a02e6a43af598d19aaa085130ecaeb7a19e9"
+    },
+    "Pig": {
+      "key": "72ecb4e6dc835b4fa0b50acd7b69c11290010637"
+    },
+    "Percent": {
+      "key": "c4c7e764eab38935fec8cac6c23af15463416152"
+    },
+    "TrendingDown": {
+      "key": "40329a26c2be7abb37b012aec4c7507e93940842"
+    },
+    "TrendingUp": {
+      "key": "0c704a9eb537c830d1aa85b6d79d884fedd5cb49"
+    },
+    "TrendingDownCircle": {
+      "key": "6240247ee65abef1413a8220ddc5f14a8ab58a7c"
+    },
+    "TrendingUpCircle": {
+      "key": "6e048c7c839cf4942a5503fd2d51341651aa3874"
+    },
+    "Wallet": {
+      "key": "bcd41436ca0e14f4a9bba55783e0b9416d3f79be"
+    },
+    "WalletCard": {
+      "key": "726b6cc3ded427e3917f81013eb70b712eb30085"
+    },
+    "WalletMoney": {
+      "key": "9e12273b425e37650fc1b81152d5de5106575109"
+    },
+    "ErrorCircle": {
+      "key": "e0fa189a631c1846dff9af98e2ddf231812034b0"
+    },
+    "CheckCircle": {
+      "key": "f8302e2117fdff9d461566f1d4a8458a235f3aa0"
+    },
+    "AlertCircle": {
+      "key": "ae2fe70d1afff65f256bc8fcaeebc505e7ae54cd"
+    },
+    "Information": {
+      "key": "7e612a4271d290f40b02d5191cde72b311a75800"
+    },
+    "Help": {
+      "key": "1e3d46f78c3e3d6da09b8def3a183b393abb9567"
+    },
+    "Alert": {
+      "key": "ceaca40051c1415cb2cee80cc70a984bbe74f39b"
+    },
+    "ErrorS": {
+      "key": "ea622a6b23840017a884947fc6de1446a1630b90"
+    },
+    "Check": {
+      "key": "990302530ff12641f487e08268c39c968cf64d16"
+    },
+    "ErrorL": {
+      "key": "e57338c06839765ae1dcde54b7d398a2707a5ac6"
+    },
+    "Alarm": {
+      "key": "4653fea336f3ccd63db589de8dee7c3089beb4ae"
+    },
+    "CheckAlt": {
+      "key": "9cdc4fb2710c10d0a52ee5cf558838a7796b5645"
+    },
+    "Clock": {
+      "key": "7135bd7e7a9ce1e8129eb7b111653973e8000bd1"
+    },
+    "Block": {
+      "key": "1815e51d8647c3e98dfc4f11c2c13b9ba8dae738"
+    },
+    "BlockAlt": {
+      "key": "7a5f081374efd42b56e7947c75ee3ece72488596"
+    },
+    "FatalError": {
+      "key": "1397aaa286369f9b8cefb73a8a3c768a1552b2d3"
+    },
+    "Forbidden": {
+      "key": "95e2b52fc54c6a155b250aba5217738d0acd8ee7"
+    },
+    "MoreHorz": {
+      "key": "b3b19c1be5be1f177a9913ee38796f2379ee5026"
+    },
+    "MoreVert": {
+      "key": "62c31a887bf5ed87b6916317a7d644b1311c2b2d"
+    },
+    "Apps": {
+      "key": "6ff4953faca8f835604d8ea6150d968ccb1f6733"
+    },
+    "Grid": {
+      "key": "bb13b47625de93b343648680dc753e7a9cd70c40"
+    },
+    "Dashboard": {
+      "key": "0cfc3f8f77c23dfd5ff970a5908b11d7bac4a71e"
+    },
+    "Menu": {
+      "key": "574f1b468dd53213e94457df47394ed387c316a2"
+    },
+    "Mouse": {
+      "key": "6b7b08b2f8973ebef2e28ff14b6b4a96f1874b60"
+    },
+    "BulletS": {
+      "key": "af0cfa28fc1353345b623888f2b30786a8792b9d"
+    },
+    "BulletM": {
+      "key": "f2bf216ff139f643015dce4624296a9d418ea853"
+    },
+    "BulletL": {
+      "key": "84c3d6aa92f85b8773a68ef448710202af66b747"
+    },
+    "Circle": {
+      "key": "c34537f8da17870606e559aa9aa0df5e1bf999d2"
+    },
+    "Tune": {
+      "key": "b3fbd06afb6def9f08636f04ac74b0c3288e8d1b"
+    },
+    "Password": {
+      "key": "68c19517568ff4c5cb55bd50c25ce23346fca1e2"
+    },
+    "Globe": {
+      "key": "297d0ca85b5133f096ea04ac78ebbe4585b5fa62"
+    },
+    "Web": {
+      "key": "d3576a488b24ce29bc2d599c73eecfdd72d4f083"
+    },
+    "World": {
+      "key": "240e85b6bca257b9d502e89cd808152dd7b52688"
+    },
+    "Gauge": {
+      "key": "865426c3f6885262c446a1a2b436d0349a35a270"
+    },
+    "Color": {
+      "key": "3770dfd3e1501c5297a5e1176ebcd96f2667a0c6"
+    },
+    "History": {
+      "key": "367c00869de3b36673255a52f6be8bf1088a4441"
+    },
+    "Calendar": {
+      "key": "96afcbca6d823e345d44a064e05c3243d4061f5a"
+    },
+    "Tag": {
+      "key": "21f13cb1354f08e37dc31593528446be84bbcc0f"
+    },
+    "Shield": {
+      "key": "c9112acb60aaf770d3a44b3773817f64e957347a"
+    },
+    "Verified": {
+      "key": "81fae1f17aac66e50951e476909a5ed14317e9d4"
+    },
+    "Health": {
+      "key": "1b9268f30d39d716c926ca920207d667098c775d"
+    },
+    "ListSmall": {
+      "key": "c14aaa2deea807ad6b99ace8c616a51728121d76"
+    },
+    "ListLarge": {
+      "key": "5049ae0479f5eb20c5ee78457f4d871d4ce8c17f"
+    },
+    "NumberOneCircle": {
+      "key": "3526b8c9f96f43ea6d7e0f8bf208b0f5df711c67"
+    },
+    "NumberTwoCircle": {
+      "key": "e90140176efd63530a10291b7cbbfdf4fc68dfed"
+    },
+    "NumberThreeCircle": {
+      "key": "69837729b821076cd2d539253a884e67b26aa466"
+    },
+    "NumberFourCircle": {
+      "key": "0a85c61c9a8082dbc9e94742ed229ea07366d173"
+    },
+    "NumberFiveCircle": {
+      "key": "f411dca6f6e4d5492a29c36f55af7b5ed11cd4a7"
+    },
+    "NumberSixCircle": {
+      "key": "357dff54d1e21d20cecd20449916e46355f2d2d3"
+    },
+    "NumberSevenCircle": {
+      "key": "d9be20442a1e3e17895e4bbdbe94e26c0563421b"
+    },
+    "NumberEightCircle": {
+      "key": "daabc46533deedd88887878f9505643bf8402053"
+    },
+    "NumberNineCircle": {
+      "key": "2baaa423859f9000c8f26bcc3f4c0337ab150cc5"
+    },
+    "NumberOne": {
+      "key": "0cb8e5322f222160046ec0fe370232e8c37d70ef"
+    },
+    "NumberTwo": {
+      "key": "0ac3881df8126647ad68995c2f197b0beb42b7f4"
+    },
+    "NumberThree": {
+      "key": "44aeabd204a7f696400e3190c801278ccdf5eda4"
+    },
+    "NumberFour": {
+      "key": "585d28a34cae8c180953f3b53548574fb6c7f874"
+    },
+    "NumberFive": {
+      "key": "d02bcaeace62ef39e96730a227a2aa5d7b722393"
+    },
+    "NumberSix": {
+      "key": "0421f3c2461bc3ac650275345fde215cd67684b6"
+    },
+    "NumberEight": {
+      "key": "ad5abb6db4c4274d61b39849809a719b19d0d87c"
+    },
+    "NumberNine": {
+      "key": "df7829399ff5dcd121a568488425cde8288196e1"
+    },
+    "File": {
+      "key": "1fc98c47df0d61452be9da154478cc00db4482de"
+    },
+    "FileXlsx": {
+      "key": "0878dbc998af0eb5f9693c503ab8624da46de4d0"
+    },
+    "FilePdf": {
+      "key": "7ca2b931ced9e882ec5b8131afe449e524dfa1c3"
+    },
+    "FileDoc": {
+      "key": "c11dddaad32d18d466164166d0eaf8aa1092dac2"
+    },
+    "FilePpt": {
+      "key": "e4970535dfd2281eba0d66b3f6d97fdec42ba284"
+    },
+    "Picture": {
+      "key": "1dc2e06d331ac01a34c7a8ba37821d82a9cafd5f"
+    },
+    "Document": {
+      "key": "ff5ed63d759c8e84ef324aa9e36e269edb5a412b"
+    },
+    "NoPicture": {
+      "key": "368824542b7e6035b1f0e5e5a471f114ce6a1725"
+    },
+    "Film": {
+      "key": "df3e3f29b1f88c3c92d2aa8f4f8e3481de3aa7ef"
+    },
+    "Receipt": {
+      "key": "cfce9a6acd14d377137b185f8e8ad0dd4574855b"
+    },
+    "ReceiptLong": {
+      "key": "3b1b5d9517b62ec50f062a90c7e439b07842a934"
+    },
+    "ReceiptLongAlt": {
+      "key": "f1040e922ec4bb2cb89ed0f1c9c251403dd8190f"
+    },
+    "Folder": {
+      "key": "deb005dc0cf0172acb87575535acbb60b1641f79"
+    },
+    "Cloud": {
+      "key": "d9fe940aba9083d1b27a8caba1158ec308752218"
+    },
+    "PhotoGallery": {
+      "key": "a246b23c1dda82f118933d4a12ad7bca38e6f936"
+    },
+    "Video": {
+      "key": "5f406311df9de608c2d8eb522f734996399be843"
+    },
+    "VideoGallery": {
+      "key": "99e68d714d4a38f5b240d60cb417310bca7cc007"
+    },
+    "AddCircle": {
+      "key": "b154c7874c2d260aedaa616eeda540e016432bff"
+    },
+    "RemoveCircle": {
+      "key": "b78b5f9a975c94c1a2bda11fdbf12603c3bf2a87"
+    },
+    "AddS": {
+      "key": "d184e09be37d2727d99bd9f8070e3dfe9397d5aa"
+    },
+    "RemoveS": {
+      "key": "f04de010984659d2b7865a4483b8c00ab770b7a4"
+    },
+    "AddL": {
+      "key": "f77bb31aa2ca4c3f822636844d038ef02e6ce5a4"
+    },
+    "RemoveL": {
+      "key": "115504775e7a0a97dfac6dd44d6ae4853d95173d"
+    },
+    "RefreshCircle": {
+      "key": "776bf7d9e7957515407b90a80bed4835a1aeadd1"
+    },
+    "Copy": {
+      "key": "6e4c0ae0802c21d7e29db80e9d05152ed456870f"
+    },
+    "Print": {
+      "key": "6c91e16c650f0d8ba1c870819e0a6fbc53af998d"
+    },
+    "Save": {
+      "key": "fec428459b65d0f337e59576524936752dd3316c"
+    },
+    "DownloadAlt": {
+      "key": "84159cbc9b0b85051b47eee06ce5085fa827bf75"
+    },
+    "Download": {
+      "key": "b362400bf11e449f1556617372bdd8948324da96"
+    },
+    "Archive": {
+      "key": "3b6e8e2ff39620f586462df4529dd45b396bce15"
+    },
+    "SyncCircle": {
+      "key": "c63d5515c0f5dca310aeccec363c3a76027294ce"
+    },
+    "Pin": {
+      "key": "8cf95433c4f306a747e8af5a306c5da90c7d1953"
+    },
+    "Target": {
+      "key": "095dc9e2e5300526b262d1bd16722e09cf85b07a"
+    },
+    "SearchAlt": {
+      "key": "6688a852ced47e6501ec92e6197e8e528173b38d"
+    },
+    "FilterAlt": {
+      "key": "e1881f03a66d49be1dd47e6443afaeb62022c611"
+    },
+    "Enlarge": {
+      "key": "ef2ec1bb1e92a7616bfd0b1f8464011051510426"
+    },
+    "Compress": {
+      "key": "ad7d2ba1ab012c7971c86836dcae43a5e294f9ee"
+    },
+    "TransferHorz": {
+      "key": "667dff0b921b6d14811cc7f3df8947eaa200af46"
+    },
+    "Repeat": {
+      "key": "3c9bfb01ce20448609236f4d132cce3598db73de"
+    },
+    "Expand": {
+      "key": "349ef9c0ace087c9a998ef66d8c974efa6798031"
+    },
+    "Minimize": {
+      "key": "a7d1033862c0ccf409db7a9e456132fca9f4772d"
+    },
+    "Move": {
+      "key": "e7f3c595951a175ad79d3af6d7c31b76fee89894"
+    },
+    "Directions": {
+      "key": "93c23f9b4ce3783d925886dcb34244a9989a749f"
+    },
+    "TransferVert": {
+      "key": "c3db44e3959722f0d140c4df13f61d92f5c1c58e"
+    },
+    "Share": {
+      "key": "9463da6eb742b873877283ec2b4136544b71b7e2"
+    },
+    "Filter": {
+      "key": "880e108593686a5c69a66ae405c1f362ed25f65f"
+    },
+    "Edit": {
+      "key": "a7dfc9a72f580395da2723aa48405bb5d7cb062d"
+    },
+    "Send": {
+      "key": "c0571d26fe8250bec7daaa3bbac563418eaa0526"
+    },
+    "Upload": {
+      "key": "59607320147d5c2314235bb0effecb62067111a3"
+    },
+    "Enter": {
+      "key": "1ab7090aeb7435e233996aa8df70d89b8086635e"
+    },
+    "Exit": {
+      "key": "57942fc15999e0d8aac80f3b311c83d4acfc4e20"
+    },
+    "Open": {
+      "key": "21e8edcb3b39cf386da52599896bb5c32caa50f5"
+    },
+    "Trash": {
+      "key": "01711976cb43e62690d1a3d07f57b8f2f766ef21"
+    },
+    "TrashAlt": {
+      "key": "14a0edeb8ceb7a373716c58552a93cac53615a8d"
+    },
+    "CloudDownload": {
+      "key": "19eed8268f5a195b9406f956a819827ccb38fb39"
+    },
+    "CloudUpload": {
+      "key": "e227a0bdc445fc8b01d1177c3189d77e79622a36"
+    },
+    "Play": {
+      "key": "a600e0f4905fea3cf5d62442e0f517c450247106"
+    },
+    "Link": {
+      "key": "f66fd1e369f88e27d789e44e533b90b1197bb9ab"
+    },
+    "LinkAlt": {
+      "key": "4c365f8388f44272657d40764c9e83520ce93b3d"
+    },
+    "ThumbDown": {
+      "key": "00a32a10ab652383fe04fe8764bafcb6920b7a33"
+    },
+    "ThumbUp": {
+      "key": "11adb3fc22f320652fa6d0958de644d8719fa8d9"
+    },
+    "Refresh": {
+      "key": "c1c3113cb97e60a2ef9c8e60ab0e7ed402bfc640"
+    },
+    "Flip": {
+      "key": "18df441750b45e75f09354b387b19b2fcf827b43"
+    },
+    "Sync": {
+      "key": "06cdb17becc1c44678fa7aad31d7f9fc54239d94"
+    },
+    "Pause": {
+      "key": "bb7a2c1fa3897f880f6d7cc0e5c6227cedacb9bb"
+    },
+    "Spin": {
+      "key": "380709f5b82c2741a9fcb58e9640eae5e608ba57"
+    },
+    "Autorenew": {
+      "key": "adcb58bdbcda12b5827c2e41c782521b245af94a"
+    },
+    "Sort": {
+      "key": "8868a7ce149b0d1fdab3604a5a4bd5eb1be3f8f8"
+    },
+    "SortUp": {
+      "key": "626d72708d28d4601a6d5e71f8c225ae9e044740"
+    },
+    "SortDown": {
+      "key": "7aa2cf2e2bb0f09eedcba3f465074b34faef6778"
+    },
+    "Love": {
+      "key": "81e33d142347f05ba567c6c054b5c96491410e38"
+    },
+    "LoveCircle": {
+      "key": "e8aeae65d7b2237f544b47921f5b556c88937970"
+    },
+    "Star": {
+      "key": "696ac2d624b7042e9b2a6e58ed510dc8d6e29a88"
+    },
+    "StarCircle": {
+      "key": "423c8f953bea08215a65f3b0d0ec1ce8980370c6"
+    },
+    "StarAlt": {
+      "key": "9b64569c2ab5e089637e4c77718e1b71ca86203f"
+    },
+    "StarCircleAlt": {
+      "key": "9c66a84055f64263844233a718f3cf1a45af5886"
+    },
+    "Visible": {
+      "key": "0050932bb332815f484b154e53416065b61f893e"
+    },
+    "Invisible": {
+      "key": "9f87acf760b28156029ed160ab949207fd79d9e9"
+    },
+    "InvisibleAlt": {
+      "key": "d09cdea37482500dee7fa22504749fa9c7817627"
+    },
+    "Lock": {
+      "key": "6c6b5c49f823dd74a3c0e9a4d1f69b1aa1e64551"
+    },
+    "OpenLock": {
+      "key": "262c6e8e926cfc946f679a5ab0fadde500443475"
+    },
+    "LightsOff": {
+      "key": "680e906bdc3ed1f5e98decf536abe474f8230398"
+    },
+    "SwitchOff": {
+      "key": "5c7a034820d160237d6a36eeefe61710bcb68908"
+    },
+    "SwitchOn": {
+      "key": "0382107884a7ee682e85f766f86b45902dfd08bd"
+    },
+    "Clip": {
+      "key": "329697f40bbc8271ea15f212948ef1fcbb7d49c8"
+    },
+    "ClipAlt": {
+      "key": "421431508b1ea8fd3daa618ee912af2e7dc1186d"
+    },
+    "Attach": {
+      "key": "bcfbe392e5a5c2901ce57e659952c329aaa5f7d5"
+    },
+    "AttachAlt": {
+      "key": "e07d169f0de21635cb3bd349361e0a5cefe2a639"
+    },
+    "Search": {
+      "key": "80ad58456c216cab5665dce456aba1a057252a5f"
+    },
+    "LightsOn": {
+      "key": "988aed2e2195a04c6cf1f042eb4e3e18cae38820"
+    },
+    "StarHalf": {
+      "key": "2770749ecf6a76f57322b1f30bf503e225499ef1"
+    },
+    "StarHalfAlt": {
+      "key": "7d6d0b087bc70328fe87690d7b44201f424b505b"
+    },
+    "ArrowDownLarge": {
+      "key": "34be37a51ecdb2f909d3a509d1de918feb7a0cf2"
+    },
+    "ArrowRightLarge": {
+      "key": "6f7fd1c970b66513dcb01e306add66d32de7d1e1"
+    },
+    "ArrowUpLarge": {
+      "key": "0303e0bbc2237821e0edb22ead37a30c8c8fed6e"
+    },
+    "ArrowLeftLarge": {
+      "key": "bfc8d9723550f70e57ed74b7181a9581068606d1"
+    },
+    "ArrowDownSmall": {
+      "key": "7bd04e9de1dc960af79a2089e7bd2a424cce1660"
+    },
+    "ArrowRightSmall": {
+      "key": "a23f932e08c425d468220c745d25322852c30f4b"
+    },
+    "ArrowUpSmall": {
+      "key": "406774f6e086b8881470139ebfd9209c873e539a"
+    },
+    "ArrowLeftSmall": {
+      "key": "72b356024e1f9deba7853088a5d212380662957a"
+    },
+    "ArrowDownLeftLarge": {
+      "key": "f7cb3819d7882020de67e599e49dbb27f7d06971"
+    },
+    "ArrowDownRightLarge": {
+      "key": "2e67ae1be051962a0f72c0d841bf6253b58d7129"
+    },
+    "ArrowUpRightLarge": {
+      "key": "1ae5bdd3b17d0db518e78344e92616d55e869fd2"
+    },
+    "ArrowUpLeftLarge": {
+      "key": "682382e28f13495ad03d53c6606717a08a3f4acc"
+    },
+    "ArrowDownLeftSmall": {
+      "key": "747db12372a9f8350c27131fcb01b3a387b6aa45"
+    },
+    "ArrowDownRightSmall": {
+      "key": "018aea0027629c9b397033b8407a9ef6d57f1d00"
+    },
+    "ArrowUpRightSmall": {
+      "key": "58a785e3c95267bc4adbd5dbe63723b68a60f880"
+    },
+    "ArrowUpLeftSmall": {
+      "key": "3d8c641cdf3c60c59c4c9ad640d051812c5a62e9"
+    },
+    "ArrowCornerUpLeft": {
+      "key": "282b2bcf74ac24bc25a77b0ca82d4662b28caa6d"
+    },
+    "ArrowCornerDownRight": {
+      "key": "699aa8fcf5d6a116372e6906ecd87499dc2a6eae"
+    },
+    "ArrowCornerRightUp": {
+      "key": "3c0841093519025f03d0a8453b992e7495a1558f"
+    },
+    "ArrowCornerLeftDown": {
+      "key": "0e5409a5bb9b8dd90316e39b765bba9bfaae5ccf"
+    },
+    "ArrowCornerDownLeft": {
+      "key": "8151b6b4e43cc78d15953c322665b99871644624"
+    },
+    "ArrowCornerUpRight": {
+      "key": "18772b339d3095d14951e7177d78976ef81420f0"
+    },
+    "ArrowCornerLeftUp": {
+      "key": "7cdd0d6eb2268ff11f7efc81796caffd23ecb3c7"
+    },
+    "ArrowCornerRightDown": {
+      "key": "fee448bf414fd195cf32059b6bc2d4c3bc527615"
+    },
+    "ChevronDown": {
+      "key": "25c872789ec602047ca5014d8f2b88b930f79264"
+    },
+    "ChevronRight": {
+      "key": "d278a423947ce479af2a3767ccc41f3f503a34c8"
+    },
+    "ChevronUp": {
+      "key": "7d6ffc8e75c9bde0207f4101737fd84abd5ba1d1"
+    },
+    "ChevronLeft": {
+      "key": "82b80bb0765f2d68baa578da6001d971ef7d12e8"
+    },
+    "ChevronDoubleLeft": {
+      "key": "d40a729c51f17e26d1c5a813c361491bff2dc87c"
+    },
+    "ChevronDoubleRight": {
+      "key": "6f97eff573441f12d988bef99cf7ac4e21dfed54"
+    },
+    "ChevronDoubleUp": {
+      "key": "7df752605df7bbd5a6a9765028cfacb4f79bd683"
+    },
+    "ChevronDoubleDown": {
+      "key": "270bde0ea4ec0c02a582562dd0756e146fb20960"
+    },
+    "ChevronDownSmall": {
+      "key": "cb7ada8559e3bb7c3840fcf0cc1797dac479b381"
+    },
+    "ChevronRightSmall": {
+      "key": "7d822e87e6cb514d779bd4ab6805a13f491c3fa8"
+    },
+    "ChevronUpSmall": {
+      "key": "d79dc09818be9440a9a52ceea4e1c2f9ac08a6a1"
+    },
+    "ChevronLeftSmall": {
+      "key": "b355afe5262a95a3b7faa2f2870b3856df345d5d"
+    },
+    "ChevronDoubleRightSmall": {
+      "key": "0bc9067b0ead8d7256b80223e89b54a0f9b5a234"
+    },
+    "ChevronDoubleUpSmall": {
+      "key": "e479dfcaaf35f1bb286f896dcaedb2b1d54229c5"
+    },
+    "ChevronDoubleLeftSmall": {
+      "key": "51c1e48a488a0700b9a06ad09860361a6ded940f"
+    },
+    "ChevronDoubleDownSmall": {
+      "key": "f203352bad68a8ddd15d9daf04e2e07c59e0c8bf"
+    },
+    "ChevronTripleDown": {
+      "key": "d66fafc2298a0f1ff5af763562c3fbaaff83e7dc"
+    },
+    "ChevronTripleUp": {
+      "key": "a87af7dc138d33224be7a8a07dbb470837f32813"
+    },
+    "ChevronTripleRight": {
+      "key": "c05441372b43ff274ca6fb4c67f8269373cf265a"
+    },
+    "ChevronTripleLeft": {
+      "key": "fe41b9f80b79de2756a06b674a2f568a15a5787f"
+    },
+    "ChevronDownCircle": {
+      "key": "6dcb8411335bfda3b6f0b52f4967d6967cda5f1d"
+    },
+    "ChevronRightCircle": {
+      "key": "4c937fe29cfa1a6b474bce41c82bcd2360c7931d"
+    },
+    "ChevronUpCircle": {
+      "key": "50bb9f4d3e4ff8733309c24ab9861cac7187fff3"
+    },
+    "ChevronLeftCircle": {
+      "key": "9882d4979d420ee42c3cbb23bb3e3865d1462f0c"
+    },
+    "MonogramEmpresa": {
+      "key": "4806685d21f478a1510a495581b8b3cf935f0445"
+    },
+    "MonogramComprar": {
+      "key": "52aa1b0ba5a4a4dae54f712a11d3b2ff6bd38845"
+    },
+    "MonogramMissoes": {
+      "key": "349ce67f211da372b78482f7082d0090b6ff6014"
+    },
+    "MonogramTrocar": {
+      "key": "47e0d1eb50e6867999a2c39a40707d499482189e"
+    },
+    "MonogramViagem": {
+      "key": "77fd725b787135c8b5fa19fe9b5423885456cfc6"
+    },
+    "MonogramTime": {
+      "key": "0991ba7498b0f5e73154be9fc7c57c466a74a7af"
+    },
+    "MonogramTransfiraPontos": {
+      "key": "6ed4482e7ce4ecdfa32ea46b6318105d50be42b6"
+    },
+    "MonogramPontosInfinitos": {
+      "key": "7fc1659dd5e524655b9ab3800e0b9be0dfeba1d5"
+    },
+    "Carteira": {
+      "key": "1a3013a4a1c17098b11d884ec8591520ab31092d"
+    },
+    "Simbolo": {
+      "key": "8cc8ed1cb10d1d222c23ad9c4f68c919f0c31504"
+    },
+    "RenovarPts": {
+      "key": "c080eb57e4022c6b1e5a2fd272540a548a81eb41"
+    },
+    "Local": {
+      "key": "d37bf76ae935aaca821918cb1d03a91174e91c9e"
+    },
+    "Negocio": {
+      "key": "a541f0414e8c25d8b36e6fc679e01a8806b9a943"
+    },
+    "PigSave": {
+      "key": "6cb5b7132d30f760a87678d9759e7f37218e3fc8"
+    },
+    "PigSimbolo": {
+      "key": "cd2dc975d79b9d7869e1c161c33c92796ed44392"
+    },
+    "Pontos": {
+      "key": "b77eaefc02c606fb9f659bd6b94833abf9e265cc"
+    },
+    "PtsRecorrencia": {
+      "key": "fc97d063472487404f18862f95fe3d0845dd2122"
+    },
+    "Loja": {
+      "key": "e1333f94d95960976cb0212f9e5abaf9bab0e5d0"
+    },
+    "BagDesconto": {
+      "key": "ddadda25a56d994de655dd7bdcf36e860aa0ab4c"
+    },
+    "BagAcumulo": {
+      "key": "1d9a10e56322459a79e947c03f86aa5c2fedafa0"
+    },
+    "Teatro": {
+      "key": "3cf4170abc8e4314c92455cbd3399be928012120"
+    },
+    "Ingresso": {
+      "key": "4c12d9f4cc1d9ad3dcd19c594d8d5228abdf52ff"
+    },
+    "AppCarrinho": {
+      "key": "55d1be5a54e18e664a200604ed7723efda88cefb"
+    },
+    "Cartao": {
+      "key": "a566a2dcb96d46dd457a13fd51711cd409bd57f5"
+    },
+    "Carrinho": {
+      "key": "9064750ba9225919c0bad34e93ccfc4a16b0645d"
+    },
+    "Estrela": {
+      "key": "acf18da22db1fc05151514fd00f98be2aab1697a"
+    },
+    "Calendario": {
+      "key": "b7793e7df85e25cd7e91884d32a7f1734b157160"
+    },
+    "Presente": {
+      "key": "9e29304e1d61eb976044b21550aeca37ef443801"
+    },
+    "Bag": {
+      "key": "040c072f5fff911252a0fbb7aa0aea781bbbbd0d"
+    },
+    "Som": {
+      "key": "a252825ba84025008cae69658c687e69aef3bb53"
+    },
+    "Chave": {
+      "key": "2df1e18870c63747544ee69df2d8ede9bc24c73b"
+    },
+    "Posto": {
+      "key": "4cac2fe5d79277d889fdd61d0495b5750e6b7780"
+    },
+    "Lupa": {
+      "key": "19176e8d4ad430b276bf2e0cd22d311f69a16a77"
+    },
+    "Computador": {
+      "key": "b91a9ab14e7e4a3ffcac5712a2252e05d3e5ec46"
+    },
+    "Casa": {
+      "key": "e839425a8f715eb2a96784d7ffd0db4934a583e9"
+    },
+    "Mala": {
+      "key": "7e81bb12bb346ac394f987ebfc69517413da688d"
+    },
+    "Bolo": {
+      "key": "5a1db41ba242859ec4666c301ca06f50c3f40c3b"
+    },
+    "Pesinho": {
+      "key": "37e8bb7e3357667c5fd1b63edb3c050fe80424e1"
+    },
+    "Indo": {
+      "key": "c328e0a4a4a0fc5db2a4aada2b2a181139001c27"
+    },
+    "Voltando": {
+      "key": "9b06c37b455706f4277071ed81b3939e861d01bf"
+    },
+    "Mundo": {
+      "key": "964dbd7da90ae6bceffa9a6ee5b226d8b7490cbb"
+    },
+    "AltoFalante": {
+      "key": "ba6e64d2ee9f569d1e145f8925a1863dec9cdc2c"
+    },
+    "Plano": {
+      "key": "6380a40fec2673a9ed41cb1b55dceb348243d6b7"
+    },
+    "Encomenda": {
+      "key": "81da563e473baf792985e137ad40342aca406c81"
+    },
+    "Clique": {
+      "key": "f3dd526f2a8445210025c8435a9eb7f895e6a5d1"
+    },
+    "Lp": {
+      "key": "b089b143fbfb0c5fa354ae784df6e8b86e3c63ea"
+    },
+    "DescontoCarrinho": {
+      "key": "5a82cce92e274db3adbcb5301537990abaf2819a"
+    },
+    "Decolagem": {
+      "key": "57e0f8657e14b457058de9fdd377702abecd4c26"
+    },
+    "Pouso": {
+      "key": "91052349f2f0e89e585df2dc50367f2cac4cadfa"
+    },
+    "Passagem": {
+      "key": "5315e4e918693a9d10bff2863c27ab9258d6f75d"
+    },
+    "Navio": {
+      "key": "3fc475a63fc13899336a6f7099acc6b4d48ef064"
+    },
+    "Alvo": {
+      "key": "e1cb7bef7e162c4af16d23f6f9ccec383f79f48d"
+    },
+    "Pessoas": {
+      "key": "512b93f91cf0756f73775ef6bc750cc6deddea40"
+    },
+    "Foguete": {
+      "key": "77c45818c4e95a0d0b3a852f95d025eb5fe7649f"
+    },
+    "Pecas": {
+      "key": "b7a4abe8b45979c3fa10d1f2088e4cb7a9bcb69d"
+    },
+    "Alerta": {
+      "key": "9d51df2645b33f2ad31f9a966227aac9e61906b9"
+    },
+    "Beauty": {
+      "key": "2daa2186d6f7005ad6486f8a97d5397ffd4a1b7c"
+    },
+    "Brinquedinho": {
+      "key": "66645270ff7a18f2384d8229a07b0efb773c6a27"
+    },
+    "Camiseta": {
+      "key": "040992bdd31ee9f7eef6ca0f07f8f2a6c7118bd2"
+    },
+    "CasaEletrodomeSticos": {
+      "key": "f5894999a887a17d7fb57f56fdc3b07895cf75c0"
+    },
+    "Chupeta": {
+      "key": "7603b487f0cde0bf993a6e1798f6684e6e4cac76"
+    },
+    "Coracao": {
+      "key": "c30ea5879b8ca111155f202655002fa448b90d12"
+    },
+    "Email": {
+      "key": "e860f709a0b21c735ad4364ea26636b9cd8caf7a"
+    },
+    "ErroFalha": {
+      "key": "85395a388484e0cdab842f3b21738763ce6e96ed"
+    },
+    "FaceId": {
+      "key": "dd5b65699f136a19bc1ffc5485227b3e450b25c1"
+    },
+    "FoneDeOuvido": {
+      "key": "0b63a7ff8ebce4f9d36db973c918d69ebe5ee913"
+    },
+    "Lampada": {
+      "key": "34a81b65ca2afea22f3464ccdff948c4506127d4"
+    },
+    "Like": {
+      "key": "b01b074fcf4ead9aba75531a32e37f54ee0671eb"
+    },
+    "Login": {
+      "key": "8380c0de333115e703588e642fe7257b5d88844a"
+    },
+    "Maquininha": {
+      "key": "b54b5e2bd26c3855d79515e2095af13c274696f2"
+    },
+    "Notificao": {
+      "key": "5f9b7ac0c051b8c35fca2d183da863d15b3961a0"
+    },
+    "NotificaoPush": {
+      "key": "32454229fd529769408e46022da8f849a18b8648"
+    },
+    "Oculos": {
+      "key": "19205e155de62163bd96b015b4edd3f3ad83a7a3"
+    },
+    "Placa": {
+      "key": "4ce48ef0114cf2b2cb92b8954b09f1cb17493718"
+    },
+    "PromoDesconto": {
+      "key": "4c4bc7cfbc6a29b7c26812d042cb817c99427025"
+    },
+    "QrCodeScan": {
+      "key": "0077aeffeae7ddcb3eff34ed896add99b14b2934"
+    },
+    "QrCodeScanPix": {
+      "key": "3ff5b5b793f46e5ce5494b6581eea92a39a265a1"
+    },
+    "Refeicao": {
+      "key": "cf1804867c368a528d55dd289e11d8c50b132aca"
+    },
+    "SegurancaProtecao": {
+      "key": "6ef88e8d379f0c6d23cea2ddf82569a8c21808e5"
+    },
+    "SemResultados": {
+      "key": "8440e7c116ce5facedd5577df33c32ae361fd5dc"
+    },
+    "SemWifi": {
+      "key": "3f71407de5f0611dd0ee4b20aff1d5c9ea7fc4e7"
+    },
+    "Senha": {
+      "key": "aa076e438bf751c4b6777d51a1b76765cb898790"
+    },
+    "Nota": {
+      "key": "81db048b22c9ab015574fb32aa35a66cf787b80d"
+    },
+    "ShoppingLivelo": {
+      "key": "9487441a5afa86e21373899adab7672848722756"
+    },
+    "Telefone": {
+      "key": "9b3667305e48f735c0bb9f0ef99ca3d0a66f1ce9"
+    },
+    "Timeout": {
+      "key": "c5d25d5064794dc98e3d04f7542c3283a15c2d3e"
+    },
+    "TouchId": {
+      "key": "f4d4c171e8db9732375d5792904f14bb33c0ce67"
+    },
+    "🛑 DEPRECIADO - TransferenciaEntreContasAlt": {
+      "key": "9d8cbb1544e4e8df97d5fab57556c199ffba339d"
+    },
+    "TransferenciaEntreContas": {
+      "key": "c731b90ffca9ccf085423245926a22e489783319"
+    },
+    "Whey": {
+      "key": "dbea219515d18be18e88e06ce4ad7c400fd6fa50"
+    },
+    "CartaoDeCredito": {
+      "key": "84754a880be1b86826c8e38c2fc699ee226bdf6c"
+    },
+    "Cinema": {
+      "key": "178440349f56658c152987fcc86e8dc598234319"
+    },
+    "🛑 DEPRECIADO - Clube": {
+      "key": "7fed7fcdd7308936b2b6f4b4a08770d200ff369d"
+    },
+    "DigitarTeclado": {
+      "key": "79a0905f59b1b85ee7a6b52c7745d25352cbb76f"
+    },
+    "Sucesso": {
+      "key": "b94e506aad38428cba2bc9d2721fb13ecf2dc28e"
+    },
+    "GerarLoteCupons": {
+      "key": "4622a01860d01e094315fec1f25d6c87c312521b"
+    },
+    "GestֶoLotesCupons": {
+      "key": "bd401052ce5b4289b1e4ace0f40fdaa9578018a2"
+    },
+    "Boleto": {
+      "key": "d0eb38fc209f6f5521e53232b960bad273d7fedc"
+    },
+    "PerfomanceDashboard": {
+      "key": "ec329a86a9a544d82232eec8e93312747e4d0989"
+    },
+    "Stix": {
+      "key": "bf4f3045b629a3e84b19d324b9f462bde77042de"
+    },
+    "TudoAzul": {
+      "key": "e4219cd128e9e901340d14a19b13b0eb66d4b95c"
+    },
+    "Latam": {
+      "key": "a59b59f7033670581c1acdd3d1c37cebae4ee9f6"
+    },
+    "CompraDePontos": {
+      "key": "9beef21a445d43f1432a4d9b8c5153f4b3e42479"
+    },
+    "Amazon": {
+      "key": "4293163abef5cd3dc205a7396f3f5055a28b5231"
+    },
+    "Uber": {
+      "key": "227e269620ba18338528292f54c4b95414bde9f9"
+    },
+    "Delivery": {
+      "key": "c0da92dae5ded5bf8ad5f6cb9b9ee008f5131853"
+    },
+    "Hamburguer": {
+      "key": "f70aad3c5fb97f198870fc3850cc5301cb0963ed"
+    },
+    "KMDeVantagens": {
+      "key": "0e9a3e2f736bc5bf47f8768db5a243bca67265c6"
+    },
+    "ShellBox": {
+      "key": "065cab92109e370bc078ee2804f40f38367040fb"
+    },
+    "Motoboy": {
+      "key": "d8214c2802e79be6eabe3e19ff368a242071e846"
+    },
+    "Smiles": {
+      "key": "ab129c728496c0b94bf57a6d3ba039291d8d9b8c"
+    },
+    "Timeout-invertido": {
+      "key": "81d0d026d52f6d1f72dc97a6b959f11791cedd6f"
+    },
+    "Hub-de-Inovação": {
+      "key": "1b865b5488919620b656d12f2aa80b6ce41f3847"
+    },
+    "Logo Livelo": {
+      "key": "6b33f30790a5ec85c50b3dfaf27431a441ae576f"
+    },
+    "Logo Clube": {
+      "key": "8144234657e99415257e2481410f445a8a096448"
+    },
+    "Avatar": {
+      "key": "3089141b9ed40d9a7998f6cdf7b7815d61a73e63"
+    },
+    "Livelo Empresas": {
+      "key": "1cc432f8ba58ad2bc8bc589c9a9e7d261f78d7f9"
+    },
+    "Clube Livelo": {
+      "key": "44e15f48367054e9c4884851ca885c4c6ab254bc"
+    },
+    "Livelo 3d": {
+      "key": "2aa5d267253e6bed0cf5352ad9823b52511a513e"
+    },
+    "Livelo 2d": {
+      "key": "e780895906d83f792a8c59b68b9a9dacdffbac19"
+    },
+    "Moeda 3d": {
+      "key": "87ff20321c49f3ca9a9f4e0c097e97f1d8b71ba8"
+    }
+  }
+}
