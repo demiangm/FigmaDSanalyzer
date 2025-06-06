@@ -1,5 +1,5 @@
 /// <reference types="@figma/plugin-typings" />
-import { AnalysisResult, ComplianceReport, DesignSystemConfig, ComponentData, StylesData } from './types';
+import { AnalysisResult, ComplianceReport, ComponentData, StylesData } from './types';
 import { analyzeNode } from './analyzer';
 import { loadDataFiles } from './dataLoader';
 
@@ -131,14 +131,16 @@ async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
     ? ((analysis.dsComponentsUsed) / analysis.totalLayers) * 100 
     : 0;
 
-  // Determine coverage level
-  let coverageLevel: 'Muito Baixa' | 'Baixa' | 'Boa';
-  if (coveragePercentage < 50) {
-    coverageLevel = 'Muito Baixa';
-  } else if (coveragePercentage < 70) {
-    coverageLevel = 'Baixa';
+  // Determinar o nível de cobertura
+  let coverageLevel = '';
+  if (coveragePercentage > 90) {
+    coverageLevel = '🎉 Ótima';
+  } else if (coveragePercentage > 70) {
+    coverageLevel = '✅ Boa';
+  } else if (coveragePercentage > 50) {
+    coverageLevel = '🚩️ Baixa';
   } else {
-    coverageLevel = 'Boa';
+    coverageLevel = '🚧 Muito baixa';
   }
 
   return {
@@ -148,7 +150,7 @@ async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
     dsComponentsUsed: analysis.dsComponentsUsed,
     hiddenComponentsUsed: analysis.hiddenComponentsUsed,
     coveragePercentage: Math.round(coveragePercentage),
-    coverageLevel,
+    coverageLevel: coverageLevel as "🎉 Ótima" | "✅ Boa" | "🚩️ Baixa" | "🚧 Muito baixa",
     nonCompliantItems: {
       colors: analysis.nonCompliantColors,
       fonts: analysis.nonCompliantFonts,
@@ -159,106 +161,361 @@ async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
 }
 
 async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
-  // Carrega todas as fontes necessárias primeiro
+  // Carrega todas as fontes necessárias
   await Promise.all([
     figma.loadFontAsync({ family: "Inter", style: "Regular" }),
-    figma.loadFontAsync({ family: "Inter", style: "Medium" })
+    figma.loadFontAsync({ family: "Inter", style: "Medium" }),
+    figma.loadFontAsync({ family: "Inter", style: "Semi Bold" }),
+    figma.loadFontAsync({ family: "Inter", style: "Bold" }),
+    figma.loadFontAsync({ family: "Inter", style: "Black" })
   ]);
 
-  const cardWidth = 300;
-  const cardHeight = 220; // Aumentado para acomodar a nova informação
-  
-  // Posiciona o card ao lado do frame
-  const cardX = frame.x + frame.width + 50;
-  const cardY = frame.y;
-  
-  // Cria o frame do card
+  // Cria o frame principal do card
   const card = figma.createFrame();
   card.name = `Analysis: ${frame.name}`;
-  card.x = cardX;
-  card.y = cardY;
-  card.resize(cardWidth, cardHeight);
+  card.x = frame.x + frame.width + 50;
+  card.y = frame.y;
+  card.resize(480, 471);
   card.fills = [{
     type: 'SOLID',
     color: { r: 1, g: 1, b: 1 }
   }];
   card.strokes = [{
     type: 'SOLID',
-    color: { r: 0.9, g: 0.9, b: 0.9 }
+    color: { r: 0.894, g: 0.894, b: 0.894 } // #e4e4e4
   }];
-  card.strokeWeight = 1;
-  card.cornerRadius = 8;
+  card.strokeWeight = 2;
+  card.cornerRadius = 24;
+  card.layoutMode = "VERTICAL";
+  card.primaryAxisSizingMode = "AUTO";
+  card.counterAxisSizingMode = "FIXED";
+  card.paddingTop = 24;
+  card.paddingRight = 24;
+  card.paddingBottom = 24;
+  card.paddingLeft = 24;
+  card.itemSpacing = 16;
   
   // Título
-  const title = figma.createText();
-  title.characters = `Cobertura do Design System: ${report.coverageLevel}`;
-  title.fontSize = 16;
-  title.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
-  title.x = 16;
-  title.y = 16;
-  title.fontName = { family: "Inter", style: "Medium" };
-  card.appendChild(title);
-  
-  // Informações de camadas
-  const layersInfo = figma.createText();
-  layersInfo.characters = `Total de Camadas: ${report.totalLayers}\nComponentes DS: ${report.dsComponentsUsed}\nComponentes Ocultos: ${report.hiddenComponentsUsed}`;
-  layersInfo.fontSize = 12;
-  layersInfo.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-  layersInfo.x = 16;
-  layersInfo.y = 50;
-  layersInfo.fontName = { family: "Inter", style: "Regular" };
-  card.appendChild(layersInfo);
-    
-  // Barra de progresso
-  const progressBg = figma.createRectangle();
-  progressBg.x = 16;
-  progressBg.y = 100;
-  progressBg.resize(cardWidth - 32, 6);
-  progressBg.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
-  progressBg.cornerRadius = 3;
-  card.appendChild(progressBg);
-  
-  const progressFill = figma.createRectangle();
-  progressFill.x = 16;
-  progressFill.y = 100;
-  progressFill.resize((cardWidth - 32) * (report.coveragePercentage / 100), 6);
-  progressFill.cornerRadius = 3;
-  
-  // Cor baseada no nível de cobertura
-  let color = { r: 0.85, g: 0.2, b: 0.2 }; // Vermelho para "Muito Baixa"
-  if (report.coverageLevel === 'Boa') {
-    color = { r: 0.2, g: 0.7, b: 0.3 }; // Verde
-  } else if (report.coverageLevel === 'Baixa') {
-    color = { r: 1, g: 0.7, b: 0.2 }; // Amarelo
-  }
-  
-  progressFill.fills = [{ type: 'SOLID', color }];
-  card.appendChild(progressFill);
-  
-  // Itens fora do DS
-  const nonCompliantTitle = figma.createText();
-  nonCompliantTitle.characters = 'Itens fora do Design System:';
-  nonCompliantTitle.fontSize = 12;
-  nonCompliantTitle.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-  nonCompliantTitle.x = 16;
-  nonCompliantTitle.y = 120;
-  nonCompliantTitle.fontName = { family: "Inter", style: "Regular" };
-  card.appendChild(nonCompliantTitle);
-  
-  const nonCompliantItems = figma.createText();
-  nonCompliantItems.characters = `Cores: ${report.nonCompliantItems.colors}\nFontes: ${report.nonCompliantItems.fonts}\nEfeitos: ${report.nonCompliantItems.effects}\nComponentes: ${report.nonCompliantItems.components}`;
-  nonCompliantItems.fontSize = 12;
-  nonCompliantItems.fills = [{ type: 'SOLID', color: { r: 0.4, g: 0.4, b: 0.4 } }];
-  nonCompliantItems.x = 16;
-  nonCompliantItems.y = 140;
-  nonCompliantItems.fontName = { family: "Inter", style: "Regular" };
-  card.appendChild(nonCompliantItems);
+  const titleContainer = figma.createFrame();
+  titleContainer.name = "Title";
+  titleContainer.layoutMode = "HORIZONTAL";
+  titleContainer.primaryAxisSizingMode = "FIXED";
+  titleContainer.counterAxisSizingMode = "AUTO";
+  titleContainer.itemSpacing = 8;
+  titleContainer.resize(432, 32);
+  titleContainer.cornerRadius = 8;
+
+  const titleTextContainer = figma.createFrame();
+  titleTextContainer.name = "Title";
+  titleTextContainer.layoutMode = "VERTICAL";
+  titleTextContainer.primaryAxisSizingMode = "AUTO";
+  titleTextContainer.counterAxisSizingMode = "AUTO";
+  titleTextContainer.cornerRadius = 8;
+
+  const titleText = figma.createText();
+  titleText.characters = "Prisma DS Compliance";
+  titleText.fontSize = 24;
+  titleText.fontName = { family: "Inter", style: "Semi Bold" };
+  titleText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+  titleText.lineHeight = { unit: 'PIXELS', value: 32 };
+
+  titleTextContainer.appendChild(titleText);
+  titleContainer.appendChild(titleTextContainer);
+
+  // Container do gráfico
+  const gaugeContainer = figma.createFrame();
+  gaugeContainer.name = "Gauge";
+  gaugeContainer.layoutMode = "VERTICAL";
+  gaugeContainer.primaryAxisSizingMode = "AUTO";
+  gaugeContainer.counterAxisSizingMode = "FIXED";
+  gaugeContainer.itemSpacing = 16;
+  gaugeContainer.resize(432, 100);
+
+  // Container do semicírculo e texto
+  const chartContainer = figma.createFrame();
+  chartContainer.name = "SemicircleChart";
+  chartContainer.layoutMode = "VERTICAL";
+  chartContainer.primaryAxisSizingMode = "AUTO";
+  chartContainer.counterAxisSizingMode = "FIXED";
+  chartContainer.itemSpacing = 8;
+  chartContainer.resize(432, 100);
+
+  // Container do texto superior
+  const textContainer = figma.createFrame();
+  textContainer.name = "Text";
+  textContainer.layoutMode = "HORIZONTAL";
+  textContainer.primaryAxisSizingMode = "FIXED";
+  textContainer.counterAxisSizingMode = "AUTO";
+  textContainer.primaryAxisAlignItems = "SPACE_BETWEEN";
+  textContainer.counterAxisAlignItems = "CENTER";
+  textContainer.resize(432, 40);
+
+  // Mensagem de status
+  const messageText = figma.createText();
+  messageText.characters = report.coverageLevel;  // Já inclui o emoji
+  messageText.fontSize = 24;
+  messageText.fontName = { family: "Inter", style: "Bold" };
+  messageText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+
+  // Texto da porcentagem
+  const percentageText = figma.createText();
+  percentageText.characters = `${report.coveragePercentage}%`;
+  percentageText.fontSize = 24;
+  percentageText.fontName = { family: "Inter", style: "Bold" };
+  percentageText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+
+  textContainer.appendChild(messageText);
+  textContainer.appendChild(percentageText);
+
+  // Container do gráfico
+  const graphContainer = figma.createFrame();
+  graphContainer.name = "Graph";
+  graphContainer.layoutMode = "HORIZONTAL";
+  graphContainer.primaryAxisSizingMode = "FIXED";
+  graphContainer.counterAxisSizingMode = "FIXED";
+  graphContainer.cornerRadius = 16;
+  graphContainer.resize(432, 43);
+  graphContainer.fills = [{ type: 'SOLID', color: { r: 0.85, g: 0.85, b: 0.85 } }]; // #D9D9D9
+
+  // Barra de progresso com gradiente
+  const progressBar = figma.createFrame();
+  progressBar.name = "Data";
+  progressBar.resize(Math.round((432 * report.coveragePercentage) / 100), 43);
+  progressBar.cornerRadius = 0;
+
+  // Retângulo com gradiente
+  const gradientRect = figma.createRectangle();
+  gradientRect.resize(432, 43);
+  gradientRect.cornerRadius = 0;
+  gradientRect.fills = [{
+    type: 'GRADIENT_LINEAR',
+    gradientTransform: [
+      [-1, 0, 1], // 270deg
+      [0, 1, 0]
+    ],
+    gradientStops: [
+      { position: 0.0003, color: { r: 0.502, g: 0.82, b: 0.188, a: 1 } },    // #80D130
+      { position: 0.4988, color: { r: 1, g: 0.624, b: 0.039, a: 1 } },       // #FF9F0A
+      { position: 0.9991, color: { r: 1, g: 0.2, b: 0, a: 1 } }              // #F30
+    ]
+  }];
+
+  progressBar.appendChild(gradientRect);
+  progressBar.clipsContent = true;
+  graphContainer.appendChild(progressBar);
+
+  chartContainer.appendChild(textContainer);
+  chartContainer.appendChild(graphContainer);
+
+  // Container de dados inferiores
+  const bottomDataContainer = figma.createFrame();
+  bottomDataContainer.name = "Data";
+  bottomDataContainer.layoutMode = "HORIZONTAL";
+  bottomDataContainer.primaryAxisSizingMode = "FIXED";
+  bottomDataContainer.counterAxisSizingMode = "AUTO";
+  bottomDataContainer.primaryAxisAlignItems = "SPACE_BETWEEN";
+  bottomDataContainer.resize(432, 40);
+
+  // Container de camadas
+  const layersContainer = figma.createFrame();
+  layersContainer.name = "Layers";
+  layersContainer.layoutMode = "VERTICAL";
+  layersContainer.primaryAxisSizingMode = "AUTO";
+  layersContainer.counterAxisSizingMode = "FIXED";
+  layersContainer.resize(132, 40);
+
+  const layersLabel = figma.createText();
+  layersLabel.characters = "Total de Camadas:";
+  layersLabel.fontSize = 14;
+  layersLabel.fontName = { family: "Inter", style: "Medium" };
+  layersLabel.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 }, opacity: 0.4 }];
+  layersLabel.lineHeight = { unit: 'PIXELS', value: 20 };
+
+  const layersNumber = figma.createText();
+  layersNumber.characters = report.totalLayers.toString();
+  layersNumber.fontSize = 17;
+  layersNumber.fontName = { family: "Inter", style: "Bold" };
+  layersNumber.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+  layersNumber.lineHeight = { unit: 'PIXELS', value: 20 };
+
+  layersContainer.appendChild(layersLabel);
+  layersContainer.appendChild(layersNumber);
+
+  // Container de componentes
+  const componentsContainer = figma.createFrame();
+  componentsContainer.name = "Components";
+  componentsContainer.layoutMode = "VERTICAL";
+  componentsContainer.primaryAxisSizingMode = "AUTO";
+  componentsContainer.counterAxisSizingMode = "AUTO";
+  componentsContainer.primaryAxisAlignItems = "SPACE_BETWEEN";
+  componentsContainer.counterAxisAlignItems = "MAX";
+
+  const componentsLabel = figma.createText();
+  componentsLabel.characters = "Componentes do Prisma:";
+  componentsLabel.fontSize = 14;
+  componentsLabel.fontName = { family: "Inter", style: "Medium" };
+  componentsLabel.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 }, opacity: 0.4 }];
+  componentsLabel.textAlignHorizontal = "RIGHT";
+
+  const componentsNumber = figma.createText();
+  componentsNumber.characters = report.dsComponentsUsed.toString();
+  componentsNumber.fontSize = 17;
+  componentsNumber.fontName = { family: "Inter", style: "Bold" };
+  componentsNumber.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+  componentsNumber.textAlignHorizontal = "RIGHT";
+
+  componentsContainer.appendChild(componentsLabel);
+  componentsContainer.appendChild(componentsNumber);
+
+  bottomDataContainer.appendChild(layersContainer);
+  bottomDataContainer.appendChild(componentsContainer);
+
+  // Container de itens fora do DS
+  const outOfDSContainer = figma.createFrame();
+  outOfDSContainer.name = "OutofDS";
+  outOfDSContainer.layoutMode = "VERTICAL";
+  outOfDSContainer.primaryAxisSizingMode = "AUTO";
+  outOfDSContainer.counterAxisSizingMode = "FIXED";
+  outOfDSContainer.itemSpacing = 8;
+  outOfDSContainer.paddingTop = 8;
+  outOfDSContainer.paddingRight = 16;
+  outOfDSContainer.paddingBottom = 16;
+  outOfDSContainer.paddingLeft = 16;
+  outOfDSContainer.cornerRadius = 8;
+  outOfDSContainer.resize(432, 100);
+  outOfDSContainer.fills = [
+    {
+      type: 'SOLID',
+      color: { r: 1, g: 0.231, b: 0.188 },
+      opacity: 0.23
+    },
+    {
+      type: 'GRADIENT_LINEAR',
+      gradientTransform: [
+        [0, 1, 0],
+        [0, -1, 1]
+      ],
+      gradientStops: [
+        { position: 0, color: { r: 1, g: 1, b: 1, a: 0.05 } },
+        { position: 1, color: { r: 1, g: 1, b: 1, a: 0.4 } }
+      ]
+    }
+  ];
+
+  // Título dos itens fora do DS
+  const outOfDSTitle = figma.createText();
+  outOfDSTitle.characters = "Itens fora do Prisma DS:";
+  outOfDSTitle.fontSize = 20;
+  outOfDSTitle.fontName = { family: "Inter", style: "Semi Bold" };
+  outOfDSTitle.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+  outOfDSTitle.lineHeight = { unit: 'PIXELS', value: 32 };
+
+  // Container de dados fora do DS
+  const outOfDSData = figma.createFrame();
+  outOfDSData.name = "Data";
+  outOfDSData.layoutMode = "HORIZONTAL";
+  outOfDSData.primaryAxisSizingMode = "AUTO";
+  outOfDSData.counterAxisSizingMode = "AUTO";
+  outOfDSData.itemSpacing = 24;
+  outOfDSData.resize(400, 40);
+  outOfDSData.fills = [];
+
+  // Função helper para criar containers de métricas
+  const createMetricContainer = (label: string, value: number, isFirst: boolean = false) => {
+    const container = figma.createFrame();
+    container.layoutMode = "VERTICAL";
+    container.itemSpacing = 3;
+    container.primaryAxisSizingMode = "AUTO";
+    container.counterAxisSizingMode = "AUTO";
+    container.layoutGrow = 1;
+    container.fills = [];
+
+    if (isFirst) {
+      container.minWidth = 94;
+    }
+
+    const number = figma.createText();
+    number.characters = value.toString();
+    number.fontSize = 27;
+    number.lineHeight = { unit: 'PIXELS', value: 20 };
+    number.fontName = { family: "Inter", style: "Semi Bold" };
+    number.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+    number.textAlignHorizontal = "LEFT";
+
+    const text = figma.createText();
+    text.characters = label;
+    text.fontSize = 14;
+    text.fontName = { family: "Inter", style: "Medium" };
+    text.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 }, opacity: 0.5 }];
+    text.textAlignHorizontal = "LEFT";
+
+    container.appendChild(number);
+    container.appendChild(text);
+    return container;
+  };
+
+  // Adicionar métricas
+  const metrics = [
+    { label: "Componentes", value: report.nonCompliantItems.components },
+    { label: "Cores", value: report.nonCompliantItems.colors },
+    { label: "Fontes", value: report.nonCompliantItems.fonts },
+    { label: "Efeitos", value: report.nonCompliantItems.effects }
+  ];
+
+  metrics.forEach((metric, index) => {
+    outOfDSData.appendChild(createMetricContainer(metric.label, metric.value, index === 0));
+  });
+
+  outOfDSContainer.appendChild(outOfDSTitle);
+  outOfDSContainer.appendChild(outOfDSData);
+
+  // Montar a hierarquia final
+  gaugeContainer.appendChild(chartContainer);
+  gaugeContainer.appendChild(bottomDataContainer);
+
+  card.appendChild(titleContainer);
+  card.appendChild(gaugeContainer);
+  card.appendChild(outOfDSContainer);
   
   // Adiciona o card à página
   figma.currentPage.appendChild(card);
   
-  // Seleciona o card para destacá-lo
-  figma.currentPage.selection = [...figma.currentPage.selection, card];
+  // Exporta o card como PNG
+  const exportSettings: ExportSettings = {
+    format: 'PNG',
+    constraint: { type: 'SCALE', value: 2 }
+  };
+  card.exportSettings = [exportSettings];
+
+  try {
+    // Exporta o card como bytes
+    const bytes = await card.exportAsync(exportSettings);
+
+    // Cria uma nova imagem com os bytes exportados
+    const image = figma.createImage(bytes);
+
+    // Cria um retângulo com a imagem
+    const rect = figma.createRectangle();
+    rect.name = `Analysis: ${frame.name}`;
+    rect.x = card.x;
+    rect.y = card.y;
+    rect.resize(card.width, card.height);
+    rect.fills = [{
+      type: 'IMAGE',
+      imageHash: image.hash,
+      scaleMode: 'FILL'
+    }];
+
+    // Remove o card original
+    card.remove();
+
+    // Seleciona o novo retângulo
+    figma.currentPage.selection = [rect];
+  } catch (error) {
+    console.error('Erro ao exportar card:', error);
+    // Em caso de erro, mantém o card original
+    figma.currentPage.selection = [card];
+  }
 }
 
 // Initialize the plugin

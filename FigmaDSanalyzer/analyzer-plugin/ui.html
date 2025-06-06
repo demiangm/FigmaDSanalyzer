@@ -44,20 +44,22 @@
       margin: 0;
     }
     .analyze-button {
-      display: block;
       width: 100%;
-      padding: 12px;
-      background: #007AFF;
+      height: 48px;
+      background: #DF0979;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 500px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      margin: 24px 0;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      transition: background-color 0.2s;
     }
-    .analyze-button:hover {
-      background: #0056b3;
+
+    analyze-button:hover {
+      background: #BE0867;
     }
     .error {
       background: #fee2e2;
@@ -103,19 +105,11 @@
       padding: 4px 8px;
       border-radius: 4px;
     }
-    .metric-good { background: #d1fae5; color: #065f46; }
-    .metric-warning { background: #fef3c7; color: #92400e; }
-    .metric-error { background: #fee2e2; color: #991b1b; }
-    .download-button {
-      background: #28CD41;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      margin: 4px;
-    }
+    .metric-excellent { background: #dcfce7; color: #166534; }
+    .metric-good { background: #dcfce7; color: #166534; }
+    .metric-warning { background: #ffedd5; color: #9a3412; }
+    .metric-error { background: #fee2e2; color: #dc2626; }
+
     .metric-row {
       display: flex;
       justify-content: space-between;
@@ -153,7 +147,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">Design System Compliance</h1>
+      <h1 class="title">Prisma Design System Compliance</h1>
       </div>
 
     <div id="analyzePanel">
@@ -276,16 +270,17 @@
 
     function createResultCard(report) {
       const getMetricClass = (value) => {
-        if (value >= 90) return 'metric-good';
-        if (value >= 70) return 'metric-warning';
+        if (value >= 90) return 'metric-excellent';
+        if (value >= 70) return 'metric-good';
         return 'metric-error';
       };
 
       const getCoverageClass = (level) => {
         switch (level) {
-          case 'Boa': return 'metric-good';
-          case 'Baixa': return 'metric-warning';
-          case 'Muito Baixa': return 'metric-error';
+          case '🎉 Ótima': return 'metric-excellent';
+          case '✅ Boa': return 'metric-good';
+          case '🚩️ Baixa': return 'metric-warning';
+          case '🚧 Muito baixa': return 'metric-error';
           default: return 'metric-error';
         }
       };
