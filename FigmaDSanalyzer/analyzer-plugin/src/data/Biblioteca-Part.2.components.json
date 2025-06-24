@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "extractedAt": "2025-06-23T19:40:24.830Z",
+    "extractedAt": "2025-06-24T13:48:01.827Z",
     "fileName": "Biblioteca Part.2"
   },
   "components": {
@@ -50,6 +50,10 @@
     },
     ".Macro.Pagination.WEB": {
       "key": "fb3267550c1976a0ca3df7bed689071320ef2207",
+      "isHidden": true
+    },
+    ".Expand": {
+      "key": "a544f3a7c8b8f07a23ea0e3a54d1a26913eea192",
       "isHidden": true
     },
     ".Links.container": {

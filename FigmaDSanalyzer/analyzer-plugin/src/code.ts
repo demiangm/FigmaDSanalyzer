@@ -10,6 +10,22 @@ figma.showUI(__html__, { width: 400, height: 600 });
 let componentsData: ComponentData[] = [];
 let stylesData: StylesData[] = [];
 
+// Pre-load a font to ensure emojis can be rendered in the UI.
+// This is a workaround for a Figma issue where emojis might not
+// appear if the font containing them hasn't been loaded into the
+// Figma environment. 'Inter' is a standard Figma font.
+async function prepareFonts() {
+  try {
+    await figma.loadFontAsync({ family: "Roboto", style: "Regular" });
+  } catch (e) {
+    console.error("Could not load the 'Roboto' font. Emojis might not display correctly in the UI.", e);
+  }
+}
+
+prepareFonts().then(() => {
+    console.log('Font pre-loaded for UI emoji support.');
+});
+
 // Handle messages from the UI
 figma.ui.onmessage = async (msg) => {
   try {
