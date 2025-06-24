@@ -1,6 +1,6 @@
 /// <reference types="@figma/plugin-typings" />
 import { AnalysisResult, ComplianceReport, ComponentData, StylesData } from './types';
-import { analyzeNode } from './analyzer';
+import { analyzeNode, analyzeFrame } from './analyzer';
 import { loadDataFiles } from './dataLoader';
 
 // Show the plugin UI
@@ -89,13 +89,14 @@ async function analyzeSelection() {
   
   for (const node of selection) {
     if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
-      const report = await analyzeFrame(node as FrameNode);
+      const report = await analyzeFrame(node as FrameNode, componentsData, stylesData);
       reports.push(report);
       
       // Cria card visual no canvas
       await createAnalysisCard(report, node as FrameNode);
       
       // Envia dados detalhados para a UI
+      console.log('[DEBUG] Enviando para UI:', report);
       figma.ui.postMessage({
         type: 'frame-analyzed',
         report: {
@@ -122,44 +123,6 @@ async function analyzeSelection() {
   });
 }
 
-async function analyzeFrame(frame: FrameNode): Promise<ComplianceReport> {
-  // Analyze the frame and all its children
-  const analysis = analyzeNode(frame, componentsData, stylesData, false, true);
-
-  // Calculate coverage percentage - exclude hidden components from the calculation
-  const coveragePercentage = analysis.totalLayers > 0 
-    ? ((analysis.dsComponentsUsed) / analysis.totalLayers) * 100 
-    : 0;
-
-  // Determinar o nível de cobertura
-  let coverageLevel = '';
-  if (coveragePercentage > 90) {
-    coverageLevel = '🎉 Ótima';
-  } else if (coveragePercentage > 70) {
-    coverageLevel = '✅ Boa';
-  } else if (coveragePercentage > 50) {
-    coverageLevel = '🚩️ Baixa';
-  } else {
-    coverageLevel = '🚧 Muito baixa';
-  }
-
-  return {
-    frameName: frame.name,
-    frameId: frame.id,
-    totalLayers: analysis.totalLayers,
-    dsComponentsUsed: analysis.dsComponentsUsed,
-    hiddenComponentsUsed: analysis.hiddenComponentsUsed,
-    coveragePercentage: Math.round(coveragePercentage),
-    coverageLevel: coverageLevel as "🎉 Ótima" | "✅ Boa" | "🚩️ Baixa" | "🚧 Muito baixa",
-    nonCompliantItems: {
-      colors: analysis.nonCompliantColors,
-      fonts: analysis.nonCompliantFonts,
-      effects: analysis.nonCompliantEffects,
-      components: analysis.nonDsComponents
-    }
-  };
-}
-
 async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   // Carrega todas as fontes necessárias
   await Promise.all([
@@ -167,7 +130,8 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
     figma.loadFontAsync({ family: "Inter", style: "Medium" }),
     figma.loadFontAsync({ family: "Inter", style: "Semi Bold" }),
     figma.loadFontAsync({ family: "Inter", style: "Bold" }),
-    figma.loadFontAsync({ family: "Inter", style: "Black" })
+    figma.loadFontAsync({ family: "Inter", style: "Black" }),
+    figma.loadFontAsync({ family: "Roboto", style: "Regular" })
   ]);
 
   // Cria o frame principal do card
@@ -250,12 +214,29 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   textContainer.counterAxisAlignItems = "CENTER";
   textContainer.resize(432, 40);
 
-  // Mensagem de status
+  // Emoji
+  const emojiText = figma.createText();
+  emojiText.characters = report.coverageLevel.emoji;
+  emojiText.fontSize = 24;
+  emojiText.fontName = { family: "Roboto", style: "Regular" };
+  emojiText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+
+  // Texto
   const messageText = figma.createText();
-  messageText.characters = report.coverageLevel;  // Já inclui o emoji
+  messageText.characters = report.coverageLevel.label;
   messageText.fontSize = 24;
   messageText.fontName = { family: "Inter", style: "Bold" };
   messageText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+
+  // Container horizontal para emoji + texto
+  const messageContainer = figma.createFrame();
+  messageContainer.layoutMode = "HORIZONTAL";
+  messageContainer.counterAxisAlignItems = "CENTER";
+  messageContainer.primaryAxisAlignItems = "CENTER";
+  messageContainer.fills = [];
+  messageContainer.itemSpacing = 8;
+  messageContainer.appendChild(emojiText);
+  messageContainer.appendChild(messageText);
 
   // Texto da porcentagem
   const percentageText = figma.createText();
@@ -264,7 +245,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   percentageText.fontName = { family: "Inter", style: "Bold" };
   percentageText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
 
-  textContainer.appendChild(messageText);
+  textContainer.appendChild(messageContainer);
   textContainer.appendChild(percentageText);
 
   // Container do gráfico

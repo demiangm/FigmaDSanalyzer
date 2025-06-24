@@ -276,11 +276,12 @@
       };
 
       const getCoverageClass = (level) => {
-        switch (level) {
-          case '🎉 Ótima': return 'metric-excellent';
-          case '✅ Boa': return 'metric-good';
-          case '🚩️ Baixa': return 'metric-warning';
-          case '🚧 Muito baixa': return 'metric-error';
+        if (!level) return 'metric-error';
+        switch (level.label || level) {
+          case 'Ótima': return 'metric-excellent';
+          case 'Boa': return 'metric-good';
+          case 'Baixa': return 'metric-warning';
+          case 'Muito baixa': return 'metric-error';
           default: return 'metric-error';
         }
       };
@@ -292,7 +293,7 @@
           <div class="metric-row">
             <span class="metric-label">Cobertura do Design System</span>
             <span class="metric-value ${getCoverageClass(report.coverageLevel)}">
-              ${report.coverageLevel} (${report.coveragePercentage}%)
+              ${report.coverageLevel.emoji ? report.coverageLevel.emoji + ' ' : ''}${report.coverageLevel.label || report.coverageLevel} (${report.coveragePercentage}%)
             </span>
           </div>
 

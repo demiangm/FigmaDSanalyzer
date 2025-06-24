@@ -359,7 +359,7 @@ function analyzeSingleNode(
       isTopLevel,
       isInsideDsComponent
     });
-    
+        
     // Analyze styles (always check styles regardless of being inside a DS component)
     const nonCompliantColors = analyzeNodeColors(node, stylesData);
     const nonCompliantFonts = analyzeNodeFonts(node, stylesData);
@@ -389,7 +389,7 @@ function analyzeSingleNode(
             console.log(`  ℹ️ Componente oculto encontrado (dentro de componente DS):`, {
               nodeId: node.id,
               nodeName: node.name
-            });
+          });
           }
         } else if (!isInsideDsComponent) {
           dsComponentsUsed = 1;
@@ -557,21 +557,32 @@ export async function analyzeFrame(
   // Analyze the frame and all its children
   const analysis = analyzeNode(frame, componentsData, stylesData, false, true);
 
-  // Calculate coverage percentage - exclude Section, Group, and Vector nodes
-  const validLayers = analysis.totalLayers - countExcludedNodes(frame);
-  const coveragePercentage = validLayers > 0 
-    ? ((analysis.dsComponentsUsed) / validLayers) * 100 
+  // Calculate coverage percentage - penalize by non-compliant styles
+  const validLayers = analysis.totalLayers;
+  const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects) > 0
+    ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects)) * 100
     : 0;
 
   // Determine coverage level based on new thresholds
-  let coverageLevel: 'Muito Baixa' | 'Baixa' | 'Boa';
+  let coverageLevel: { emoji: string; label: string };
   if (coveragePercentage < 50) {
-    coverageLevel = 'Muito Baixa';
+    coverageLevel = { emoji: "🚧", label: "Muito baixa" };
   } else if (coveragePercentage < 70) {
-    coverageLevel = 'Baixa';
+    coverageLevel = { emoji: "🚩️", label: "Baixa" };
+  } else if (coveragePercentage < 90) {
+    coverageLevel = { emoji: "✅", label: "Boa" };
   } else {
-    coverageLevel = 'Boa';
+    coverageLevel = { emoji: "🎉", label: "Ótima" };
   }
+
+  console.log('[DEBUG] Cálculo de cobertura:', {
+    validLayers,
+    dsComponentsUsed: analysis.dsComponentsUsed,
+    nonCompliantColors: analysis.nonCompliantColors,
+    nonCompliantFonts: analysis.nonCompliantFonts,
+    nonCompliantEffects: analysis.nonCompliantEffects,
+    coveragePercentage
+  });
 
   return {
     frameName: frame.name,
@@ -580,8 +591,7 @@ export async function analyzeFrame(
     dsComponentsUsed: analysis.dsComponentsUsed,
     hiddenComponentsUsed: analysis.hiddenComponentsUsed,
     coveragePercentage: Math.round(coveragePercentage),
-    coverageLevel: coverageLevel === 'Muito Baixa' ? '🚧 Muito baixa' :
-                   coverageLevel === 'Baixa' ? '🚩️ Baixa' : '✅ Boa',
+    coverageLevel,
     nonCompliantItems: {
       colors: analysis.nonCompliantColors,
       fonts: analysis.nonCompliantFonts,

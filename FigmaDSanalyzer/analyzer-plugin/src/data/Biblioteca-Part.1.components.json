@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "extractedAt": "2025-06-02T17:10:58.850Z",
+    "extractedAt": "2025-06-23T19:44:56.605Z",
     "fileName": "Biblioteca Part.1"
   },
   "components": {
@@ -236,6 +236,14 @@
       "key": "6d5b45384d81abc22b909da1b4b2defa379082ff",
       "isHidden": true
     },
+    ".Component 2": {
+      "key": "dd0888f20dcf5cab5a0a4b077085107657c462e9",
+      "isHidden": true
+    },
+    "_macro - scrollbar vertical": {
+      "key": "271395b9bf55ee8e8651d5e658a7338e1f17c0b8",
+      "isHidden": true
+    },
     "Switch": {
       "key": "421d15abc1cd2d4775e97989903ace48a619fa85",
       "isHidden": false
@@ -328,9 +336,9 @@
       "key": "ef13c5c15c8c6f0fdf59a3ded913a9ff360dfb0b",
       "isHidden": true
     },
-    "Seleção": {
+    ".Seleção": {
       "key": "ec171a4d0464e4fc05d901c7b8d0f947500f4143",
-      "isHidden": false
+      "isHidden": true
     },
     "_Collapse simples": {
       "key": "f70b3e9a89d917f6265e72ac2201254fe2203e30",
