@@ -9,6 +9,7 @@ const EXCLUDED_NODE_TYPES = [
   'GROUP',
   'VECTOR',
   'ELLIPSE',
+  'TEXT',
   'COMPONENT',  // Main component definition
   'COMPONENT_SET'  // Component variants container
 ];

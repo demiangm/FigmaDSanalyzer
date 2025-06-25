@@ -230,11 +230,27 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   textContainer.counterAxisAlignItems = "CENTER";
   textContainer.resize(432, 40);
 
-  // Emoji
+  // Emoji simples para o card no canvas
+  let simpleEmoji = '';
+  switch (report.coverageLevel.label) {
+    case 'Muito baixa':
+      simpleEmoji = '✗';
+      break;
+    case 'Baixa':
+      simpleEmoji = '⚠';
+      break;
+    case 'Boa':
+      simpleEmoji = '✓';
+      break;
+    case 'Ótima':
+      simpleEmoji = '★';
+      break;
+    default:
+      simpleEmoji = '?';
+  }
   const emojiText = figma.createText();
-  emojiText.characters = report.coverageLevel.emoji;
+  emojiText.characters = simpleEmoji;
   emojiText.fontSize = 24;
-  emojiText.fontName = { family: "Roboto", style: "Regular" };
   emojiText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
 
   // Texto
