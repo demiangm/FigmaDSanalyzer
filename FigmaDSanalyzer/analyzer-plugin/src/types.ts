@@ -64,7 +64,7 @@ export interface ComplianceReport {
   dsComponentsUsed: number;
   hiddenComponentsUsed: number;
   coveragePercentage: number;
-  coverageLevel: { emoji: string; label: string };
+  coverageLevel: { label: string };
   nonCompliantItems: {
     colors: number;
     fonts: number;

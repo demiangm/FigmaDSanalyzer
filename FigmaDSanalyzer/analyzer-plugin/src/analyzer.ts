@@ -9,6 +9,7 @@ const EXCLUDED_NODE_TYPES = [
   'GROUP',
   'VECTOR',
   'ELLIPSE',
+  'TEXT',
   'COMPONENT',  // Main component definition
   'COMPONENT_SET'  // Component variants container
 ];
@@ -564,15 +565,15 @@ export async function analyzeFrame(
     : 0;
 
   // Determine coverage level based on new thresholds
-  let coverageLevel: { emoji: string; label: string };
+  let coverageLevel: { label: string };
   if (coveragePercentage < 50) {
-    coverageLevel = { emoji: "🚧", label: "Muito baixa" };
+    coverageLevel = { label: "Muito baixa" };
   } else if (coveragePercentage < 70) {
-    coverageLevel = { emoji: "🚩️", label: "Baixa" };
+    coverageLevel = { label: "Baixa" };
   } else if (coveragePercentage < 90) {
-    coverageLevel = { emoji: "✅", label: "Boa" };
+    coverageLevel = { label: "Boa" };
   } else {
-    coverageLevel = { emoji: "🎉", label: "Ótima" };
+    coverageLevel = { label: "Ótima" };
   }
 
   console.log('[DEBUG] Cálculo de cobertura:', {
