@@ -1,0 +1,25 @@
+// tsconfig.json (para o código do plugin Figma)
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "types": ["@figma/plugin-typings", "node", "webpack-env"],
+    "lib": ["es2017", "dom"],
+    "strict": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": [
+    "src/**/*",
+    "src/**/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "scripts"
+  ]
+}

@@ -53,29 +53,44 @@ function extractDesignSystemData() {
             textStyles: {},
             effectStyles: {}
         };
-        const isVisibleComponent = (name) => !name.startsWith('.') && !name.startsWith('_');
+        // Função para verificar se um componente é oculto
+        const isHiddenComponent = (name) => name.startsWith('.') || name.startsWith('_');
         const componentEntries = {};
+        // Encontra todos os componentes, incluindo os ocultos
         const components = figma.root.findAll(node => {
             var _a;
             return node.type === 'COMPONENT' &&
-                ((_a = node.parent) === null || _a === void 0 ? void 0 : _a.type) !== 'COMPONENT_SET' &&
-                isVisibleComponent(node.name);
+                ((_a = node.parent) === null || _a === void 0 ? void 0 : _a.type) !== 'COMPONENT_SET';
         });
-        const componentSets = figma.root.findAll(node => node.type === 'COMPONENT_SET' &&
-            isVisibleComponent(node.name));
+        const componentSets = figma.root.findAll(node => node.type === 'COMPONENT_SET');
+        // Função auxiliar para obter o nome da página de um node
+        function getPageName(node) {
+            let parent = node.parent;
+            while (parent && parent.type !== 'PAGE') {
+                parent = parent.parent;
+            }
+            return parent && parent.type === 'PAGE' ? parent.name : 'UnknownPage';
+        }
         // Adiciona componentes independentes
         for (const component of components) {
-            componentEntries[component.name] = {
-                key: component.key
+            const pageName = getPageName(component);
+            const uniqueName = `${pageName}/${component.name}`;
+            componentEntries[uniqueName] = {
+                key: component.key,
+                isHidden: isHiddenComponent(component.name)
             };
         }
         // Adiciona component sets
         for (const set of componentSets) {
-            componentEntries[set.name] = {
-                key: set.key
+            const pageName = getPageName(set);
+            const uniqueName = `${pageName}/${set.name}`;
+            componentEntries[uniqueName] = {
+                key: set.key,
+                isHidden: isHiddenComponent(set.name)
             };
         }
         componentsFile.components = componentEntries;
+        // Extrai estilos
         for (const style of figma.getLocalPaintStyles()) {
             stylesFile.colorStyles[style.name] = `Key:${style.key}`;
         }

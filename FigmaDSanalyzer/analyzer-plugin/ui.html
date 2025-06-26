@@ -19,7 +19,7 @@
     .header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content:  flex-start;
       padding: 12px 0;
       border-bottom: 1px solid #e5e5e5;
       margin-bottom: 16px;
@@ -29,23 +29,7 @@
       font-weight: 600;
       margin: 0;
     }
-    .nav {
-      display: flex;
-      gap: 8px;
-    }
-    .nav button {
-      padding: 6px 12px;
-      border: none;
-      background: #f5f5f5;
-      color: #666;
-      font-size: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .nav button.active {
-      background: #007AFF;
-      color: white;
-    }
+    /* .nav e .nav button foram removidos, pois as abas não existem mais */
     .hero {
       text-align: center;
       margin: 32px 0;
@@ -60,20 +44,22 @@
       margin: 0;
     }
     .analyze-button {
-      display: block;
       width: 100%;
-      padding: 12px;
-      background: #007AFF;
+      height: 48px;
+      background: #DF0979;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 500px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      margin: 24px 0;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      transition: background-color 0.2s;
     }
-    .analyze-button:hover {
-      background: #0056b3;
+
+    analyze-button:hover {
+      background: #BE0867;
     }
     .error {
       background: #fee2e2;
@@ -86,34 +72,7 @@
     .hidden {
       display: none;
     }
-    .config-section {
-      margin-bottom: 24px;
-    }
-    .config-section h3 {
-      font-size: 14px;
-      margin: 0 0 8px;
-    }
-    .input-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .input-group input {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-    .input-group button {
-      padding: 8px 16px;
-      background: #007AFF;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-    }
+    /* As classes .config-section, .input-group e suas subclasses foram removidas */
     .results-card {
       background: #f8f9fa;
       border-radius: 8px;
@@ -146,81 +105,93 @@
       padding: 4px 8px;
       border-radius: 4px;
     }
-    .metric-good { background: #d1fae5; color: #065f46; }
-    .metric-warning { background: #fef3c7; color: #92400e; }
-    .metric-error { background: #fee2e2; color: #991b1b; }
-    .download-button {
-      background: #28CD41;
-      color: white;
-      border: none;
-      padding: 8px 12px;
+    .metric-excellent { background: #dcfce7; color: #166534; }
+    .metric-good { background: #dcfce7; color: #166534; }
+    .metric-warning { background: #ffedd5; color: #9a3412; }
+    .metric-error { background: #fee2e2; color: #dc2626; }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    
+    .metric-label {
+      color: #666;
+    }
+    
+    .metric-value {
+      font-weight: 500;
+      padding: 2px 8px;
       border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      margin: 4px;
+    }
+    
+    .metric-good {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .metric-warning {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    
+    .metric-error {
+      background: #fee2e2;
+      color: #dc2626;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">Design System Compliance</h1>
-      <div class="nav">
-        <button id="analyzeTab" class="active">Analisar</button>
-        <button id="configTab">Configurar</button>
-      </div>
+      <span class="logo-svg" style="display: flex; align-items: center; margin-right: 12px;">
+        <svg width="24" height="24" viewBox="0 0 156 156" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M47.05 148.452C41.1393 148.452 35.6776 145.299 32.7221 140.18L3.60844 89.7579C0.652601 84.6386 0.652481 78.3313 3.60815 73.2119L36.6569 15.9698C39.6126 10.8504 45.075 7.6968 50.9863 7.69702L109.21 7.69912C115.121 7.69932 120.582 10.8526 123.538 15.9713L152.652 66.3935C154.129 68.9531 154.868 71.8098 154.868 74.6664L154.868 74.6832C154.868 74.7195 154.868 74.7558 154.868 74.7921C154.847 77.6069 154.108 80.4175 152.652 82.9397L121.01 137.745C121.003 137.756 120.997 137.768 120.99 137.779L119.603 140.182C116.647 145.301 111.185 148.455 105.274 148.454L47.05 148.452ZM74.8381 67.232L23.4376 67.2302L48.9388 23.0609C49.361 22.3296 50.1413 21.879 50.9858 21.8791L101.022 21.8809C101.229 21.8809 101.343 21.9293 101.421 21.9759C101.517 22.0337 101.622 22.1326 101.704 22.2748C101.786 22.4171 101.819 22.5576 101.821 22.6697C101.823 22.7587 101.808 22.8796 101.709 23.054L76.8788 66.0613C76.4551 66.7861 75.6783 67.2321 74.8381 67.232ZM114.869 120.018L140.37 75.8485C140.495 75.6322 140.583 75.4009 140.634 75.1636C140.691 74.8996 140.702 74.6282 140.667 74.3613C140.627 74.0573 140.528 73.7592 140.37 73.4851L115.35 30.1536C115.247 29.9745 115.148 29.8994 115.069 29.8556C114.971 29.8012 114.832 29.7597 114.668 29.7597C114.504 29.7597 114.366 29.8012 114.268 29.8556C114.19 29.8987 114.092 29.9722 113.991 30.1451L113.986 30.1536L89.167 73.1411L89.161 73.1515C88.7447 73.8809 88.7467 74.777 89.167 75.5048L114.869 120.018ZM42.2895 125.971C42.1883 126.143 42.0913 126.216 42.0137 126.259C41.9156 126.314 41.7774 126.355 41.6132 126.355C41.4489 126.355 41.3107 126.314 41.2126 126.259C41.1335 126.215 41.0342 126.14 40.9309 125.961L15.9117 82.6304C15.8083 82.4513 15.7929 82.3278 15.7945 82.2374C15.7964 82.1252 15.8296 81.9847 15.9117 81.8425C15.9938 81.7002 16.0989 81.6013 16.1951 81.5435C16.2726 81.4969 16.3873 81.4485 16.594 81.4485L66.6292 81.4503C66.836 81.4503 66.9506 81.4987 67.0282 81.5453C67.1243 81.6031 67.2294 81.702 67.3115 81.8443C67.3937 81.9865 67.4268 82.127 67.4287 82.2391C67.4303 82.328 67.4155 82.4486 67.3171 82.6224L67.3117 82.6318L67.3115 82.6321L42.2895 125.971ZM79.5991 89.7131C79.7004 89.541 79.7975 89.4678 79.8752 89.4247C79.9733 89.3704 80.1115 89.3288 80.2758 89.3288C80.44 89.3288 80.5782 89.3704 80.6763 89.4247C80.7555 89.4686 80.8547 89.5437 80.9581 89.7227L105.977 133.054C106.081 133.233 106.096 133.356 106.094 133.447C106.093 133.559 106.059 133.699 105.977 133.841C105.895 133.984 105.79 134.083 105.694 134.14C105.616 134.187 105.502 134.235 105.295 134.235L55.2597 134.234C55.053 134.234 54.9383 134.185 54.8608 134.139C54.7646 134.081 54.6595 133.982 54.5774 133.84C54.4953 133.697 54.4622 133.557 54.4602 133.445C54.4586 133.356 54.4734 133.236 54.5715 133.062L54.5773 133.052L54.5774 133.052L79.5934 89.7231L79.5935 89.7228L79.5991 89.7131Z" fill="url(#paint0_linear_5791_20)"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M109.21 7.6969C115.121 7.69712 120.582 10.8504 123.538 15.9691L152.652 66.3913C155.607 71.5105 155.608 77.8179 152.652 82.9373L119.603 140.179C116.648 145.299 111.185 148.452 105.274 148.452L47.0501 148.45C41.1394 148.45 35.6777 145.297 32.7222 140.178L3.60857 89.7557C2.13064 87.196 1.39165 84.3394 1.3916 81.4827L1.39161 81.466C1.39165 81.4297 1.3918 81.3934 1.39208 81.357C1.41334 78.5423 2.15208 75.7317 3.60827 73.2095L35.2501 18.4042C35.2537 18.3979 35.2574 18.3916 35.2611 18.3853C35.2641 18.38 35.2672 18.3748 35.2702 18.3695L36.657 15.9676C39.6127 10.8482 45.0751 7.69461 50.9864 7.69482L109.21 7.6969ZM81.422 88.9171L132.822 88.919L107.321 133.088C106.899 133.82 106.119 134.27 105.274 134.27L55.2383 134.268C55.0316 134.268 54.9169 134.22 54.8394 134.173C54.7433 134.116 54.6382 134.017 54.556 133.874C54.4739 133.732 54.4408 133.592 54.4388 133.479C54.4373 133.39 54.4521 133.27 54.5511 133.095L79.375 90.0989L79.3773 90.0948L79.3815 90.0876C79.8052 89.363 80.5819 88.9171 81.422 88.9171ZM41.3913 36.1312L15.8901 80.3006C15.7647 80.5177 15.6766 80.7498 15.6257 80.9879C15.5694 81.2511 15.5586 81.5218 15.5932 81.7879C15.6328 82.0919 15.7318 82.3899 15.8901 82.6641L40.9096 125.996C41.013 126.175 41.1123 126.25 41.1914 126.294C41.2895 126.348 41.4277 126.389 41.592 126.389C41.7562 126.389 41.8944 126.348 41.9925 126.294C42.0704 126.25 42.1678 126.177 42.2694 126.004L42.2743 125.996L67.0931 83.008L67.0993 82.9974C67.5154 82.268 67.5133 81.3721 67.0931 80.6443L41.3913 36.1312ZM113.97 30.1782C114.072 30.0062 114.169 29.933 114.246 29.8899C114.344 29.8356 114.483 29.794 114.647 29.794C114.811 29.794 114.949 29.8356 115.047 29.8899C115.127 29.9338 115.226 30.0089 115.329 30.1879L140.348 73.5188C140.452 73.6979 140.467 73.8213 140.466 73.9118C140.464 74.0239 140.431 74.1644 140.348 74.3067C140.266 74.4489 140.161 74.5479 140.065 74.6056C139.987 74.6522 139.873 74.7006 139.666 74.7006L89.6309 74.6988C89.4241 74.6988 89.3094 74.6504 89.2319 74.6038C89.1358 74.5461 89.0307 74.4471 88.9486 74.3049C88.8664 74.1626 88.8333 74.0222 88.8313 73.91C88.8298 73.8212 88.8446 73.7004 88.9432 73.5265L88.9484 73.5173L88.9486 73.517L113.97 30.1782ZM76.6612 66.4357C76.5598 66.6081 76.4626 66.6813 76.3849 66.7244C76.2868 66.7788 76.1486 66.8203 75.9843 66.8203C75.8201 66.8203 75.6818 66.7788 75.5837 66.7244C75.5046 66.6806 75.4054 66.6055 75.302 66.4264L50.2829 23.0956C50.1795 22.9165 50.164 22.793 50.1656 22.7025C50.1676 22.5904 50.2007 22.4499 50.2828 22.3077C50.365 22.1654 50.4701 22.0665 50.5662 22.0087C50.6438 21.9621 50.7584 21.9137 50.9652 21.9137L101 21.9155C101.207 21.9155 101.322 21.9639 101.399 22.0105C101.495 22.0683 101.601 22.1672 101.683 22.3095C101.765 22.4517 101.798 22.5922 101.8 22.7043C101.801 22.7931 101.787 22.9137 101.688 23.0874L101.683 23.097L101.683 23.0973L76.6667 66.4261L76.6666 66.4264L76.6612 66.4357Z" fill="url(#paint1_linear_5791_20)"/>
+          <defs>
+            <linearGradient id="paint0_linear_5791_20" x1="37.9006" y1="148.52" x2="119.541" y2="8.10163" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#A50AFF"/>
+              <stop offset="0.484375" stop-color="#C00AC0" stop-opacity="0.13"/>
+            </linearGradient>
+            <linearGradient id="paint1_linear_5791_20" x1="37.9007" y1="148.517" x2="119.541" y2="8.09943" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#A50AFF"/>
+              <stop offset="1" stop-color="#DF0979"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <h1 class="title">Prisma Design System Compliance</h1>
     </div>
-    
+
     <div id="analyzePanel">
       <div class="hero">
         <h2>Analisar Conformidade do Design System</h2>
-        <p>Selecione frames ou componentes e execute uma análise para verificar a conformidade com os padrões do seu design system.</p>
+        <p>Selecione frames ou componentes e execute uma análise para verificar a conformidade com os padrões do nosso design system.</p>
       </div>
-      
+
       <button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
-      <button class="analyze-button" id="generateFiles" style="background: #28CD41; margin-top: 8px;">Gerar Arquivos de Configuração</button>
-      
+
       <div id="errorMessage" class="error hidden"></div>
       <div id="resultsContainer" class="hidden"></div>
-      
+
+      <div id="dataSummary" class="hidden" style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px 0;">
+        <h4 style="margin: 0 0 8px; font-size: 12px; color: #0369a1;">Design System Carregado:</h4>
+        <div id="summaryContent" style="font-size: 11px; color: #0369a1;"></div>
+      </div>
+
       <p style="font-size: 12px; color: #666; text-align: center;">
         Selecione um ou mais frames no Figma, depois clique em "Iniciar Análise" para começar a verificação de conformidade.
       </p>
     </div>
-    
-    <div id="configPanel" class="hidden">
-      <div class="config-section">
-        <h3>Cores do Design System</h3>
-        <div class="input-group">
-          <input type="text" id="newColor" placeholder="#000000">
-          <button onclick="addColor()">Adicionar</button>
-        </div>
-        <div id="colorList"></div>
-      </div>
-      
-      <div class="config-section">
-        <h3>Fontes do Design System</h3>
-        <div class="input-group">
-          <input type="text" id="newFont" placeholder="Inter">
-          <button onclick="addFont()">Adicionar</button>
-        </div>
-        <div id="fontList"></div>
-      </div>
-      
-      <div class="config-section">
-        <h3>Prefixos de Componentes</h3>
-        <div class="input-group">
-          <input type="text" id="newPrefix" placeholder="DS/">
-          <button onclick="addPrefix()">Adicionar</button>
-        </div>
-        <div id="prefixList"></div>
-      </div>
+
     </div>
-  </div>
 
   <script>
     // Estado da aplicação
-    let currentView = 'analyze';
+    // currentView e designSystem podem ser mantidos ou movidos para o código do plugin se forem configuráveis
     let designSystem = {
       colors: ['#000000', '#FFFFFF', '#F5F5F5', '#007AFF', '#FF3B30'],
       fonts: ['Inter', 'SF Pro Display', 'Roboto'],
@@ -228,46 +199,28 @@
     };
 
     // Elementos do DOM
-    const analyzeTab = document.getElementById('analyzeTab');
-    const configTab = document.getElementById('configTab');
-    const analyzePanel = document.getElementById('analyzePanel');
-    const configPanel = document.getElementById('configPanel');
+    // analyzeTab, configTab e configPanel foram removidos
     const startAnalysisBtn = document.getElementById('startAnalysis');
-    const generateFilesBtn = document.getElementById('generateFiles');
     const errorMessage = document.getElementById('errorMessage');
     const resultsContainer = document.getElementById('resultsContainer');
 
     // Event listeners
-    analyzeTab.addEventListener('click', () => switchView('analyze'));
-    configTab.addEventListener('click', () => switchView('config'));
+    // Event listeners para analyzeTab e configTab foram removidos
     startAnalysisBtn.addEventListener('click', startAnalysis);
-    generateFilesBtn.addEventListener('click', generateConfigFiles);
 
     // Funções
-    function switchView(view) {
-      currentView = view;
-      
-      if (view === 'analyze') {
-        analyzeTab.classList.add('active');
-        configTab.classList.remove('active');
-        analyzePanel.classList.remove('hidden');
-        configPanel.classList.add('hidden');
-      } else {
-        configTab.classList.add('active');
-        analyzeTab.classList.remove('active');
-        configPanel.classList.remove('hidden');
-        analyzePanel.classList.add('hidden');
-        renderConfig();
-      }
-    }
-
+    // switchView, renderConfig, renderColors, renderFonts, renderPrefixes,
+    // addColor, addFont, addPrefix, removeColor, removeFont, removePrefix e saveConfig
+    // foram removidos
     function startAnalysis() {
       parent.postMessage({
         pluginMessage: {
           type: 'analyze-selection'
+          // Você pode incluir a configuração do designSystem aqui se for estática ou carregada de outro lugar
+          // config: designSystem 
         }
       }, '*');
-      
+
       startAnalysisBtn.textContent = 'Analisando...';
       startAnalysisBtn.disabled = true;
     }
@@ -281,116 +234,10 @@
       errorMessage.classList.add('hidden');
     }
 
-    function renderConfig() {
-      renderColors();
-      renderFonts();
-      renderPrefixes();
-    }
-
-    function renderColors() {
-      const colorList = document.getElementById('colorList');
-      colorList.innerHTML = designSystem.colors.map(color => 
-        `<div style="display: flex; align-items: center; gap: 8px; padding: 4px; background: #f5f5f5; margin: 4px 0; border-radius: 4px;">
-          <div style="width: 16px; height: 16px; background: ${color}; border-radius: 2px; border: 1px solid #ddd;"></div>
-          <span style="flex: 1; font-size: 12px;">${color}</span>
-          <button onclick="removeColor('${color}')" style="background: #dc2626; color: white; border: none; padding: 2px 6px; border-radius: 2px; font-size: 10px; cursor: pointer;">×</button>
-        </div>`
-      ).join('');
-    }
-
-    function renderFonts() {
-      const fontList = document.getElementById('fontList');
-      fontList.innerHTML = designSystem.fonts.map(font => 
-        `<div style="display: flex; align-items: center; gap: 8px; padding: 4px; background: #f5f5f5; margin: 4px 0; border-radius: 4px;">
-          <span style="flex: 1; font-size: 12px;">${font}</span>
-          <button onclick="removeFont('${font}')" style="background: #dc2626; color: white; border: none; padding: 2px 6px; border-radius: 2px; font-size: 10px; cursor: pointer;">×</button>
-        </div>`
-      ).join('');
-    }
-
-    function renderPrefixes() {
-      const prefixList = document.getElementById('prefixList');
-      prefixList.innerHTML = designSystem.componentPrefixes.map(prefix => 
-        `<div style="display: flex; align-items: center; gap: 8px; padding: 4px; background: #f5f5f5; margin: 4px 0; border-radius: 4px;">
-          <span style="flex: 1; font-size: 12px;">${prefix}</span>
-          <button onclick="removePrefix('${prefix}')" style="background: #dc2626; color: white; border: none; padding: 2px 6px; border-radius: 2px; font-size: 10px; cursor: pointer;">×</button>
-        </div>`
-      ).join('');
-    }
-
-    function addColor() {
-      const input = document.getElementById('newColor');
-      const color = input.value.trim();
-      if (color && !designSystem.colors.includes(color)) {
-        designSystem.colors.push(color);
-        input.value = '';
-        renderColors();
-        saveConfig();
-      }
-    }
-
-    function addFont() {
-      const input = document.getElementById('newFont');
-      const font = input.value.trim();
-      if (font && !designSystem.fonts.includes(font)) {
-        designSystem.fonts.push(font);
-        input.value = '';
-        renderFonts();
-        saveConfig();
-      }
-    }
-
-    function addPrefix() {
-      const input = document.getElementById('newPrefix');
-      const prefix = input.value.trim();
-      if (prefix && !designSystem.componentPrefixes.includes(prefix)) {
-        designSystem.componentPrefixes.push(prefix);
-        input.value = '';
-        renderPrefixes();
-        saveConfig();
-      }
-    }
-
-    function removeColor(color) {
-      designSystem.colors = designSystem.colors.filter(c => c !== color);
-      renderColors();
-      saveConfig();
-    }
-
-    function removeFont(font) {
-      designSystem.fonts = designSystem.fonts.filter(f => f !== font);
-      renderFonts();
-      saveConfig();
-    }
-
-    function removePrefix(prefix) {
-      designSystem.componentPrefixes = designSystem.componentPrefixes.filter(p => p !== prefix);
-      renderPrefixes();
-      saveConfig();
-    }
-
-    function saveConfig() {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'update-design-system',
-          config: {
-            colors: designSystem.colors,
-            fonts: designSystem.fonts.map(f => ({ family: f, weights: [400, 500, 600, 700] })),
-            shadows: [
-              { name: 'Small', blur: 4, offsetX: 0, offsetY: 2, color: '#00000025' },
-              { name: 'Medium', blur: 8, offsetX: 0, offsetY: 4, color: '#00000025' },
-              { name: 'Large', blur: 16, offsetX: 0, offsetY: 8, color: '#00000025' }
-            ],
-            componentPrefixes: designSystem.componentPrefixes
-          }
-        }
-      }, '*');
-    }
-
     // Escutar mensagens do plugin
     window.addEventListener('message', (event) => {
       const message = event.data.pluginMessage;
-      
+
       switch (message.type) {
         case 'analysis-complete':
           startAnalysisBtn.textContent = 'Iniciar Análise';
@@ -398,135 +245,115 @@
           hideError();
           showResults(message.reports);
           break;
-          
+
         case 'analysis-error':
           startAnalysisBtn.textContent = 'Iniciar Análise';
           startAnalysisBtn.disabled = false;
           showError(message.message);
           break;
-          
+
         case 'design-system-loaded':
-          if (message.config) {
-            designSystem.colors = message.config.colors || designSystem.colors;
-            designSystem.fonts = message.config.fonts?.map(f => f.family) || designSystem.fonts;
-            designSystem.componentPrefixes = message.config.componentPrefixes || designSystem.componentPrefixes;
-            if (currentView === 'config') renderConfig();
+          if (message.summary) {
+            updateDataSummary(message.summary);
           }
-          break;
-          
-        case 'config-files-generated':
-          generateFilesBtn.textContent = 'Gerar Arquivos de Configuração';
-          generateFilesBtn.disabled = false;
-          
-          // Salvar dados para download
-          window.componentsData = message.componentsFile;
-          window.stylesData = message.stylesFile;
-          
-          // Adicionar botões de download
-          resultsContainer.innerHTML = `
-            <div class="results-card">
-              <h3>Arquivos de Configuração Gerados</h3>
-              <p style="font-size: 12px; color: #666; margin-bottom: 12px;">
-                Arquivos gerados com sucesso! Clique nos botões abaixo para fazer o download.
-              </p>
-              <button class="download-button" onclick="downloadComponents()">
-                📦 Baixar components.json
-              </button>
-              <button class="download-button" onclick="downloadStyles()">
-                🎨 Baixar styles.json
-              </button>
-            </div>
-          `;
-          resultsContainer.classList.remove('hidden');
-          break;
-          
-        case 'config-generation-error':
-          generateFilesBtn.textContent = 'Gerar Arquivos de Configuração';
-          generateFilesBtn.disabled = false;
-          showError(message.message);
           break;
       }
     });
-
-    function generateConfigFiles() {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'generate-config-files'
-        }
-      }, '*');
-      
-      generateFilesBtn.textContent = 'Gerando...';
-      generateFilesBtn.disabled = true;
-    }
 
     function showResults(reports) {
       if (!reports || reports.length === 0) {
         showError('Nenhum resultado encontrado');
         return;
       }
-      
+
       resultsContainer.classList.remove('hidden');
       resultsContainer.innerHTML = reports.map(report => createResultCard(report)).join('');
     }
 
+    function updateDataSummary(summary) {
+      const dataSummary = document.getElementById('dataSummary');
+      const summaryContent = document.getElementById('summaryContent');
+
+      summaryContent.innerHTML = `
+        <div>• ${summary.components} componentes</div>
+        <div>• ${summary.colorStyles} estilos de cor</div>
+        <div>• ${summary.textStyles} estilos de texto</div>
+        <div>• ${summary.effectStyles} estilos de efeito</div>
+      `;
+
+      dataSummary.classList.remove('hidden');
+    }
+
     function createResultCard(report) {
       const getMetricClass = (value) => {
-        if (value >= 90) return 'metric-good';
-        if (value >= 70) return 'metric-warning';
+        if (value >= 90) return 'metric-excellent';
+        if (value >= 70) return 'metric-good';
         return 'metric-error';
+      };
+
+      const getCoverageClass = (level) => {
+        if (!level) return 'metric-error';
+        switch (level.label || level) {
+          case 'Ótima': return 'metric-excellent';
+          case 'Boa': return 'metric-good';
+          case 'Baixa': return 'metric-warning';
+          case 'Muito baixa': return 'metric-error';
+          default: return 'metric-error';
+        }
       };
 
       return `
         <div class="results-card">
           <h3>${report.frameName}</h3>
+          
           <div class="metric-row">
-            <span class="metric-label">Conformidade Geral</span>
-            <span class="metric-value ${getMetricClass(report.overallCompliance)}">${report.overallCompliance}%</span>
+            <span class="metric-label">Cobertura do Design System</span>
+            <span class="metric-value ${getCoverageClass(report.coverageLevel)}">
+              ${report.coverageLevel.emoji ? report.coverageLevel.emoji + ' ' : ''}${report.coverageLevel.label || report.coverageLevel} (${report.coveragePercentage}%)
+            </span>
           </div>
+
           <div class="metric-row">
-            <span class="metric-label">Cores do Design System</span>
-            <span class="metric-value ${getMetricClass(report.colorCompliance)}">${report.colorCompliance}% (${report.analysis.colors.compliant}/${report.analysis.colors.total})</span>
+            <span class="metric-label">Total de Camadas</span>
+            <span class="metric-value">${report.totalLayers}</span>
           </div>
+
           <div class="metric-row">
-            <span class="metric-label">Fontes do Design System</span>
-            <span class="metric-value ${getMetricClass(report.fontCompliance)}">${report.fontCompliance}% (${report.analysis.fonts.compliant}/${report.analysis.fonts.total})</span>
+            <span class="metric-label">Elementos do DS</span>
+            <span class="metric-value">${report.dsComponentsUsed}</span>
           </div>
+
+          <h4 style="margin: 16px 0 8px; font-size: 12px;">Itens fora do Design System:</h4>
+          
           <div class="metric-row">
-            <span class="metric-label">Sombras do Design System</span>
-            <span class="metric-value ${getMetricClass(report.shadowCompliance)}">${report.shadowCompliance}% (${report.analysis.shadows.compliant}/${report.analysis.shadows.total})</span>
+            <span class="metric-label">Componentes</span>
+            <span class="metric-value ${report.nonCompliantItems.components > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.components}
+            </span>
           </div>
+
           <div class="metric-row">
-            <span class="metric-label">Componentes do Design System</span>
-            <span class="metric-value ${getMetricClass(report.componentCompliance)}">${report.componentCompliance}% (${report.analysis.components.compliant}/${report.analysis.components.total})</span>
+            <span class="metric-label">Cores</span>
+            <span class="metric-value ${report.nonCompliantItems.colors > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.colors}
+            </span>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-label">Fontes</span>
+            <span class="metric-value ${report.nonCompliantItems.fonts > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.fonts}
+            </span>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-label">Efeitos</span>
+            <span class="metric-value ${report.nonCompliantItems.effects > 0 ? 'metric-error' : 'metric-good'}">
+              ${report.nonCompliantItems.effects}
+            </span>
           </div>
         </div>
       `;
-    }
-
-    function downloadComponents() {
-      if (window.componentsData) {
-        const content = JSON.stringify(window.componentsData, null, 2);
-        downloadFile(content, 'components.json');
-      }
-    }
-
-    function downloadStyles() {
-      if (window.stylesData) {
-        const content = JSON.stringify(window.stylesData, null, 2);
-        downloadFile(content, 'styles.json');
-      }
-    }
-
-    function downloadFile(content, filename) {
-      const blob = new Blob([content], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
     }
 
     // Inicialização
