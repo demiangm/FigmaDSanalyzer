@@ -51,10 +51,12 @@ export interface AnalysisResult {
   nonCompliantColors: number;
   nonCompliantFonts: number;
   nonCompliantEffects: number;
+  nonCompliantBorderRadius: number;
   nonDsComponents: number;
   totalLayers: number;
   dsComponentsUsed: number;
   hiddenComponentsUsed: number;
+  violations?: Violation[];
 }
 
 export interface ComplianceReport {
@@ -69,6 +71,8 @@ export interface ComplianceReport {
     colors: number;
     fonts: number;
     effects: number;
+    borderRadius: number;
     components: number;
   };
+  violations: Violation[];
 }

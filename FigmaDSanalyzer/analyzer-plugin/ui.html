@@ -11,6 +11,7 @@
       background: #ffffff;
       color: #333;
       overflow-x: hidden;
+      overflow-y: hidden;
     }
     .container {
       padding: 16px;
@@ -42,8 +43,8 @@
       width: 100%;
       margin-bottom: 16px;
       margin-top: 24px;
-      padding: 0 24px;
       box-sizing: border-box;
+      padding: 0;
     }
     .tabs-container {
       display: flex;
@@ -53,16 +54,16 @@
       gap: 4px;
       align-items: center;
       justify-content: space-between;
-      width: 100%;
+      width: calc(100% - 48px);
       height: 40px;
-      margin: 0;
+      margin: 0 px;
       box-sizing: border-box;
     }
     .tab-btn {
       border: none;
       background: transparent;
       color: #222;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       border-radius: 999px;
       padding: 6px 0;
@@ -173,10 +174,10 @@
       margin: 8px 0;
       border: 1px solid #e5e5e5;
     }
-    .results-card h3 {
-      margin: 0 0 12px;
-      font-size: 14px;
-      color: #333;
+    .results-card h3, .results-card h4 {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #222 !important;
     }
     .metric-row {
       display: flex;
@@ -201,7 +202,10 @@
     .metric-excellent { background: #dcfce7; color: #166534; }
     .metric-good { background: #dcfce7; color: #166534; }
     .metric-warning { background: #ffedd5; color: #9a3412; }
-    .metric-error { background: #fee2e2; color: #dc2626; }
+    .metric-error {
+      color: #660303 !important;
+      background: #fee2e2;
+    }
 
     .metric-row {
       display: flex;
@@ -337,12 +341,71 @@
       margin-top: auto;
       margin-bottom: 24px;
     }
+    #inspecScrollContainer {
+      max-height: calc(100vh - 180px);
+      overflow-y: overlay;
+      overflow-x: hidden;
+      padding-bottom: 24px;
+      width: 100%;
+      box-sizing: border-box;
+      scrollbar-gutter: stable;
+      position: relative;
+    }
+    #inspecScrollContainer::-webkit-scrollbar {
+      width: 8px;
+      background: transparent;
+      position: absolute;
+      right: 0;
+    }
+    #inspecScrollContainer::-webkit-scrollbar-thumb {
+      background: #e5e5e5;
+      border-radius: 8px;
+      border: none;
+    }
+    #inspecScrollContainer::-webkit-scrollbar-track {
+      background: transparent;
+      border: none;
+    }
+    #inspecScrollContainer {
+      scrollbar-width: thin;
+      scrollbar-color: #e5e5e5 transparent;
+    }
+    /* Títulos das seções (inspec) */
+    .inspec-section-title {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #222 !important;
+      margin: 24px 0 12px 0 !important;
+    }
+    /* Números de erro em vermelho dark */
+    .inspec-error-count {
+      color: #660303 !important;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">Prisma Design System Compliance</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="display:inline-flex;align-items:center;">
+          <svg width="32" height="32" viewBox="0 0 792 792" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M238.87 729.681C217.436 729.68 197.63 718.245 186.912 699.682L39.104 443.693C29.4455 426.965 28.4896 406.74 36.2363 389.319H35.8543L38.9518 383.954C39.002 383.867 39.0523 383.779 39.1029 383.691L206.889 93.0772C217.607 74.5124 237.416 63.0764 258.853 63.0771L554.45 63.0878C575.884 63.0885 595.69 74.5235 606.408 93.0859L754.216 349.075C759.74 358.643 762.418 369.356 762.248 380.033C762.088 390.073 759.411 400.081 754.217 409.078L583.182 705.32L582.99 704.987C571.777 720.407 553.783 729.692 534.467 729.691L238.87 729.681ZM733.432 397.077C735.326 393.797 736.662 390.293 737.441 386.696C738.314 382.659 738.485 378.507 737.954 374.425C737.351 369.794 735.843 365.254 733.432 361.077L606.41 141.087C595.647 122.446 568.763 122.421 557.957 141.011L557.913 141.087L431.909 359.332L431.865 359.408C425.478 370.533 425.493 384.22 431.91 395.333L583.181 657.32L733.432 397.077ZM379.947 365.332L77.4226 365.321L227.674 105.078C234.105 93.9395 245.99 87.0779 258.852 87.0784L512.881 87.0875C534.405 87.0882 547.868 110.358 537.172 129.011L411.081 347.408C404.64 358.502 392.779 365.332 379.947 365.332ZM235.462 651.589C224.649 670.162 197.778 670.131 187.019 651.496L59.9984 431.509C49.2201 412.842 62.6923 389.507 84.2476 389.508L338.272 389.517C359.789 389.518 373.25 412.769 362.577 431.419L362.521 431.515L362.52 431.517L235.462 651.589ZM383.362 443.418C394.176 424.849 421.043 424.881 431.802 443.515L558.823 663.502C569.601 682.169 556.129 705.504 534.573 705.503L280.548 705.494C259.032 705.493 245.571 682.242 256.244 663.592L256.3 663.495L256.301 663.494L383.305 443.517L383.305 443.515L383.362 443.418Z" fill="url(#paint0_linear_44172_14495)"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M554.45 63.077C575.885 63.0777 595.691 74.5127 606.409 93.0751L754.216 349.065C763.875 365.792 764.831 386.018 757.084 403.438H757.466L754.374 408.794C754.322 408.885 754.27 408.976 754.218 409.066L586.431 699.68C575.713 718.245 555.904 729.681 534.468 729.68L238.871 729.67C217.436 729.669 197.63 718.234 186.912 699.672L39.1045 443.682C37.9321 441.652 36.8879 439.57 35.972 437.448C31.654 427.442 30.1857 416.542 31.5672 405.929C32.5719 398.209 35.0838 390.641 39.1034 383.679L210.138 87.4381L210.33 87.7702C221.543 72.351 239.537 63.0657 258.853 63.0664L554.45 63.077ZM59.888 395.68C57.9917 398.965 56.6545 402.474 55.8766 406.076C54.6759 411.635 54.8073 417.413 56.2709 422.924C57.0749 425.95 58.281 428.896 59.8887 431.68L186.911 651.671C197.673 670.309 224.551 670.336 235.36 651.753L235.408 651.67L361.411 433.426L361.46 433.341C367.842 422.218 367.826 408.535 361.411 397.425L210.14 135.437L59.888 395.68ZM413.374 427.426L715.898 427.437L565.647 687.679C559.216 698.818 547.33 705.68 534.468 705.679L280.44 705.67C258.918 705.669 245.455 682.406 256.144 663.753L382.245 445.341C388.686 434.252 400.544 427.425 413.374 427.426ZM557.856 141.174C568.667 122.596 595.541 122.625 606.302 141.261L733.322 361.249C744.1 379.916 730.628 403.25 709.073 403.25L455.048 403.241C433.53 403.24 420.068 379.985 430.746 361.334L430.8 361.242L430.8 361.241L557.856 141.174ZM409.962 349.334C399.149 367.908 372.278 367.878 361.518 349.243L234.498 129.256C223.72 110.588 237.192 87.2539 258.747 87.2546L512.772 87.2637C534.292 87.2645 547.754 110.523 537.071 129.174L537.02 129.262L537.02 129.264L409.962 349.334Z" fill="url(#paint1_linear_44172_14495)"/>
+            <defs>
+              <linearGradient id="paint0_linear_44172_14495" x1="205" y1="730" x2="590.5" y2="63" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#A50AFF"/>
+                <stop offset="0.484375" stop-color="#C00AC0" stop-opacity="0.13"/>
+              </linearGradient>
+              <linearGradient id="paint1_linear_44172_14495" x1="205" y1="729.989" x2="590.5" y2="62.9892" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#A50AFF"/>
+                <stop offset="1" stop-color="#DF0979"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <h1 class="title" style="margin:0;">Prisma Design System Compliance</h1>
+      </div>
       <button id="infoBtn" class="info-btn" title="Informações">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#888" style="display:block;"><circle cx="12" cy="12" r="10" fill="#888"/><rect x="11" y="10" width="2" height="6" rx="1" fill="#fff"/><rect x="11" y="7" width="2" height="2" rx="1" fill="#fff"/></svg>
       </button>
@@ -351,7 +414,7 @@
       <div class="tabs-container">
         <button id="tabHome" class="tab-btn tab-active">Home</button>
         <button id="tabDados" class="tab-btn">Dados</button>
-        <button id="tabInspec" class="tab-btn">Inspec</button>
+        <button id="tabInspec" class="tab-btn">Inspect</button>
       </div>
     </div>
     <div id="infoModal" class="info-modal" style="display:none;">
@@ -364,7 +427,7 @@
       </div>
     </div>
     <div id="tabContentHome">
-      <div class="hero">
+      <div class="hero empty-state-animated">
         <div class="hero-animated-icon" style="margin-bottom:18px;">
           <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="28" cy="28" r="26" stroke="#DF0979" stroke-width="4" fill="#fff"/>
@@ -437,7 +500,9 @@
         </div>
         <p class="empty-text">Nenhuma inspeção realizada ainda.<br>Os itens inspecionados aparecerão aqui após a análise.<br>Utilize a aba Home para rodar a análise.</p>
       </div>
-      <div id="inspecContainer" class="hidden"></div>
+      <div id="inspecScrollContainer">
+        <div id="inspecContainer" class="hidden"></div>
+      </div>
     </div>
   </div>
 
@@ -676,54 +741,112 @@
       }
       emptyStateInspec.style.display = 'none';
       inspecContainer.classList.remove('hidden');
-      // Agrupar por tipo de issue
-      const groups = {};
-      for (const v of violations) {
-        if (!groups[v.issue]) groups[v.issue] = [];
-        groups[v.issue].push(v);
-      }
-      let html = '';
+      // Agrupar por título final (ex: 'Fontes', 'Cores', etc)
       const groupTitles = {
-        'cor': 'Cor',
-        'color': 'Cor',
-        'fonte': 'Tipografia',
-        'font': 'Tipografia',
+        'cor': 'Cores',
+        'color': 'Cores',
+        'fonte': 'Fontes',
+        'font': 'Fontes',
         'efeito': 'Efeitos',
         'effect': 'Efeitos',
         'component': 'Componentes',
         'componente': 'Componentes'
       };
-      Object.keys(groups).forEach(issue => {
-        // Detecta o tipo para o título
-        let lower = issue.toLowerCase();
+      // Novo agrupamento por título final
+      const groupedByTitle = {};
+      for (const v of violations) {
+        let lower = v.issue ? v.issue.toLowerCase() : '';
         let groupKey = Object.keys(groupTitles).find(k => lower.includes(k));
         let groupTitle = groupKey ? groupTitles[groupKey] : 'Outros';
-        html += `<h3 style='margin:24px 0 12px 0;font-size:16px;font-weight:700;color:#222;'>${groupTitle}</h3>`;
-        groups[issue].forEach(v => {
-          html += `<div style='margin-bottom:16px;padding:16px 18px 12px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 4px 0 rgba(0,0,0,0.03);display:flex;align-items:center;justify-content:space-between;'>
-            <div style='display:flex;flex-direction:column;gap:4px;'>
-              <span style='font-weight:500;font-size:15px;color:#333;'>${v.nodeName}</span>
-              <span style='display:flex;align-items:center;gap:10px;margin-top:2px;'>`;
-          if (groupTitle === 'Cor') {
-            if (v.currentValue && v.currentValue.startsWith('#')) {
-              html += `<span style='display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid #ccc;vertical-align:middle;background:${v.currentValue};'></span> <span style='background:#ececec;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;'>${v.currentValue}</span>`;
-            }
-          } else if (groupTitle === 'Tipografia') {
-            html += `<span style='background:#ececec;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;'>${v.currentValue}</span>`;
-          } else {
-            html += `<span style='background:#ececec;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;'>${v.currentValue}</span>`;
+        if (!groupedByTitle[groupTitle]) groupedByTitle[groupTitle] = [];
+        groupedByTitle[groupTitle].push(v);
+      }
+      let html = '';
+      Object.keys(groupedByTitle).forEach(groupTitle => {
+        html += `<h3 class='inspec-section-title'>${groupTitle}</h3>`;
+        if (groupTitle === 'Fontes') {
+          // Agrupar todas as fontes erradas por nodeId, listando todas as fontes erradas em um único card por elemento
+          function extractFontInfo(val) {
+            if (!val) return { name: '', sizes: [] };
+            // Remove todos os números (tamanhos) para obter o nome
+            let name = val.replace(/\d+/g, '').replace(/\s*–\s*/g,' ').replace(/\s*Regular$/i, '').replace(/\s+/g, ' ').trim();
+            // Extrai todos os números como tamanhos
+            let sizes = (val.match(/\d+/g) || []);
+            return { name, sizes };
           }
-          html += `</span>
-            </div>
-            <button class='zoom-btn' data-nodeid='${v.nodeId}' title='Localizar no Figma' style='margin-left:16px;padding:4px 8px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;'>
-              <svg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                <circle cx='11' cy='11' r='9' stroke='#444' stroke-width='2' fill='none'/>
-                <line x1='11' y1='6' x2='11' y2='16' stroke='#444' stroke-width='2' stroke-linecap='round'/>
-                <line x1='6' y1='11' x2='16' y2='11' stroke='#444' stroke-width='2' stroke-linecap='round'/>
-              </svg>
-            </button>
-          </div>`;
-        });
+          const fontsByNode = {};
+          groupedByTitle[groupTitle].forEach(v => {
+            if (!v.currentValue || !v.nodeId) return;
+            const info = extractFontInfo(v.currentValue);
+            if (!fontsByNode[v.nodeId]) fontsByNode[v.nodeId] = { nodeName: v.nodeName, nodeId: v.nodeId, fonts: {} };
+            if (!fontsByNode[v.nodeId].fonts[info.name]) fontsByNode[v.nodeId].fonts[info.name] = new Set();
+            info.sizes.forEach(size => fontsByNode[v.nodeId].fonts[info.name].add(size));
+          });
+          Object.values(fontsByNode).forEach(obj => {
+            let icon = `<svg width='22' height='22' viewBox='0 0 22 22'><text x='5' y='17' font-size='14' font-family='Inter,Arial,sans-serif' fill='#1A73E8'>T</text></svg>`;
+            // Exibir apenas a primeira fonte encontrada
+            let firstFont = Object.entries(obj.fonts)[0];
+            let name = firstFont ? firstFont[0] : '';
+            let sizesArr = firstFont ? Array.from(firstFont[1]) : [];
+            let sizesStr = sizesArr.length > 0 ? `<span style='color:#555;font-size:12px;margin-left:6px;'>${sizesArr.join(', ')}</span>` : '';
+            let fontList = name ? `<span style='background:#f7f7f7;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;color:#555;display:inline-block;margin-bottom:2px;margin-right:4px;'>${name}${sizesStr}</span>` : '';
+            html += `<div style='margin-bottom:12px;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 4px 0 rgba(0,0,0,0.03);display:flex;align-items:center;gap:14px;'>
+              <div style='flex-shrink:0;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#f6f6fa;'>${icon}</div>
+              <div style='flex:1;display:flex;flex-direction:column;gap:2px;'>
+                <span style='font-weight:500;font-size:15px;color:#222;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:180px;'>${obj.nodeName}</span>
+                <span style='display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:2px;'>${fontList}</span>
+              </div>
+              <div class='inspec-error-count' style='font-size:15px;min-width:32px;text-align:right;'>1</div>
+              <button class='zoom-btn' data-nodeid='${obj.nodeId}' title='Localizar no Figma' style='margin-left:10px;padding:0 0 0 2px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;'>
+                <svg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                  <circle cx='11' cy='11' r='9' stroke='#444' stroke-width='2' fill='none'/>
+                  <line x1='11' y1='6' x2='11' y2='16' stroke='#444' stroke-width='2' stroke-linecap='round'/>
+                  <line x1='6' y1='11' x2='16' y2='11' stroke='#444' stroke-width='2' stroke-linecap='round'/>
+                </svg>
+              </button>
+            </div>`;
+          });
+        } else {
+          groupedByTitle[groupTitle].forEach(v => {
+            // Ícone por tipo
+            let icon = '';
+            if (groupTitle === 'Cores') {
+              icon = `<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 3C7.03 3 3 7.03 3 12c0 3.87 3.13 7 7 7h1a2 2 0 0 0 2-2v-1a1 1 0 0 1 1-1h1a2 2 0 0 0 2-2v-1c0-3.87-3.13-7-7-7z' stroke='#A50AFF' fill='#fff'/><circle cx='12' cy='12' r='5' fill='#A50AFF' opacity='0.18'/></svg>`;
+            } else if (groupTitle === 'Componentes') {
+              icon = `<svg width='22' height='22' viewBox='0 0 22 22'><rect x='4' y='4' width='14' height='14' rx='3' fill='none' stroke='#DF0979' stroke-width='2'/></svg>`;
+            } else if (groupTitle === 'Efeitos') {
+              icon = `<svg width='22' height='22' viewBox='0 0 22 22'><circle cx='11' cy='11' r='9' fill='none' stroke='#00B894' stroke-width='2'/></svg>`;
+            } else if (v.issue && v.issue.toLowerCase().includes('borda')) {
+              icon = `<svg width='22' height='22' viewBox='0 0 22 22'><rect x='4' y='4' width='14' height='14' rx='7' fill='none' stroke='#00B8D4' stroke-width='2'/></svg>`;
+            } else {
+              icon = `<svg width='22' height='22' viewBox='0 0 22 22'><circle cx='11' cy='11' r='9' fill='none' stroke='#888' stroke-width='2'/></svg>`;
+            }
+            // Valor detalhado
+            let detail = '';
+            if (groupTitle === 'Cores') {
+              let swatchColor = v.currentValue && v.currentValue.startsWith('#') ? v.currentValue : '#eee';
+              let label = v.currentValue ? v.currentValue : '(sem valor)';
+              detail = `<span style='display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid #ccc;vertical-align:middle;background:${swatchColor};'></span> <span style='background:#f7f7f7;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;color:#555;margin-left:4px;'>${label}</span>`;
+            } else if (v.currentValue) {
+              detail = `<span style='background:#f7f7f7;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;color:#555;'>${v.currentValue}</span>`;
+            }
+            html += `<div style='margin-bottom:12px;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 4px 0 rgba(0,0,0,0.03);display:flex;align-items:center;gap:14px;'>
+              <div style='flex-shrink:0;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#f6f6fa;'>${icon}</div>
+              <div style='flex:1;display:flex;flex-direction:column;gap:2px;'>
+                <span style='font-weight:500;font-size:15px;color:#222;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:180px;'>${v.nodeName}</span>
+                <span style='display:flex;align-items:center;gap:8px;margin-top:2px;'>${detail}</span>
+              </div>
+              <div class='inspec-error-count' style='font-size:15px;min-width:32px;text-align:right;'>1</div>
+              <button class='zoom-btn' data-nodeid='${v.nodeId}' title='Localizar no Figma' style='margin-left:10px;padding:0 0 0 2px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;'>
+                <svg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                  <circle cx='11' cy='11' r='9' stroke='#444' stroke-width='2' fill='none'/>
+                  <line x1='11' y1='6' x2='11' y2='16' stroke='#444' stroke-width='2' stroke-linecap='round'/>
+                  <line x1='6' y1='11' x2='16' y2='11' stroke='#444' stroke-width='2' stroke-linecap='round'/>
+                </svg>
+              </button>
+            </div>`;
+          });
+        }
       });
       inspecContainer.innerHTML = html;
     }

@@ -152,6 +152,7 @@ async function analyzeSelection() {
 }
 
 async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
+  console.log('[DEBUG] Report recebido para exportação:', JSON.stringify(report, null, 2));
   // Carrega todas as fontes necessárias
   await Promise.all([
     figma.loadFontAsync({ family: "Inter", style: "Regular" }),
@@ -197,6 +198,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   titleContainer.resize(432, 32);
   titleContainer.cornerRadius = 8;
 
+  // Título
   const titleTextContainer = figma.createFrame();
   titleTextContainer.name = "Title";
   titleTextContainer.layoutMode = "VERTICAL";
@@ -484,7 +486,8 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
     { label: "Componentes", value: report.nonCompliantItems.components },
     { label: "Cores", value: report.nonCompliantItems.colors },
     { label: "Fontes", value: report.nonCompliantItems.fonts },
-    { label: "Efeitos", value: report.nonCompliantItems.effects }
+    { label: "Efeitos", value: report.nonCompliantItems.effects },
+    { label: "Borda", value: report.nonCompliantItems.borderRadius }
   ];
 
   metrics.forEach((metric, index) => {

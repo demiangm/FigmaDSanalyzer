@@ -20,6 +20,15 @@ const IGNORED_FRAME_NAMES = [
   'Overlay'
 ];
 
+// Função utilitária para converter RGB (0-255) em hexadecimal
+function rgbToHex(r: number, g: number, b: number): string {
+  const componentToHex = (c: number) => {
+    const hex = Math.round(c).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 function analyzeNodeColors(
   node: SceneNode,
   stylesData: StylesData[],
@@ -27,50 +36,85 @@ function analyzeNodeColors(
 ): number {
   let nonCompliantColors = 0;
   try {
+    // FILL
     if ('fillStyleId' in node) {
       const fillStyleId = (node as any).fillStyleId;
       if (fillStyleId) {
         if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+          let hex = '';
+          if ('fills' in node && Array.isArray((node as any).fills) && (node as any).fills.length > 0) {
+            // Pega o primeiro fill visível e do tipo SOLID
+            const fill = (node as any).fills.find(f => f && f.visible !== false && f.type === 'SOLID');
+            if (fill && fill.color) {
+              hex = rgbToHex(fill.color.r * 255, fill.color.g * 255, fill.color.b * 255);
+            }
+          }
+          if (!hex) hex = '(sem cor)';
           nonCompliantColors++;
           violations.push({
             nodeId: node.id,
             nodeName: node.name,
             issue: 'Cor (fill) não conforme',
-            currentValue: fillStyleId,
+            currentValue: hex,
             expectedValue: 'Estilo do DS'
           });
         }
       } else if (hasFills(node)) {
+        let hex = '';
+        if ('fills' in node && Array.isArray((node as any).fills) && (node as any).fills.length > 0) {
+          const fill = (node as any).fills.find(f => f && f.visible !== false && f.type === 'SOLID');
+          if (fill && fill.color) {
+            hex = rgbToHex(fill.color.r * 255, fill.color.g * 255, fill.color.b * 255);
+          }
+        }
+        if (!hex) hex = '(sem cor)';
         nonCompliantColors++;
         violations.push({
           nodeId: node.id,
           nodeName: node.name,
           issue: 'Cor (fill) sem estilo vinculado',
-          currentValue: '',
+          currentValue: hex,
           expectedValue: 'Estilo do DS'
         });
       }
     }
+    // STROKE
     if ('strokeStyleId' in node) {
       const strokeStyleId = (node as any).strokeStyleId;
       if (strokeStyleId) {
         if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+          let hex = '';
+          if ('strokes' in node && Array.isArray((node as any).strokes) && (node as any).strokes.length > 0) {
+            const stroke = (node as any).strokes.find(s => s && s.visible !== false && s.type === 'SOLID');
+            if (stroke && stroke.color) {
+              hex = rgbToHex(stroke.color.r * 255, stroke.color.g * 255, stroke.color.b * 255);
+            }
+          }
+          if (!hex) hex = '(sem cor)';
           nonCompliantColors++;
           violations.push({
             nodeId: node.id,
             nodeName: node.name,
             issue: 'Cor (stroke) não conforme',
-            currentValue: strokeStyleId,
+            currentValue: hex,
             expectedValue: 'Estilo do DS'
           });
         }
       } else if (hasStrokes(node)) {
+        let hex = '';
+        if ('strokes' in node && Array.isArray((node as any).strokes) && (node as any).strokes.length > 0) {
+          const stroke = (node as any).strokes.find(s => s && s.visible !== false && s.type === 'SOLID');
+          if (stroke && stroke.color) {
+            hex = rgbToHex(stroke.color.r * 255, stroke.color.g * 255, stroke.color.b * 255);
+          }
+        }
+        if (!hex) hex = '(sem cor)';
         nonCompliantColors++;
         violations.push({
           nodeId: node.id,
           nodeName: node.name,
           issue: 'Cor (stroke) sem estilo vinculado',
-          currentValue: '',
+          currentValue: hex,
           expectedValue: 'Estilo do DS'
         });
       }
@@ -111,74 +155,104 @@ function hasStrokes(node: SceneNode): boolean {
   return false;
 }
 
-function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
+function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[], violations: Violation[]): number {
   let nonCompliantFonts = 0;
   
   try {
     if (node.type === 'TEXT') {
       const textNode = node as TextNode;
       console.log(`\nAnalisando fontes do nó: ${node.name} (${node.id})`);
-      
-      // Handle rich text with multiple segments
+      // Helper para montar string do valor
+      function getFontValue(font: FontName, size: number) {
+        return `${size} - ${font.family} - ${font.style}`;
+      }
+      // Handle rich text com múltiplos segmentos
       if (textNode.textStyleId && typeof textNode.textStyleId !== 'string') {
-        // For rich text, check each segment's style
         const styleIds = Object.values(textNode.textStyleId);
         for (const styleId of styleIds) {
-          console.log(`  Text Style:`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            styleId: styleId,
-            hasStyle: Boolean(styleId)
-        });
-        
           if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
             nonCompliantFonts++;
+            let fontValue = '';
+            try {
+              const font = textNode.getRangeFontName(0, textNode.characters.length) as FontName;
+              fontValue = getFontValue(font, textNode.fontSize as number);
+            } catch {}
+            console.log(`  Text Style:`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              styleId: styleId,
+              hasStyle: Boolean(styleId)
+            });
+            
             console.log(`  ❌ Fonte não conforme encontrada:`, {
               nodeId: node.id,
               nodeName: node.name,
-              reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+              reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS',
+              currentValue: fontValue
             });
-        } else {
+            violations.push({
+              nodeId: node.id,
+              nodeName: node.name,
+              issue: 'Fonte não conforme',
+              currentValue: fontValue,
+              expectedValue: 'Estilo do DS'
+            });
+          } else {
             console.log(`  ✅ Fonte conforme`);
           }
         }
       } else {
-        // Single style for the entire text
+        // Single style para todo o texto
         const textStyleId = textNode.textStyleId as string;
-        console.log(`  Text Style:`, {
-          nodeId: node.id,
-          nodeName: node.name,
-          styleId: textStyleId,
-          hasStyle: Boolean(textStyleId)
-        });
-        
         if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
           nonCompliantFonts++;
+          let fontValue = '';
+          try {
+            const font = textNode.fontName as FontName;
+            fontValue = getFontValue(font, textNode.fontSize as number);
+          } catch {}
+          console.log(`  Text Style:`, {
+            nodeId: node.id,
+            nodeName: node.name,
+            styleId: textStyleId,
+            hasStyle: Boolean(textStyleId)
+          });
+          
           console.log(`  ❌ Fonte não conforme encontrada:`, {
             nodeId: node.id,
             nodeName: node.name,
-            reason: !textStyleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+            reason: !textStyleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS',
+            currentValue: fontValue
+          });
+          violations.push({
+            nodeId: node.id,
+            nodeName: node.name,
+            issue: 'Fonte não conforme',
+            currentValue: fontValue,
+            expectedValue: 'Estilo do DS'
           });
         } else {
           console.log(`  ✅ Fonte conforme`);
         }
       }
-
-      // Additional check for font families in the text content
+      // Checagem adicional de famílias de fonte
       try {
         const fontNames = textNode.getRangeAllFontNames(0, textNode.characters.length);
         if (fontNames && fontNames.length > 0) {
-          console.log(`  Fontes utilizadas:`, fontNames.map(font => font.family));
-          
-          // You might want to add a check here against allowed font families
-          const allowedFonts = ['Livelo Sans VF', 'Inter']; // Add your allowed fonts here
+          const allowedFonts = ['Livelo Sans VF', 'Inter'];
           const nonCompliantFontFamilies = fontNames
             .map(font => font.family)
             .filter(fontFamily => !allowedFonts.includes(fontFamily));
-          
           if (nonCompliantFontFamilies.length > 0) {
-            console.log(`  ❌ Fontes não permitidas encontradas:`, nonCompliantFontFamilies);
             nonCompliantFonts += nonCompliantFontFamilies.length;
+            console.log(`  ❌ Fontes não permitidas encontradas:`, nonCompliantFontFamilies);
+            violations.push({
+              nodeId: node.id,
+              nodeName: node.name,
+              issue: 'Fonte não permitida',
+              currentValue: nonCompliantFontFamilies.join(', '),
+              expectedValue: allowedFonts.join(', ')
+            });
           }
         }
       } catch (error) {
@@ -314,6 +388,46 @@ function hasAppliedStyles(node: SceneNode): boolean {
   return false;
 }
 
+function analyzeNodeBorderRadius(node: SceneNode, violations: Violation[]): number {
+  let nonCompliantBorderRadius = 0;
+  // Defina aqui os valores permitidos pelo DS
+  const allowedBorderRadius = [0, 2, 4, 8, 12, 16, 24, 32, 40, 48, 56, 64];
+  try {
+    if ('cornerRadius' in node && typeof (node as any).cornerRadius === 'number') {
+      const radius = (node as any).cornerRadius;
+      if (!allowedBorderRadius.includes(radius)) {
+        nonCompliantBorderRadius++;
+        violations.push({
+          nodeId: node.id,
+          nodeName: node.name,
+          issue: 'Raio de borda não conforme',
+          currentValue: radius.toString(),
+          expectedValue: allowedBorderRadius.join(', ')
+        });
+      }
+    }
+    // Suporte para cornerRadius como array (cantos independentes)
+    if ('cornerRadius' in node && Array.isArray((node as any).cornerRadius)) {
+      const radii = (node as any).cornerRadius;
+      radii.forEach((radius: number, idx: number) => {
+        if (!allowedBorderRadius.includes(radius)) {
+          nonCompliantBorderRadius++;
+          violations.push({
+            nodeId: node.id,
+            nodeName: node.name,
+            issue: `Raio de borda não conforme (canto ${idx + 1})`,
+            currentValue: radius.toString(),
+            expectedValue: allowedBorderRadius.join(', ')
+          });
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao analisar border radius:', error);
+  }
+  return nonCompliantBorderRadius;
+}
+
 function analyzeSingleNode(
   node: SceneNode, 
   componentsData: ComponentData[], 
@@ -328,6 +442,7 @@ function analyzeSingleNode(
         nonCompliantColors: 0,
         nonCompliantFonts: 0,
         nonCompliantEffects: 0,
+        nonCompliantBorderRadius: 0,
         nonDsComponents: 0,
         totalLayers: 0,
         dsComponentsUsed: 0,
@@ -346,8 +461,9 @@ function analyzeSingleNode(
     // Analyze styles (always check styles regardless of being inside a DS component)
     const violations: Violation[] = [];
     const nonCompliantColors = analyzeNodeColors(node, stylesData, violations);
-    const nonCompliantFonts = analyzeNodeFonts(node, stylesData);
+    const nonCompliantFonts = analyzeNodeFonts(node, stylesData, violations);
     const nonCompliantEffects = analyzeNodeEffects(node, stylesData);
+    const nonCompliantBorderRadius = analyzeNodeBorderRadius(node, violations);
     
     let totalLayers = 0;
     let dsComponentsUsed = 0;
@@ -439,6 +555,7 @@ function analyzeSingleNode(
       nonCompliantColors,
       nonCompliantFonts,
       nonCompliantEffects,
+      nonCompliantBorderRadius,
       nonDsComponents,
       totalLayers,
       dsComponentsUsed,
@@ -451,6 +568,7 @@ function analyzeSingleNode(
       nonCompliantColors: 0,
       nonCompliantFonts: 0,
       nonCompliantEffects: 0,
+      nonCompliantBorderRadius: 0,
       nonDsComponents: 0,
       totalLayers: 0,
       dsComponentsUsed: 0,
@@ -497,6 +615,7 @@ export function analyzeNode(
           result.nonCompliantColors += childResult.nonCompliantColors;
           result.nonCompliantFonts += childResult.nonCompliantFonts;
           result.nonCompliantEffects += childResult.nonCompliantEffects;
+          result.nonCompliantBorderRadius += childResult.nonCompliantBorderRadius;
           result.nonDsComponents += childResult.nonDsComponents;
           
           // If this is not a DS component, add child layers and components
@@ -505,7 +624,7 @@ export function analyzeNode(
             result.dsComponentsUsed += childResult.dsComponentsUsed;
           }
           result.hiddenComponentsUsed += childResult.hiddenComponentsUsed;
-          result.violations.push(...childResult.violations);
+          result.violations.push(...childResult.violations!);
         } catch (error) {
           console.error('Erro ao analisar nó filho:', error);
         }
@@ -546,8 +665,8 @@ export async function analyzeFrame(
 
   // Calculate coverage percentage - penalize by non-compliant styles
   const validLayers = analysis.totalLayers;
-  const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects) > 0
-    ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects)) * 100
+  const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects + analysis.nonCompliantBorderRadius) > 0
+    ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects + analysis.nonCompliantBorderRadius)) * 100
     : 0;
 
   // Determine coverage level based on new thresholds
@@ -568,6 +687,7 @@ export async function analyzeFrame(
     nonCompliantColors: analysis.nonCompliantColors,
     nonCompliantFonts: analysis.nonCompliantFonts,
     nonCompliantEffects: analysis.nonCompliantEffects,
+    nonCompliantBorderRadius: analysis.nonCompliantBorderRadius,
     coveragePercentage
   });
 
@@ -583,9 +703,10 @@ export async function analyzeFrame(
       colors: analysis.nonCompliantColors,
       fonts: analysis.nonCompliantFonts,
       effects: analysis.nonCompliantEffects,
+      borderRadius: analysis.nonCompliantBorderRadius,
       components: analysis.nonDsComponents
     },
-    violations: analysis.violations
+    violations: analysis.violations!
   };
 }
 
