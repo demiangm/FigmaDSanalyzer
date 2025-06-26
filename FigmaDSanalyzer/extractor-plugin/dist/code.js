@@ -63,16 +63,28 @@ function extractDesignSystemData() {
                 ((_a = node.parent) === null || _a === void 0 ? void 0 : _a.type) !== 'COMPONENT_SET';
         });
         const componentSets = figma.root.findAll(node => node.type === 'COMPONENT_SET');
+        // Função auxiliar para obter o nome da página de um node
+        function getPageName(node) {
+            let parent = node.parent;
+            while (parent && parent.type !== 'PAGE') {
+                parent = parent.parent;
+            }
+            return parent && parent.type === 'PAGE' ? parent.name : 'UnknownPage';
+        }
         // Adiciona componentes independentes
         for (const component of components) {
-            componentEntries[component.name] = {
+            const pageName = getPageName(component);
+            const uniqueName = `${pageName}/${component.name}`;
+            componentEntries[uniqueName] = {
                 key: component.key,
                 isHidden: isHiddenComponent(component.name)
             };
         }
         // Adiciona component sets
         for (const set of componentSets) {
-            componentEntries[set.name] = {
+            const pageName = getPageName(set);
+            const uniqueName = `${pageName}/${set.name}`;
+            componentEntries[uniqueName] = {
                 key: set.key,
                 isHidden: isHiddenComponent(set.name)
             };

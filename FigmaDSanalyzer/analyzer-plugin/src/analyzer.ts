@@ -9,7 +9,6 @@ const EXCLUDED_NODE_TYPES = [
   'GROUP',
   'VECTOR',
   'ELLIPSE',
-  'TEXT',
   'COMPONENT',  // Main component definition
   'COMPONENT_SET'  // Component variants container
 ];
@@ -19,6 +18,17 @@ const IGNORED_FRAME_NAMES = [
   'Grid',
   'Overlay'
 ];
+
+// Lista de prefixos de nomes a ignorar
+const IGNORED_NAME_PREFIXES = [
+  'Native/',
+  'iOS/',
+  'Android/'
+];
+
+function hasIgnoredPrefix(name: string): boolean {
+  return IGNORED_NAME_PREFIXES.some(prefix => name.startsWith(prefix));
+}
 
 function analyzeNodeColors(
   node: SceneNode, 
@@ -50,13 +60,13 @@ function analyzeNodeColors(
         } else {
           console.log(`  ✅ Cor conforme (fill)`);
         }
-      } else if (hasFills(node)) {
-        // If node has fills but no style, count as non-compliant
+      } else if (hasNonImageFills(node)) {
+        // If node has non-image fills but no style, count as non-compliant
         nonCompliantColors++;
         console.log(`  ❌ Cor não conforme encontrada (fill):`, {
           nodeId: node.id,
           nodeName: node.name,
-          reason: 'Sem estilo vinculado'
+          reason: 'Sem estilo vinculado (e não é imagem)'
         });
       }
     }
@@ -99,17 +109,17 @@ function analyzeNodeColors(
   return nonCompliantColors;
   }
 
-// Helper function to check if node has visible fills
-function hasFills(node: SceneNode): boolean {
+// Helper function to check if node has visible non-image fills
+function hasNonImageFills(node: SceneNode): boolean {
   try {
     if ('fills' in node) {
       const fills = (node as any).fills;
       if (Array.isArray(fills)) {
-        return fills.some(fill => fill && fill.visible !== false);
+        return fills.some(fill => fill && fill.visible !== false && fill.type !== 'IMAGE');
       }
     }
   } catch (error) {
-    console.error('Erro ao verificar fills:', error);
+    console.error('Erro ao verificar fills não-imagem:', error);
   }
   return false;
 }
@@ -338,7 +348,7 @@ function analyzeSingleNode(
   stylesData: StylesData[], 
   isTopLevel: boolean = true,
   isInsideDsComponent: boolean = false
-): AnalysisResult {
+): AnalysisResult & { shouldSkipChildren?: boolean } {
   try {
     // Skip if node was already processed
     if (processedNodes.has(node.id)) {
@@ -349,11 +359,36 @@ function analyzeSingleNode(
         nonDsComponents: 0,
         totalLayers: 0,
         dsComponentsUsed: 0,
-        hiddenComponentsUsed: 0
+        hiddenComponentsUsed: 0,
+        shouldSkipChildren: false
       };
     }
-    
+
     processedNodes.add(node.id);
+
+    // Se for instância de biblioteca externa e nome tem prefixo ignorado, ignora totalmente (antes de qualquer análise)
+    if (node.type === 'INSTANCE') {
+      const instance = node as InstanceNode;
+      const mainComponent = instance.mainComponent;
+      const isExternalLibrary = mainComponent && mainComponent.remote === true;
+      if (isExternalLibrary && hasIgnoredPrefix(node.name)) {
+        console.log(`  ➖ Instância de biblioteca externa ignorada por prefixo:`, {
+          nodeId: node.id,
+          nodeName: node.name
+        });
+        // Retorna imediatamente, não processa children nem estilos
+        return {
+          nonCompliantColors: 0,
+          nonCompliantFonts: 0,
+          nonCompliantEffects: 0,
+          nonDsComponents: 0,
+          totalLayers: 0,
+          dsComponentsUsed: 0,
+          hiddenComponentsUsed: 0,
+          shouldSkipChildren: true
+        };
+      }
+    }
     
     console.log(`\n📍 Analisando nó: ${node.name} (${node.type})`, {
       nodeId: node.id,
@@ -374,6 +409,10 @@ function analyzeSingleNode(
     // Check if this node is a component instance
     if (node.type === 'INSTANCE') {
       const componentStatus = isComponentFromDS(node, componentsData);
+      const instance = node as InstanceNode;
+      const mainComponent = instance.mainComponent;
+      const isLocalComponent = mainComponent && mainComponent.remote === false && !componentStatus.isFromDS;
+      const isExternalLibrary = mainComponent && mainComponent.remote === true;
       
       if (componentStatus.isFromDS) {
         if (componentStatus.isHidden) {
@@ -407,9 +446,24 @@ function analyzeSingleNode(
             nodeName: node.name
           });
         }
+      } else if (isLocalComponent) {
+        // Só conta como layer se tiver estilo aplicado
+        if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel && hasAppliedStyles(node)) {
+          totalLayers = 1;
+          console.log(`  🏠 Instância local contabilizada como frame (tem estilo):`, {
+            nodeId: node.id,
+            nodeName: node.name,
+            totalLayers
+          });
+        } else {
+          console.log(`  🏠 Instância local NÃO contabilizada (sem estilo ou ignorada):`, {
+            nodeId: node.id,
+            nodeName: node.name
+          });
+        }
       } else {
         nonDsComponents = 1;
-        // Count non-DS instances as regular layers
+        // Count non-DS, non-local instances as regular layers
         if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel) {
           totalLayers = 1;
           console.log(`  ❌ Componente não conforme contabilizado como layer:`, {
@@ -430,13 +484,38 @@ function analyzeSingleNode(
       
       if (shouldCountAsLayer) {
         totalLayers = 1;
-        console.log(`  ➕ Layer contabilizada:`, {
-          nodeId: node.id,
-          nodeName: node.name,
-          type: node.type,
-          totalLayers,
-          hasStyles: node.type === 'FRAME' ? hasAppliedStyles(node) : 'N/A'
-        });
+        // Se for TEXT e estiver com estilo correto do DS, conta como dsComponentsUsed
+        if (node.type === 'TEXT') {
+          const textNode = node as TextNode;
+          let isCompliant = false;
+          if (textNode.textStyleId && typeof textNode.textStyleId === 'string') {
+            isCompliant = isStyleInDesignSystem(textNode.textStyleId, 'textStyles', stylesData);
+          } else if (textNode.textStyleId && typeof textNode.textStyleId === 'object') {
+            // Rich text: todos os segmentos precisam ser do DS
+            const styleIds = Object.values(textNode.textStyleId).filter((id): id is string => typeof id === 'string');
+            isCompliant = styleIds.length > 0 && styleIds.every(styleId => styleId && isStyleInDesignSystem(styleId, 'textStyles', stylesData));
+          }
+          if (isCompliant) {
+            dsComponentsUsed = 1;
+            console.log(`  ✅ Texto conforme DS contabilizado como componente do DS`, {
+              nodeId: node.id,
+              nodeName: node.name
+            });
+          } else {
+            console.log(`  ➕ Layer de texto contabilizada (não conforme DS)`, {
+              nodeId: node.id,
+              nodeName: node.name
+            });
+          }
+        } else {
+          console.log(`  ➕ Layer contabilizada:`, {
+            nodeId: node.id,
+            nodeName: node.name,
+            type: node.type,
+            totalLayers,
+            hasStyles: node.type === 'FRAME' ? hasAppliedStyles(node) : 'N/A'
+          });
+        }
       } else {
         console.log(`  ➖ Layer não contabilizada:`, {
           nodeId: node.id,
@@ -459,7 +538,8 @@ function analyzeSingleNode(
       nonDsComponents,
       totalLayers,
       dsComponentsUsed,
-      hiddenComponentsUsed
+      hiddenComponentsUsed,
+      shouldSkipChildren: false
     };
   } catch (error) {
     console.error('Erro ao analisar nó:', error);
@@ -470,7 +550,8 @@ function analyzeSingleNode(
       nonDsComponents: 0,
       totalLayers: 0,
       dsComponentsUsed: 0,
-      hiddenComponentsUsed: 0
+      hiddenComponentsUsed: 0,
+      shouldSkipChildren: false
     };
   }
 }
@@ -491,6 +572,11 @@ export function analyzeNode(
 
     // Analyze current node
     const result = analyzeSingleNode(node, componentsData, stylesData, isTopLevel, isInsideDsComponent);
+    
+    // Se o nó deve ser ignorado junto com os filhos, retorna já
+    if (result.shouldSkipChildren) {
+      return result;
+    }
     
     // If this is a DS component instance, mark that we're inside a DS component
     const isDsComponent = result.dsComponentsUsed > 0;

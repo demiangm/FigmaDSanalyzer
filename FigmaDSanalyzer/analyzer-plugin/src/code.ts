@@ -181,26 +181,46 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   titleContainer.layoutMode = "HORIZONTAL";
   titleContainer.primaryAxisSizingMode = "FIXED";
   titleContainer.counterAxisSizingMode = "AUTO";
-  titleContainer.itemSpacing = 8;
   titleContainer.resize(432, 32);
   titleContainer.cornerRadius = 8;
+  titleContainer.primaryAxisAlignItems = "SPACE_BETWEEN";
+  titleContainer.counterAxisAlignItems = "CENTER";
+  titleContainer.fills = [];
 
-  const titleTextContainer = figma.createFrame();
-  titleTextContainer.name = "Title";
-  titleTextContainer.layoutMode = "VERTICAL";
-  titleTextContainer.primaryAxisSizingMode = "AUTO";
-  titleTextContainer.counterAxisSizingMode = "AUTO";
-  titleTextContainer.cornerRadius = 8;
-
+  // Título à esquerda
   const titleText = figma.createText();
   titleText.characters = "Prisma DS Compliance";
   titleText.fontSize = 24;
   titleText.fontName = { family: "Inter", style: "Semi Bold" };
   titleText.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
-  titleText.lineHeight = { unit: 'PIXELS', value: 32 };
 
-  titleTextContainer.appendChild(titleText);
-  titleContainer.appendChild(titleTextContainer);
+  // Tag de versão à direita
+  const versionTagFrame = figma.createFrame();
+  versionTagFrame.name = "VersionTag";
+  versionTagFrame.layoutMode = "HORIZONTAL";
+  versionTagFrame.primaryAxisSizingMode = "AUTO";
+  versionTagFrame.counterAxisSizingMode = "AUTO";
+  versionTagFrame.paddingLeft = 4;
+  versionTagFrame.paddingRight = 4;
+  versionTagFrame.paddingTop = 2;
+  versionTagFrame.paddingBottom = 2;
+  versionTagFrame.cornerRadius = 6;
+  versionTagFrame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.76, b: 0.89 } }];
+  versionTagFrame.opacity = 0.8;
+
+  const versionTag = figma.createText();
+  versionTag.characters = "alpha";
+  versionTag.fontSize = 12;
+  versionTag.fontName = { family: "Inter", style: "Bold" };
+  versionTag.fills = [{ type: 'SOLID', color: { r: 0.9, g: 0.2, b: 0.6 } }];
+  versionTag.textAlignHorizontal = "CENTER";
+  versionTag.textAlignVertical = "CENTER";
+
+  versionTagFrame.appendChild(versionTag);
+
+  // Adiciona título e tag diretamente ao container
+  titleContainer.appendChild(titleText);
+  titleContainer.appendChild(versionTagFrame);
 
   // Container do gráfico
   const gaugeContainer = figma.createFrame();
@@ -364,7 +384,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   componentsContainer.counterAxisAlignItems = "MAX";
 
   const componentsLabel = figma.createText();
-  componentsLabel.characters = "Componentes do Prisma:";
+  componentsLabel.characters = "Elementos do DS:";
   componentsLabel.fontSize = 14;
   componentsLabel.fontName = { family: "Inter", style: "Medium" };
   componentsLabel.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 }, opacity: 0.4 }];

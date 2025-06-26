@@ -72,9 +72,20 @@ async function extractDesignSystemData() {
     node.type === 'COMPONENT_SET'
   );
 
+  // Função auxiliar para obter o nome da página de um node
+  function getPageName(node: BaseNode): string {
+    let parent = node.parent;
+    while (parent && parent.type !== 'PAGE') {
+      parent = parent.parent;
+    }
+    return parent && parent.type === 'PAGE' ? parent.name : 'UnknownPage';
+  }
+
   // Adiciona componentes independentes
   for (const component of components) {
-    componentEntries[component.name] = {
+    const pageName = getPageName(component);
+    const uniqueName = `${pageName}/${component.name}`;
+    componentEntries[uniqueName] = {
       key: (component as ComponentNode).key,
       isHidden: isHiddenComponent(component.name)
     };
@@ -82,7 +93,9 @@ async function extractDesignSystemData() {
 
   // Adiciona component sets
   for (const set of componentSets) {
-    componentEntries[set.name] = {
+    const pageName = getPageName(set);
+    const uniqueName = `${pageName}/${set.name}`;
+    componentEntries[uniqueName] = {
       key: (set as ComponentSetNode).key,
       isHidden: isHiddenComponent(set.name)
     };
