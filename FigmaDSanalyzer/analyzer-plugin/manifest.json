@@ -1,7 +1,8 @@
 {
-  "name": "Design System Analyzer",
-  "id": "designsystem-analyzer",
+  "name": "PrismaDesign System Analyzer",
+  "id": "1520157561724138383",
   "api": "1.0.0",
+  "documentAccess": "dynamic-page",
   "main": "dist/code.js",
   "ui": "ui.html",
   "capabilities": [],
