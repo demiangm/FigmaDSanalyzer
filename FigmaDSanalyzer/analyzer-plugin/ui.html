@@ -10,24 +10,117 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #ffffff;
       color: #333;
+      overflow-x: hidden;
     }
     .container {
       padding: 16px;
       height: calc(100vh - 32px);
       overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 0;
+      padding: 4px 0 4px 0;
       border-bottom: 1px solid #e5e5e5;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+      min-height: 40px;
     }
     .title {
       font-size: 14px;
       font-weight: 600;
       margin: 0;
+    }
+    .tabbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 16px;
+      margin-top: 24px;
+      padding: 0 24px;
+      box-sizing: border-box;
+    }
+    .tabs-container {
+      display: flex;
+      background: #f2f2f2;
+      border-radius: 999px;
+      padding: 2px;
+      gap: 4px;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 40px;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: #222;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 999px;
+      padding: 6px 0;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      outline: none;
+      position: relative;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .tab-btn:hover {
+      background: #e5e5e5;
+      color: #111;
+    }
+    .tab-active {
+      background: #fff;
+      color: #111;
+      box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+      border: 2px solid #fff;
+      z-index: 1;
+    }
+    .empty-state-animated {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 220px;
+      animation: fadeInUp 0.7s cubic-bezier(.23,1.01,.32,1) both;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .empty-icon {
+      margin-bottom: 18px;
+      color: #bdbdbd;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+    .empty-text {
+      color: #888;
+      font-size: 15px;
+      text-align: center;
+      max-width: 260px;
     }
     /* .nav e .nav button foram removidos, pois as abas não existem mais */
     .hero {
@@ -142,36 +235,211 @@
       background: #fee2e2;
       color: #dc2626;
     }
+    .info-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: 32px;
+      padding: 0;
+      border-radius: 50%;
+      transition: background 0.2s, border-color 0.2s;
+      color: #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      box-sizing: border-box;
+    }
+    .info-btn:hover {
+      background: #f5f5f5;
+      color: #222;
+    }
+    .info-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.18);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 1000;
+      transition: background 0.2s;
+    }
+    .info-modal-content {
+      background: #fff;
+      border-radius: 18px 18px 0 0;
+      padding: 24px 24px 20px 24px;
+      min-width: 320px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
+      position: relative;
+      text-align: left;
+      margin-bottom: 0;
+      animation: slideUpSheet 0.25s cubic-bezier(.23,1.01,.32,1);
+    }
+    @keyframes slideUpSheet {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .info-modal-content:before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      margin: 0 auto 0 auto;
+    }
+    .info-modal-content .sheet-padding {
+      padding-top: 24px;
+    }
+    .info-modal-content h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #222;
+    }
+    .info-modal-content ul {
+      padding-left: 18px;
+      margin: 12px 0 0 0;
+      color: #444;
+      font-size: 14px;
+    }
+    .info-modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #888;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .info-modal-close:hover {
+      background: #e5e5e5;
+      color: #222;
+    }
+    .bottom-instruction {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin: 0;
+      margin-top: auto;
+      margin-bottom: 24px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1 class="title">Prisma Design System Compliance</h1>
+      <button id="infoBtn" class="info-btn" title="Informações">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#888" style="display:block;"><circle cx="12" cy="12" r="10" fill="#888"/><rect x="11" y="10" width="2" height="6" rx="1" fill="#fff"/><rect x="11" y="7" width="2" height="2" rx="1" fill="#fff"/></svg>
+      </button>
+    </div>
+    <div class="tabbar-row">
+      <div class="tabs-container">
+        <button id="tabHome" class="tab-btn tab-active">Home</button>
+        <button id="tabDados" class="tab-btn">Dados</button>
+        <button id="tabInspec" class="tab-btn">Inspec</button>
       </div>
-
-    <div id="analyzePanel">
+    </div>
+    <div id="infoModal" class="info-modal" style="display:none;">
+      <div class="info-modal-content">
+        <button class="info-modal-close" id="closeInfoModal">×</button>
+        <div class="sheet-padding">
+          <div style="font-size:15px;font-weight:500;color:#111;margin-bottom:12px;">Dados carregados do Prisma para analise.</div>
+          <div id="summaryContentModal" style="font-size: 13px; color: #111;"></div>
+        </div>
+      </div>
+    </div>
+    <div id="tabContentHome">
       <div class="hero">
+        <div class="hero-animated-icon" style="margin-bottom:18px;">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="26" stroke="#DF0979" stroke-width="4" fill="#fff"/>
+            <polyline points="18,30 26,38 40,20" fill="none" stroke="#DF0979" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="stroke-dasharray" values="0,60;30,30;60,0" dur="1.2s" repeatCount="indefinite"/>
+            </polyline>
+          </svg>
+        </div>
         <h2>Analisar Conformidade do Design System</h2>
-        <p>Selecione frames ou componentes e execute uma análise para verificar a conformidade com os padrões do seu design system.</p>
+        <p>Verifique a conformidade com os padrões do seu design system.</p>
       </div>
-
-      <button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
-
       <div id="errorMessage" class="error hidden"></div>
-      <div id="resultsContainer" class="hidden"></div>
-
-      <div id="dataSummary" class="hidden" style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px 0;">
-        <h4 style="margin: 0 0 8px; font-size: 12px; color: #0369a1;">Design System Carregado:</h4>
-        <div id="summaryContent" style="font-size: 11px; color: #0369a1;"></div>
+      <footer style="position:fixed;left:0;right:0;bottom:0;width:100%;background:#fff;padding:16px;z-index:100;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;" id="footerHome">
+        <button class="analyze-button" id="startAnalysis" style="width:320px;max-width:100%;">Iniciar Análise</button>
+        <p class="bottom-instruction" style="margin:8px 0 0 0;font-size:13px;color:#666;text-align:center;">Selecione um ou mais frames no Figma, depois clique em "Iniciar Análise" para começar a verificação de conformidade.</p>
+      </footer>
+    </div>
+    <div id="tabContentDados" style="display:none;">
+      <div id="emptyStateDados" class="empty-state-animated">
+        <div class="empty-icon">
+          <svg width="56" height="48" viewBox="0 0 56 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="28" width="8" height="14" rx="2" fill="#e5e7eb">
+              <animate attributeName="y" values="28;18;28" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="14;24;14" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="20" y="18" width="8" height="24" rx="2" fill="#a5b4fc">
+              <animate attributeName="y" values="18;28;18" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="24;14;24" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="34" y="24" width="8" height="18" rx="2" fill="#60a5fa">
+              <animate attributeName="y" values="24;14;24" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="18;28;18" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="48" y="12" width="8" height="30" rx="2" fill="#38bdf8">
+              <animate attributeName="y" values="12;22;12" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="30;10;30" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+          </svg>
+        </div>
+        <p class="empty-text">Os dados aparecerão aqui quando forem gerados na análise.</p>
       </div>
-
-      <p style="font-size: 12px; color: #666; text-align: center;">
-        Selecione um ou mais frames no Figma, depois clique em "Iniciar Análise" para começar a verificação de conformidade.
-      </p>
+      <div id="resultsContainer" class="hidden"></div>
     </div>
-
+    <div id="tabContentInspec" style="display:none;">
+      <div id="emptyStateInspec" class="empty-state-animated">
+        <div class="empty-icon">
+          <svg width="56" height="48" viewBox="0 0 56 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g>
+              <rect x="8" y="8" width="40" height="32" rx="4" fill="#e5e7eb"/>
+              <rect x="14" y="14" width="28" height="8" rx="2" fill="#a5b4fc">
+                <animate attributeName="width" values="28;16;28" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="14" y="26" width="18" height="4" rx="2" fill="#60a5fa">
+                <animate attributeName="width" values="18;8;18" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="34" y="26" width="8" height="4" rx="2" fill="#38bdf8">
+                <animate attributeName="width" values="8;16;8" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="20" y="34" width="16" height="2" rx="1" fill="#bdbdbd">
+                <animate attributeName="width" values="16;8;16" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+            </g>
+            <g>
+              <rect x="44" y="36" width="8" height="8" rx="2" fill="#fbbf24">
+                <animate attributeName="y" values="36;32;36" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="46" y="38" width="4" height="4" rx="1" fill="#fff"/>
+            </g>
+          </svg>
+        </div>
+        <p class="empty-text">Nenhuma inspeção realizada ainda.<br>Os itens inspecionados aparecerão aqui após a análise.<br>Utilize a aba Home para rodar a análise.</p>
+      </div>
+      <div id="inspecContainer" class="hidden"></div>
     </div>
+  </div>
 
   <script>
     // Estado da aplicação
@@ -187,6 +455,20 @@
     const startAnalysisBtn = document.getElementById('startAnalysis');
     const errorMessage = document.getElementById('errorMessage');
     const resultsContainer = document.getElementById('resultsContainer');
+    const tabHome = document.getElementById('tabHome');
+    const tabDados = document.getElementById('tabDados');
+    const tabInspec = document.getElementById('tabInspec');
+    const tabContentHome = document.getElementById('tabContentHome');
+    const tabContentDados = document.getElementById('tabContentDados');
+    const tabContentInspec = document.getElementById('tabContentInspec');
+    const emptyStateDados = document.getElementById('emptyStateDados');
+    const emptyStateInspec = document.getElementById('emptyStateInspec');
+    const inspecContainer = document.getElementById('inspecContainer');
+    const infoBtn = document.getElementById('infoBtn');
+    const infoModal = document.getElementById('infoModal');
+    const closeInfoModal = document.getElementById('closeInfoModal');
+    const summaryContentModal = document.getElementById('summaryContentModal');
+    let lastViolations = [];
 
     // Event listeners
     // Event listeners para analyzeTab e configTab foram removidos
@@ -245,27 +527,32 @@
     });
 
     function showResults(reports) {
+      lastViolations = extractViolationsFromReports(reports);
       if (!reports || reports.length === 0) {
-        showError('Nenhum resultado encontrado');
+        emptyStateDados.style.display = '';
+        document.getElementById('resultsContainer').classList.add('hidden');
+        lastViolations = [];
+        renderInspec([]);
+        switchTab('dados');
         return;
       }
-
+      emptyStateDados.style.display = 'none';
+      const resultsContainer = document.getElementById('resultsContainer');
       resultsContainer.classList.remove('hidden');
       resultsContainer.innerHTML = reports.map(report => createResultCard(report)).join('');
+      renderInspec(lastViolations);
+      switchTab('dados');
     }
 
     function updateDataSummary(summary) {
-      const dataSummary = document.getElementById('dataSummary');
-      const summaryContent = document.getElementById('summaryContent');
-
-      summaryContent.innerHTML = `
-        <div>• ${summary.components} componentes</div>
-        <div>• ${summary.colorStyles} estilos de cor</div>
-        <div>• ${summary.textStyles} estilos de texto</div>
-        <div>• ${summary.effectStyles} estilos de efeito</div>
-      `;
-
-      dataSummary.classList.remove('hidden');
+      if (summaryContentModal) {
+        summaryContentModal.innerHTML = `
+          <div>• ${summary.components} componentes</div>
+          <div>• ${summary.colorStyles} estilos de cor</div>
+          <div>• ${summary.textStyles} estilos de texto</div>
+          <div>• ${summary.effectStyles} estilos de efeito</div>
+        `;
+      }
     }
 
     function createResultCard(report) {
@@ -340,8 +627,126 @@
       `;
     }
 
+    function switchTab(tab) {
+      tabHome.classList.remove('tab-active');
+      tabDados.classList.remove('tab-active');
+      tabInspec.classList.remove('tab-active');
+      tabContentHome.style.display = 'none';
+      tabContentDados.style.display = 'none';
+      tabContentInspec.style.display = 'none';
+      if (tab === 'home') {
+        tabHome.classList.add('tab-active');
+        tabContentHome.style.display = '';
+      } else if (tab === 'dados') {
+        tabDados.classList.add('tab-active');
+        tabContentDados.style.display = '';
+      } else if (tab === 'inspec') {
+        tabInspec.classList.add('tab-active');
+        tabContentInspec.style.display = '';
+      }
+    }
+    tabHome.addEventListener('click', () => switchTab('home'));
+    tabDados.addEventListener('click', () => switchTab('dados'));
+    tabInspec.addEventListener('click', () => {
+      switchTab('inspec');
+      renderInspec(lastViolations);
+    });
+
+    if (infoBtn && infoModal && closeInfoModal) {
+      infoBtn.addEventListener('click', () => {
+        infoModal.style.display = '';
+      });
+      closeInfoModal.addEventListener('click', () => {
+        infoModal.style.display = 'none';
+      });
+      infoModal.addEventListener('click', (e) => {
+        if (e.target === infoModal) infoModal.style.display = 'none';
+      });
+    }
+
     // Inicialização
     parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
+
+    function renderInspec(violations) {
+      if (!violations || violations.length === 0) {
+        emptyStateInspec.style.display = '';
+        inspecContainer.classList.add('hidden');
+        inspecContainer.innerHTML = '';
+        return;
+      }
+      emptyStateInspec.style.display = 'none';
+      inspecContainer.classList.remove('hidden');
+      // Agrupar por tipo de issue
+      const groups = {};
+      for (const v of violations) {
+        if (!groups[v.issue]) groups[v.issue] = [];
+        groups[v.issue].push(v);
+      }
+      let html = '';
+      const groupTitles = {
+        'cor': 'Cor',
+        'color': 'Cor',
+        'fonte': 'Tipografia',
+        'font': 'Tipografia',
+        'efeito': 'Efeitos',
+        'effect': 'Efeitos',
+        'component': 'Componentes',
+        'componente': 'Componentes'
+      };
+      Object.keys(groups).forEach(issue => {
+        // Detecta o tipo para o título
+        let lower = issue.toLowerCase();
+        let groupKey = Object.keys(groupTitles).find(k => lower.includes(k));
+        let groupTitle = groupKey ? groupTitles[groupKey] : 'Outros';
+        html += `<h3 style='margin:24px 0 12px 0;font-size:16px;font-weight:700;color:#222;'>${groupTitle}</h3>`;
+        groups[issue].forEach(v => {
+          html += `<div style='margin-bottom:16px;padding:16px 18px 12px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 4px 0 rgba(0,0,0,0.03);display:flex;align-items:center;justify-content:space-between;'>
+            <div style='display:flex;flex-direction:column;gap:4px;'>
+              <span style='font-weight:500;font-size:15px;color:#333;'>${v.nodeName}</span>
+              <span style='display:flex;align-items:center;gap:10px;margin-top:2px;'>`;
+          if (groupTitle === 'Cor') {
+            if (v.currentValue && v.currentValue.startsWith('#')) {
+              html += `<span style='display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid #ccc;vertical-align:middle;background:${v.currentValue};'></span> <span style='background:#ececec;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;'>${v.currentValue}</span>`;
+            }
+          } else if (groupTitle === 'Tipografia') {
+            html += `<span style='background:#ececec;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;'>${v.currentValue}</span>`;
+          } else {
+            html += `<span style='background:#ececec;border-radius:6px;padding:2px 8px;font-family:monospace;font-size:13px;'>${v.currentValue}</span>`;
+          }
+          html += `</span>
+            </div>
+            <button class='zoom-btn' data-nodeid='${v.nodeId}' title='Localizar no Figma' style='margin-left:16px;padding:4px 8px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;'>
+              <svg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <circle cx='11' cy='11' r='9' stroke='#444' stroke-width='2' fill='none'/>
+                <line x1='11' y1='6' x2='11' y2='16' stroke='#444' stroke-width='2' stroke-linecap='round'/>
+                <line x1='6' y1='11' x2='16' y2='11' stroke='#444' stroke-width='2' stroke-linecap='round'/>
+              </svg>
+            </button>
+          </div>`;
+        });
+      });
+      inspecContainer.innerHTML = html;
+    }
+
+    // Receber violações detalhadas após análise
+    function extractViolationsFromReports(reports) {
+      if (!reports || !Array.isArray(reports)) return [];
+      let all = [];
+      for (const r of reports) {
+        if (r.violations && Array.isArray(r.violations)) {
+          all = all.concat(r.violations);
+        }
+      }
+      return all;
+    }
+
+    // Handler para botões de zoom
+    inspecContainer.addEventListener('click', function(e) {
+      const target = e.target.closest('.zoom-btn');
+      if (target && target.dataset.nodeid) {
+        parent.postMessage({ pluginMessage: { type: 'zoom-to-node', nodeId: target.dataset.nodeid } }, '*');
+      }
+    });
   </script>
 </body>
 </html>

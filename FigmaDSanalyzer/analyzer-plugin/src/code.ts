@@ -29,18 +29,30 @@ prepareFonts().then(() => {
 // Handle messages from the UI
 figma.ui.onmessage = async (msg) => {
   try {
-  switch (msg.type) {
-    case 'analyze-selection':
-      await analyzeSelection();
-      break;
-    
-    case 'get-design-system':
-      await loadDesignSystemData();
-      break;
-    
-    case 'close-plugin':
-      figma.closePlugin();
-      break;
+    switch (msg.type) {
+      case 'analyze-selection':
+        await analyzeSelection();
+        break;
+      case 'get-design-system':
+        await loadDesignSystemData();
+        break;
+      case 'close-plugin':
+        figma.closePlugin();
+        break;
+      case 'zoom-to-node':
+        if (msg.nodeId && typeof msg.nodeId === 'string') {
+          const node = figma.getNodeById(msg.nodeId);
+          if (node && 'visible' in node && 'locked' in node) { // SceneNode check
+            figma.currentPage.selection = [node];
+            figma.viewport.scrollAndZoomIntoView([node]);
+          } else {
+            console.warn('Node não encontrado ou não é SceneNode:', msg.nodeId, node);
+            figma.notify('Elemento não encontrado ou não é selecionável.');
+          }
+        } else {
+          console.warn('nodeId inválido recebido para zoom:', msg.nodeId);
+        }
+        break;
     }
   } catch (error) {
     console.error('Erro na execução:', error);

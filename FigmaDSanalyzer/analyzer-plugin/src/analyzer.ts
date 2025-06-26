@@ -1,4 +1,4 @@
-import { AnalysisResult, ComplianceReport, ComponentData, StylesData } from './types';
+import { AnalysisResult, ComplianceReport, ComponentData, StylesData, Violation } from './types';
 
 // Set to track processed nodes and avoid duplicates
 const processedNodes = new Set<string>();
@@ -21,83 +21,65 @@ const IGNORED_FRAME_NAMES = [
 ];
 
 function analyzeNodeColors(
-  node: SceneNode, 
-  stylesData: StylesData[]
+  node: SceneNode,
+  stylesData: StylesData[],
+  violations: Violation[]
 ): number {
   let nonCompliantColors = 0;
-  
   try {
-    console.log(`\nAnalisando cores do nó: ${node.name} (${node.id})`);
-
-    // Check fillStyleId
     if ('fillStyleId' in node) {
       const fillStyleId = (node as any).fillStyleId;
       if (fillStyleId) {
-        console.log(`  Fill Style:`, {
-          nodeId: node.id,
-          nodeName: node.name,
-          styleId: fillStyleId,
-          hasStyle: true
-        });
-        
         if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
           nonCompliantColors++;
-          console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+          violations.push({
             nodeId: node.id,
             nodeName: node.name,
-            reason: 'Estilo não encontrado no DS'
+            issue: 'Cor (fill) não conforme',
+            currentValue: fillStyleId,
+            expectedValue: 'Estilo do DS'
           });
-        } else {
-          console.log(`  ✅ Cor conforme (fill)`);
         }
       } else if (hasFills(node)) {
-        // If node has fills but no style, count as non-compliant
         nonCompliantColors++;
-        console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+        violations.push({
           nodeId: node.id,
           nodeName: node.name,
-          reason: 'Sem estilo vinculado'
+          issue: 'Cor (fill) sem estilo vinculado',
+          currentValue: '',
+          expectedValue: 'Estilo do DS'
         });
       }
     }
-
-    // Check strokeStyleId
     if ('strokeStyleId' in node) {
       const strokeStyleId = (node as any).strokeStyleId;
       if (strokeStyleId) {
-        console.log(`  Stroke Style:`, {
-          nodeId: node.id,
-          nodeName: node.name,
-          styleId: strokeStyleId,
-          hasStyle: true
-        });
-        
         if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
           nonCompliantColors++;
-          console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+          violations.push({
             nodeId: node.id,
             nodeName: node.name,
-            reason: 'Estilo não encontrado no DS'
+            issue: 'Cor (stroke) não conforme',
+            currentValue: strokeStyleId,
+            expectedValue: 'Estilo do DS'
           });
-        } else {
-          console.log(`  ✅ Cor conforme (stroke)`);
         }
       } else if (hasStrokes(node)) {
-        // If node has strokes but no style, count as non-compliant
         nonCompliantColors++;
-        console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+        violations.push({
           nodeId: node.id,
           nodeName: node.name,
-          reason: 'Sem estilo vinculado'
-          });
-        }
+          issue: 'Cor (stroke) sem estilo vinculado',
+          currentValue: '',
+          expectedValue: 'Estilo do DS'
+        });
       }
+    }
   } catch (error) {
     console.error('Erro ao analisar cores:', error);
   }
-
   return nonCompliantColors;
-  }
+}
 
 // Helper function to check if node has visible fills
 function hasFills(node: SceneNode): boolean {
@@ -362,7 +344,8 @@ function analyzeSingleNode(
     });
         
     // Analyze styles (always check styles regardless of being inside a DS component)
-    const nonCompliantColors = analyzeNodeColors(node, stylesData);
+    const violations: Violation[] = [];
+    const nonCompliantColors = analyzeNodeColors(node, stylesData, violations);
     const nonCompliantFonts = analyzeNodeFonts(node, stylesData);
     const nonCompliantEffects = analyzeNodeEffects(node, stylesData);
     
@@ -459,7 +442,8 @@ function analyzeSingleNode(
       nonDsComponents,
       totalLayers,
       dsComponentsUsed,
-      hiddenComponentsUsed
+      hiddenComponentsUsed,
+      violations
     };
   } catch (error) {
     console.error('Erro ao analisar nó:', error);
@@ -470,7 +454,8 @@ function analyzeSingleNode(
       nonDsComponents: 0,
       totalLayers: 0,
       dsComponentsUsed: 0,
-      hiddenComponentsUsed: 0
+      hiddenComponentsUsed: 0,
+      violations: []
     };
   }
 }
@@ -520,6 +505,7 @@ export function analyzeNode(
             result.dsComponentsUsed += childResult.dsComponentsUsed;
           }
           result.hiddenComponentsUsed += childResult.hiddenComponentsUsed;
+          result.violations.push(...childResult.violations);
         } catch (error) {
           console.error('Erro ao analisar nó filho:', error);
         }
@@ -598,7 +584,8 @@ export async function analyzeFrame(
       fonts: analysis.nonCompliantFonts,
       effects: analysis.nonCompliantEffects,
       components: analysis.nonDsComponents
-    }
+    },
+    violations: analysis.violations
   };
 }
 
