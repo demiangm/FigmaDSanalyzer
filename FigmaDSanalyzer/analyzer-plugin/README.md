@@ -10,18 +10,18 @@ Ele calcula a cobertura e adiciona um **cartão de cobertura** ao lado de cada f
 
 Um design system só gera valor quando é efetivamente utilizado. Como todo projeto começa na etapa de Design e segue para o time de Desenvolvimento, se o designer não estiver aplicando corretamente o **Prisma**, o desenvolvedor também terá dificuldades para utilizá-lo — ou precisará devolver o projeto para que o designer faça os ajustes necessários.
 
-Esses problemas acontecem porque, na etapa de *handoff*, não fica claro se o design system está sendo utilizado, onde ele não está sendo aplicado ou se está sendo usado corretamente.
+Esses problemas acontecem porque, na etapa de *handoff*, não fica claro se o design system está sendo utilizado, onde não está sendo aplicado ou se está sendo usado corretamente.
 
-Para resolver essas questões, este plugin permite que os designers verifiquem a **cobertura do design system** antes do *handoff*, apresentando visualmente os resultados.
+Para resolver essas questões, este plugin permite que os designers verifiquem a **cobertura do design system** antes do *handoff*, apresentando os resultados de forma visual.
 
 ### Benefícios:
-- **Designers** – recebem uma validação instantânea sobre a coesão e a aderência dos seus designs ao **Prisma Design System**.
+- **Designers** – recebem uma validação instantânea sobre a coesão e a aderência dos seus designs ao **Prisma**.
 - **Desenvolvedores** – conseguem identificar rapidamente o que está em conformidade com o Prisma e o que precisa de ajustes, otimizando o planejamento e a entrega das funcionalidades.
 
 ## ⚙️ O que o plugin faz?
 
 A partir de cada frame selecionado, o plugin:
-1. Escaneia recursivamente as camadas internas.
+1. Escaneia recursivamente todas as camadas internas dos frames selecionados.
 2. Calcula as métricas de uso do design system.
 3. Renderiza um **cartão de cobertura** ao lado de cada frame, indicando:
    - ✅ Porcentagem de cobertura
@@ -42,6 +42,7 @@ A partir de cada frame selecionado, o plugin:
 - **Componentes**: Número total de instâncias de componentes do Prisma utilizados a partir da biblioteca oficial.
 - **Porcentagem de cobertura**:
   Calculada da seguinte forma:
+  **Fórmula:**
   `(Total de Elementos do DS / (Total de Camadas + Estilos fora do DS)) × 100`
 
 ### Interpretação da cobertura:
@@ -51,7 +52,7 @@ A partir de cada frame selecionado, o plugin:
 - **> 90%** → _Ótima_ – o design está no nível esperado, pode seguir sem problemas.
 
 ### Itens fora do DS
-- **Componentes**: Número de componentes que **não** são do Prisma – ou seja, componentes locais ou de outras bibliotecas.
+- **Componentes**: Número de componentes que **não** são do Prisma – ou seja de outras bibliotecas.
 - **Fontes**: Número de estilos tipográficos que **não** são do Prisma.
 - **Cores**: Número de estilos de cor que **não** são do Prisma.
 - **Efeitos**: Número de efeitos que **não** são do Prisma.
