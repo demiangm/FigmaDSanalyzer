@@ -9,6 +9,7 @@ const EXCLUDED_NODE_TYPES = [
   'GROUP',
   'VECTOR',
   'ELLIPSE',
+  'LINE',
   'COMPONENT',  // Main component definition
   'COMPONENT_SET'  // Component variants container
 ];
@@ -23,7 +24,15 @@ const IGNORED_FRAME_NAMES = [
 const IGNORED_NAME_PREFIXES = [
   'Native/',
   'iOS/',
-  'Android/'
+  'Android/',
+  'Assets.'
+];
+
+// Palavras-chave para ignorar análise de estilos em componentes do DS
+const IGNORE_STYLE_KEYWORDS = [
+  'ignore-ds-styles',
+  'ilustração',
+  // Adicione outras palavras-chave aqui
 ];
 
 function hasIgnoredPrefix(name: string): boolean {
@@ -150,24 +159,46 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
       // Handle rich text with multiple segments
       if (textNode.textStyleId && typeof textNode.textStyleId !== 'string') {
         // For rich text, check each segment's style
-        const styleIds = Object.values(textNode.textStyleId);
-        for (const styleId of styleIds) {
-          console.log(`  Text Style:`, {
+        const styleIds = Object.values(textNode.textStyleId).filter((id): id is string => typeof id === 'string');
+        let hasNonCompliantSegment = false;
+        
+        // Se não há nenhum styleId válido, é não conforme
+        if (styleIds.length === 0) {
+          nonCompliantFonts = 1;
+          console.log(`  ❌ Texto com múltiplos estilos não conforme:`, {
             nodeId: node.id,
             nodeName: node.name,
-            styleId: styleId,
-            hasStyle: Boolean(styleId)
-        });
-        
-          if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
-            nonCompliantFonts++;
-            console.log(`  ❌ Fonte não conforme encontrada:`, {
+            reason: 'Nenhum estilo de texto aplicado'
+          });
+        } else {
+          for (const styleId of styleIds) {
+            console.log(`  Text Style:`, {
               nodeId: node.id,
               nodeName: node.name,
-              reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+              styleId: styleId,
+              hasStyle: Boolean(styleId)
             });
-        } else {
-            console.log(`  ✅ Fonte conforme`);
+            
+            if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
+              hasNonCompliantSegment = true;
+              console.log(`  ❌ Segmento não conforme encontrado:`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+              });
+            } else {
+              console.log(`  ✅ Segmento conforme`);
+            }
+          }
+          
+          // Se qualquer segmento não for conforme, conta como 1 fonte não conforme
+          if (hasNonCompliantSegment) {
+            nonCompliantFonts = 1;
+            console.log(`  ❌ Texto com múltiplos estilos não conforme:`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              reason: 'Pelo menos um segmento não usa estilo do DS'
+            });
           }
         }
       } else {
@@ -181,7 +212,7 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
         });
         
         if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
-          nonCompliantFonts++;
+          nonCompliantFonts = 1;
           console.log(`  ❌ Fonte não conforme encontrada:`, {
             nodeId: node.id,
             nodeName: node.name,
@@ -190,27 +221,6 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
         } else {
           console.log(`  ✅ Fonte conforme`);
         }
-      }
-
-      // Additional check for font families in the text content
-      try {
-        const fontNames = textNode.getRangeAllFontNames(0, textNode.characters.length);
-        if (fontNames && fontNames.length > 0) {
-          console.log(`  Fontes utilizadas:`, fontNames.map(font => font.family));
-          
-          // You might want to add a check here against allowed font families
-          const allowedFonts = ['Livelo Sans VF', 'Inter']; // Add your allowed fonts here
-          const nonCompliantFontFamilies = fontNames
-            .map(font => font.family)
-            .filter(fontFamily => !allowedFonts.includes(fontFamily));
-          
-          if (nonCompliantFontFamilies.length > 0) {
-            console.log(`  ❌ Fontes não permitidas encontradas:`, nonCompliantFontFamilies);
-            nonCompliantFonts += nonCompliantFontFamilies.length;
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao verificar famílias de fonte:', error);
       }
     }
   } catch (error) {
@@ -339,11 +349,16 @@ function hasAppliedStyles(node: SceneNode): boolean {
   return false;
 }
 
+function shouldIgnoreStylesByDescription(description?: string): boolean {
+  if (!description) return false;
+  return IGNORE_STYLE_KEYWORDS.some(keyword => description.toLowerCase().includes(keyword.toLowerCase()));
+}
+
 // Versão assíncrona de analyzeSingleNode
 async function analyzeSingleNodeAsync(
-  node: SceneNode,
+  node: SceneNode, 
   componentsData: ComponentData[],
-  stylesData: StylesData[],
+  stylesData: StylesData[], 
   isTopLevel: boolean = true,
   isInsideDsComponent: boolean = false
 ): Promise<AnalysisResult & { shouldSkipChildren?: boolean }> {
@@ -361,36 +376,45 @@ async function analyzeSingleNodeAsync(
       };
     }
     processedNodes.add(node.id);
+    let nonCompliantColors = 0;
+    let nonCompliantFonts = 0;
+    let nonCompliantEffects = 0;
+    let nonDsComponents = 0;
+    let totalLayers = 0;
+    let dsComponentsUsed = 0;
+    let hiddenComponentsUsed = 0;
     if (node.type === 'INSTANCE') {
       const instance = node as InstanceNode;
       const mainComponent = await instance.getMainComponentAsync();
       const isExternalLibrary = mainComponent && mainComponent.remote === true;
+      const componentStatus = await isComponentFromDSAsync(node, componentsData);
+      // Nova regra: ignorar estilos se descrição do componente do DS contiver palavra-chave
+      if (componentStatus.isFromDS && mainComponent && shouldIgnoreStylesByDescription(mainComponent.description)) {
+        return {
+          nonCompliantColors: 0,
+          nonCompliantFonts: 0,
+          nonCompliantEffects: 0,
+          nonDsComponents: 0,
+          totalLayers: 1,
+          dsComponentsUsed: 1,
+          hiddenComponentsUsed: 0,
+          shouldSkipChildren: true
+        };
+      }
       if (isExternalLibrary && hasIgnoredPrefix(node.name)) {
         return {
           nonCompliantColors: 0,
           nonCompliantFonts: 0,
           nonCompliantEffects: 0,
           nonDsComponents: 0,
-          totalLayers: 0,
+          totalLayers: 1,
           dsComponentsUsed: 0,
           hiddenComponentsUsed: 0,
           shouldSkipChildren: true
         };
       }
-    }
-    const nonCompliantColors = analyzeNodeColors(node, stylesData);
-    const nonCompliantFonts = analyzeNodeFonts(node, stylesData);
-    const nonCompliantEffects = analyzeNodeEffects(node, stylesData);
-    let totalLayers = 0;
-    let dsComponentsUsed = 0;
-    let nonDsComponents = 0;
-    let hiddenComponentsUsed = 0;
-    if (node.type === 'INSTANCE') {
-      const componentStatus = await isComponentFromDSAsync(node, componentsData);
-      const instance = node as InstanceNode;
-      const mainComponent = await instance.getMainComponentAsync();
+      // Lógica de análise para instâncias
       const isLocalComponent = mainComponent && mainComponent.remote === false && !componentStatus.isFromDS;
-      const isExternalLibrary = mainComponent && mainComponent.remote === true;
       if (componentStatus.isFromDS) {
         if (componentStatus.isHidden) {
           hiddenComponentsUsed = 1;
@@ -412,6 +436,10 @@ async function analyzeSingleNodeAsync(
           totalLayers = 1;
         }
       }
+      // Análise de estilos
+      nonCompliantColors = analyzeNodeColors(node, stylesData);
+      nonCompliantFonts = analyzeNodeFonts(node, stylesData);
+      nonCompliantEffects = analyzeNodeEffects(node, stylesData);
     } else {
       const shouldCountAsLayer = !EXCLUDED_NODE_TYPES.includes(node.type) &&
         !isTopLevel &&
@@ -434,6 +462,10 @@ async function analyzeSingleNodeAsync(
           }
         }
       }
+      // Análise de estilos
+      nonCompliantColors = analyzeNodeColors(node, stylesData);
+      nonCompliantFonts = analyzeNodeFonts(node, stylesData);
+      nonCompliantEffects = analyzeNodeEffects(node, stylesData);
     }
     return {
       nonCompliantColors,
