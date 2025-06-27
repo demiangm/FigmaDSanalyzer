@@ -1,7 +1,7 @@
 # 🧩 PrismaScope
 
 Desenvolvemos um plugin para Figma que analisa a **cobertura do Prisma Design System** nas entregas de design.
-Ele calcula a cobertura e adiciona um **cartão de cobertura** ao lado de cada frame com as métricas encontradas.
+Ele calcula a cobertura e adiciona um **cartão** ao lado de cada frame com as métricas encontradas.
 
 ![Prisma-coverage-cover](./assets/Capa.png)
 
@@ -10,7 +10,7 @@ Ele calcula a cobertura e adiciona um **cartão de cobertura** ao lado de cada f
 
 Um design system só gera valor quando é efetivamente utilizado. Como todo projeto começa na etapa de Design e segue para o time de Desenvolvimento, se o designer não estiver aplicando corretamente o **Prisma**, o desenvolvedor também terá dificuldades para utilizá-lo — ou precisará devolver o projeto para que o designer faça os ajustes necessários.
 
-Esses problemas acontecem porque, na etapa de *handoff*, não fica claro se o design system está sendo utilizado, onde não está sendo aplicado ou se está sendo usado corretamente.
+Esses problemas acontecem porque, na etapa de *handoff*, não fica claro se o design system está sendo utilizado e onde não está sendo aplicado.
 
 Para resolver essas questões, este plugin permite que os designers verifiquem a **cobertura do design system** antes do *handoff*, apresentando os resultados de forma visual.
 
@@ -42,7 +42,7 @@ A partir de cada frame selecionado, o plugin:
 - **Componentes**: Número total de instâncias de componentes do Prisma utilizados a partir da biblioteca oficial.
 - **Porcentagem de cobertura**:
   Calculada da seguinte forma:
-  **Fórmula:**
+  **Fórmula:**<br>
   `(Total de Elementos do DS / (Total de Camadas + Estilos fora do DS)) × 100`
 
 ### Interpretação da cobertura:
@@ -59,18 +59,18 @@ A partir de cada frame selecionado, o plugin:
 
 ## ▶️ Como usar
 
-1. **Abra seu arquivo no Figma**
+1. **Abra seu arquivo no Figma**<br>
    Acesse o arquivo de design que deseja analisar.
 
-2. **Selecione os frames que deseja verificar**
+2. **Selecione os frames que deseja verificar**<br>
    Você pode selecionar um ou mais frames de nível superior na página.
 
-3. **Execute o plugin PrismaScope**
+3. **Execute o plugin PrismaScope**<br>
    Vá até o menu do Figma:
    `Menu > Plugins > PrismaScope`
 
-4. **Visualize os cartões de cobertura**
+4. **Visualize os cartões de cobertura**<br>
    O plugin irá escanear os frames selecionados, calcular a cobertura do Prisma Design System e exibir um **cartão de cobertura** ao lado de cada frame.
 
-5. **Revise os destaques visuais**
+5. **Revise os destaques visuais**<br>
    Elementos que **não utilizam o Prisma** serão destacados com bordas, facilitando a identificação de inconsistências.

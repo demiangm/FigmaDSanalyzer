@@ -1,6 +1,6 @@
 /// <reference types="@figma/plugin-typings" />
 import { AnalysisResult, ComplianceReport, ComponentData, StylesData } from './types';
-import { analyzeNode, analyzeFrame } from './analyzer';
+import { analyzeFrame } from './analyzer';
 import { loadDataFiles } from './dataLoader';
 
 // Show the plugin UI
@@ -318,7 +318,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
 
   // Retângulo com gradiente
   const gradientRect = figma.createRectangle();
-  gradientRect.resize(432, 43);
+  gradientRect.resize(864, 43);
   gradientRect.cornerRadius = 0;
   gradientRect.fills = [{
     type: 'GRADIENT_LINEAR',
@@ -328,10 +328,14 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
     ],
     gradientStops: [
       { position: 0.0003, color: { r: 0.502, g: 0.82, b: 0.188, a: 1 } },    // #80D130
-      { position: 0.4988, color: { r: 1, g: 0.624, b: 0.039, a: 1 } },       // #FF9F0A
+      { position: 0.4, color: { r: 0.82, g: 0.82, b: 0.188, a: 1 } },        // #D1D130
+      { position: 0.6997, color: { r: 1, g: 0.624, b: 0.039, a: 1 } },       // #FF9F0A
       { position: 0.9991, color: { r: 1, g: 0.2, b: 0, a: 1 } }              // #F30
     ]
   }];
+  // Posiciona o gradiente conforme a cobertura
+  const gradientX = -432 * (report.coveragePercentage / 100);
+  gradientRect.x = gradientX;
 
   progressBar.appendChild(gradientRect);
   progressBar.clipsContent = true;
