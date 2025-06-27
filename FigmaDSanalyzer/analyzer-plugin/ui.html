@@ -358,6 +358,21 @@
 
     // Inicialização
     parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
+
+    // Handler para mensagens do backend
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+      if (msg.type === 'error') {
+        const errorDiv = document.getElementById('errorMessage');
+        if (errorDiv) {
+          errorDiv.textContent = 'Erro na análise: ' + msg.message;
+          errorDiv.classList.remove('hidden');
+        } else {
+          alert('Erro na análise: ' + msg.message);
+        }
+      }
+    };
   </script>
 </body>
 </html>

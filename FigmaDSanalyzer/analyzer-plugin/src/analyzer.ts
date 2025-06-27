@@ -268,22 +268,20 @@ function hasEffects(node: SceneNode): boolean {
   return false;
 }
 
-function isComponentFromDS(node: SceneNode, componentsData: ComponentData[]): { isFromDS: boolean; isHidden: boolean } {
+// Torna isComponentFromDS assíncrona e usa getMainComponentAsync
+async function isComponentFromDSAsync(node: SceneNode, componentsData: ComponentData[]): Promise<{ isFromDS: boolean; isHidden: boolean }> {
   try {
     if (node.type === 'INSTANCE') {
       const instance = node as InstanceNode;
-      const mainComponent = instance.mainComponent;
-      
+      const mainComponent = await instance.getMainComponentAsync();
       if (mainComponent) {
         let foundComponent: { isFromDS: boolean; isHidden: boolean } = { isFromDS: false, isHidden: false };
-        
-        componentsData.some(data => 
+        componentsData.some(data =>
           Object.entries(data.components || {}).some(([name, comp]) => {
             try {
               const matchVariant = comp.key === mainComponent.key;
-              const matchParent = mainComponent.parent?.type === 'COMPONENT_SET' && 
-                                comp.key === (mainComponent.parent as ComponentSetNode).key;
-              
+              const matchParent = mainComponent.parent?.type === 'COMPONENT_SET' &&
+                comp.key === (mainComponent.parent as ComponentSetNode).key;
               if (matchVariant || matchParent) {
                 foundComponent = {
                   isFromDS: true,
@@ -298,7 +296,6 @@ function isComponentFromDS(node: SceneNode, componentsData: ComponentData[]): { 
             }
           })
         );
-        
         return foundComponent;
       }
     }
@@ -342,15 +339,15 @@ function hasAppliedStyles(node: SceneNode): boolean {
   return false;
 }
 
-function analyzeSingleNode(
-  node: SceneNode, 
-  componentsData: ComponentData[], 
-  stylesData: StylesData[], 
+// Versão assíncrona de analyzeSingleNode
+async function analyzeSingleNodeAsync(
+  node: SceneNode,
+  componentsData: ComponentData[],
+  stylesData: StylesData[],
   isTopLevel: boolean = true,
   isInsideDsComponent: boolean = false
-): AnalysisResult & { shouldSkipChildren?: boolean } {
+): Promise<AnalysisResult & { shouldSkipChildren?: boolean }> {
   try {
-    // Skip if node was already processed
     if (processedNodes.has(node.id)) {
       return {
         nonCompliantColors: 0,
@@ -363,20 +360,12 @@ function analyzeSingleNode(
         shouldSkipChildren: false
       };
     }
-
     processedNodes.add(node.id);
-
-    // Se for instância de biblioteca externa e nome tem prefixo ignorado, ignora totalmente (antes de qualquer análise)
     if (node.type === 'INSTANCE') {
       const instance = node as InstanceNode;
-      const mainComponent = instance.mainComponent;
+      const mainComponent = await instance.getMainComponentAsync();
       const isExternalLibrary = mainComponent && mainComponent.remote === true;
       if (isExternalLibrary && hasIgnoredPrefix(node.name)) {
-        console.log(`  ➖ Instância de biblioteca externa ignorada por prefixo:`, {
-          nodeId: node.id,
-          nodeName: node.name
-        });
-        // Retorna imediatamente, não processa children nem estilos
         return {
           nonCompliantColors: 0,
           nonCompliantFonts: 0,
@@ -389,148 +378,63 @@ function analyzeSingleNode(
         };
       }
     }
-    
-    console.log(`\n📍 Analisando nó: ${node.name} (${node.type})`, {
-      nodeId: node.id,
-      isTopLevel,
-      isInsideDsComponent
-    });
-        
-    // Analyze styles (always check styles regardless of being inside a DS component)
     const nonCompliantColors = analyzeNodeColors(node, stylesData);
     const nonCompliantFonts = analyzeNodeFonts(node, stylesData);
     const nonCompliantEffects = analyzeNodeEffects(node, stylesData);
-    
     let totalLayers = 0;
     let dsComponentsUsed = 0;
     let nonDsComponents = 0;
     let hiddenComponentsUsed = 0;
-    
-    // Check if this node is a component instance
     if (node.type === 'INSTANCE') {
-      const componentStatus = isComponentFromDS(node, componentsData);
+      const componentStatus = await isComponentFromDSAsync(node, componentsData);
       const instance = node as InstanceNode;
-      const mainComponent = instance.mainComponent;
+      const mainComponent = await instance.getMainComponentAsync();
       const isLocalComponent = mainComponent && mainComponent.remote === false && !componentStatus.isFromDS;
       const isExternalLibrary = mainComponent && mainComponent.remote === true;
-      
       if (componentStatus.isFromDS) {
         if (componentStatus.isHidden) {
           hiddenComponentsUsed = 1;
           if (!isInsideDsComponent) {
             nonDsComponents = 1;
-            totalLayers = 1; // Count hidden components as layers when used directly
-            console.log(`  ❌ Componente oculto usado diretamente:`, {
-              nodeId: node.id,
-              nodeName: node.name,
-              reason: 'Componente oculto deve ser usado apenas dentro de outros componentes'
-            });
-          } else {
-            console.log(`  ℹ️ Componente oculto encontrado (dentro de componente DS):`, {
-              nodeId: node.id,
-              nodeName: node.name
-          });
+            totalLayers = 1;
           }
         } else if (!isInsideDsComponent) {
           dsComponentsUsed = 1;
-          totalLayers = 1; // Count DS components as one layer
-          console.log(`  ✅ Componente do DS encontrado:`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            totalLayers,
-            dsComponentsUsed
-          });
-        } else {
-          console.log(`  ℹ️ Componente DS aninhado encontrado (não contabilizado):`, {
-            nodeId: node.id,
-            nodeName: node.name
-          });
+          totalLayers = 1;
         }
       } else if (isLocalComponent) {
-        // Só conta como layer se tiver estilo aplicado
         if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel && hasAppliedStyles(node)) {
           totalLayers = 1;
-          console.log(`  🏠 Instância local contabilizada como frame (tem estilo):`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            totalLayers
-          });
-        } else {
-          console.log(`  🏠 Instância local NÃO contabilizada (sem estilo ou ignorada):`, {
-            nodeId: node.id,
-            nodeName: node.name
-          });
         }
       } else {
         nonDsComponents = 1;
-        // Count non-DS, non-local instances as regular layers
         if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel) {
           totalLayers = 1;
-          console.log(`  ❌ Componente não conforme contabilizado como layer:`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            totalLayers
-          });
         }
       }
     } else {
-      // For non-instance nodes, count as layer if not excluded
-      const shouldCountAsLayer = !EXCLUDED_NODE_TYPES.includes(node.type) && 
-                               !isTopLevel && 
-                               !IGNORED_FRAME_NAMES.includes(node.name) &&
-                               !isInsideDsComponent && // Don't count layers inside DS components
-                               // Only count FRAME if it has styles applied
-                               (node.type !== 'FRAME' || hasAppliedStyles(node));
-      
+      const shouldCountAsLayer = !EXCLUDED_NODE_TYPES.includes(node.type) &&
+        !isTopLevel &&
+        !IGNORED_FRAME_NAMES.includes(node.name) &&
+        !isInsideDsComponent &&
+        (node.type !== 'FRAME' || hasAppliedStyles(node));
       if (shouldCountAsLayer) {
         totalLayers = 1;
-        // Se for TEXT e estiver com estilo correto do DS, conta como dsComponentsUsed
         if (node.type === 'TEXT') {
           const textNode = node as TextNode;
           let isCompliant = false;
           if (textNode.textStyleId && typeof textNode.textStyleId === 'string') {
             isCompliant = isStyleInDesignSystem(textNode.textStyleId, 'textStyles', stylesData);
           } else if (textNode.textStyleId && typeof textNode.textStyleId === 'object') {
-            // Rich text: todos os segmentos precisam ser do DS
             const styleIds = Object.values(textNode.textStyleId).filter((id): id is string => typeof id === 'string');
             isCompliant = styleIds.length > 0 && styleIds.every(styleId => styleId && isStyleInDesignSystem(styleId, 'textStyles', stylesData));
           }
           if (isCompliant) {
             dsComponentsUsed = 1;
-            console.log(`  ✅ Texto conforme DS contabilizado como componente do DS`, {
-              nodeId: node.id,
-              nodeName: node.name
-            });
-          } else {
-            console.log(`  ➕ Layer de texto contabilizada (não conforme DS)`, {
-              nodeId: node.id,
-              nodeName: node.name
-            });
           }
-        } else {
-          console.log(`  ➕ Layer contabilizada:`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            type: node.type,
-            totalLayers,
-            hasStyles: node.type === 'FRAME' ? hasAppliedStyles(node) : 'N/A'
-          });
         }
-      } else {
-        console.log(`  ➖ Layer não contabilizada:`, {
-          nodeId: node.id,
-          nodeName: node.name,
-          type: node.type,
-          reason: EXCLUDED_NODE_TYPES.includes(node.type) ? 'Tipo excluído' :
-                 isTopLevel ? 'Nó de topo' :
-                 IGNORED_FRAME_NAMES.includes(node.name) ? 'Nome ignorado' :
-                 node.type === 'FRAME' && !hasAppliedStyles(node) ? 'Frame sem estilos' :
-                 isInsideDsComponent ? 'Dentro de componente DS' :
-                 'Outro'
-        });
       }
     }
-
     return {
       nonCompliantColors,
       nonCompliantFonts,
@@ -542,7 +446,11 @@ function analyzeSingleNode(
       shouldSkipChildren: false
     };
   } catch (error) {
-    console.error('Erro ao analisar nó:', error);
+    // Envia erro para a UI se disponível
+    if (typeof figma !== 'undefined' && figma.ui) {
+      figma.ui.postMessage({ type: 'error', message: error instanceof Error ? error.message : String(error) });
+    }
+    console.error('Erro ao analisar nó (async):', error);
     return {
       nonCompliantColors: 0,
       nonCompliantFonts: 0,
@@ -556,65 +464,58 @@ function analyzeSingleNode(
   }
 }
 
-export function analyzeNode(
-  node: SceneNode, 
-  componentsData: ComponentData[], 
+// Versão assíncrona recursiva de analyzeNode
+export async function analyzeNodeAsync(
+  node: SceneNode,
+  componentsData: ComponentData[],
   stylesData: StylesData[],
   skipComponentAnalysis: boolean = false,
   isTopLevel: boolean = true,
   isInsideDsComponent: boolean = false
-): AnalysisResult {
+): Promise<AnalysisResult> {
   try {
-    // Clear the processed nodes set at the start of a new analysis
     if (isTopLevel) {
       processedNodes.clear();
     }
-
-    // Analyze current node
-    const result = analyzeSingleNode(node, componentsData, stylesData, isTopLevel, isInsideDsComponent);
-    
-    // Se o nó deve ser ignorado junto com os filhos, retorna já
+    const result = await analyzeSingleNodeAsync(node, componentsData, stylesData, isTopLevel, isInsideDsComponent);
     if (result.shouldSkipChildren) {
       return result;
     }
-    
-    // If this is a DS component instance, mark that we're inside a DS component
     const isDsComponent = result.dsComponentsUsed > 0;
-    
-    // Recursively analyze children - always analyze children to count all DS components
     if ('children' in node && node.children) {
       for (const child of node.children) {
         try {
-          const childResult = analyzeNode(
-            child, 
-            componentsData, 
-            stylesData, 
-            skipComponentAnalysis, 
+          const childResult = await analyzeNodeAsync(
+            child,
+            componentsData,
+            stylesData,
+            skipComponentAnalysis,
             false,
             isInsideDsComponent || isDsComponent
           );
-
-          // Add results from children
           result.nonCompliantColors += childResult.nonCompliantColors;
           result.nonCompliantFonts += childResult.nonCompliantFonts;
           result.nonCompliantEffects += childResult.nonCompliantEffects;
           result.nonDsComponents += childResult.nonDsComponents;
-          
-          // If this is not a DS component, add child layers and components
           if (!isDsComponent) {
             result.totalLayers += childResult.totalLayers;
             result.dsComponentsUsed += childResult.dsComponentsUsed;
           }
           result.hiddenComponentsUsed += childResult.hiddenComponentsUsed;
         } catch (error) {
-          console.error('Erro ao analisar nó filho:', error);
+          if (typeof figma !== 'undefined' && figma.ui) {
+            figma.ui.postMessage({ type: 'error', message: error instanceof Error ? error.message : String(error) });
+          }
+          console.error('Erro ao analisar nó filho (async):', error);
         }
       }
     }
-    
     return result;
   } catch (error) {
-    console.error('Erro ao analisar nó:', error);
+    if (typeof figma !== 'undefined' && figma.ui) {
+      figma.ui.postMessage({ type: 'error', message: error instanceof Error ? error.message : String(error) });
+    }
+    console.error('Erro ao analisar nó (async):', error);
     throw error;
   }
 }
@@ -636,56 +537,49 @@ function isStyleInDesignSystem(
   });
 }
 
+// Versão assíncrona de analyzeFrame
 export async function analyzeFrame(
   frame: FrameNode,
   componentsData: ComponentData[],
   stylesData: StylesData[]
 ): Promise<ComplianceReport> {
-  // Analyze the frame and all its children
-  const analysis = analyzeNode(frame, componentsData, stylesData, false, true);
-
-  // Calculate coverage percentage - penalize by non-compliant styles
-  const validLayers = analysis.totalLayers;
-  const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects) > 0
-    ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects)) * 100
-    : 0;
-
-  // Determine coverage level based on new thresholds
-  let coverageLevel: { emoji: string; label: string };
-  if (coveragePercentage < 50) {
-    coverageLevel = { emoji: "🚧", label: "Muito baixa" };
-  } else if (coveragePercentage < 70) {
-    coverageLevel = { emoji: "🚩️", label: "Baixa" };
-  } else if (coveragePercentage < 90) {
-    coverageLevel = { emoji: "✅", label: "Boa" };
-  } else {
-    coverageLevel = { emoji: "🎉", label: "Ótima" };
-  }
-
-  console.log('[DEBUG] Cálculo de cobertura:', {
-    validLayers,
-    dsComponentsUsed: analysis.dsComponentsUsed,
-    nonCompliantColors: analysis.nonCompliantColors,
-    nonCompliantFonts: analysis.nonCompliantFonts,
-    nonCompliantEffects: analysis.nonCompliantEffects,
-    coveragePercentage
-  });
-
-  return {
-    frameName: frame.name,
-    frameId: frame.id,
-    totalLayers: validLayers,
-    dsComponentsUsed: analysis.dsComponentsUsed,
-    hiddenComponentsUsed: analysis.hiddenComponentsUsed,
-    coveragePercentage: Math.round(coveragePercentage),
-    coverageLevel,
-    nonCompliantItems: {
-      colors: analysis.nonCompliantColors,
-      fonts: analysis.nonCompliantFonts,
-      effects: analysis.nonCompliantEffects,
-      components: analysis.nonDsComponents
+  try {
+    const analysis = await analyzeNodeAsync(frame, componentsData, stylesData, false, true);
+    const validLayers = analysis.totalLayers;
+    const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects) > 0
+      ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects)) * 100
+      : 0;
+    let coverageLevel: { emoji: string; label: string };
+    if (coveragePercentage < 50) {
+      coverageLevel = { emoji: "🚧", label: "Muito baixa" };
+    } else if (coveragePercentage < 70) {
+      coverageLevel = { emoji: "🚩️", label: "Baixa" };
+    } else if (coveragePercentage < 90) {
+      coverageLevel = { emoji: "✅", label: "Boa" };
+    } else {
+      coverageLevel = { emoji: "🎉", label: "Ótima" };
     }
-  };
+    return {
+      frameName: frame.name,
+      frameId: frame.id,
+      totalLayers: validLayers,
+      dsComponentsUsed: analysis.dsComponentsUsed,
+      hiddenComponentsUsed: analysis.hiddenComponentsUsed,
+      coveragePercentage: Math.round(coveragePercentage),
+      coverageLevel,
+      nonCompliantItems: {
+        colors: analysis.nonCompliantColors,
+        fonts: analysis.nonCompliantFonts,
+        effects: analysis.nonCompliantEffects,
+        components: analysis.nonDsComponents
+      }
+    };
+  } catch (error) {
+    if (typeof figma !== 'undefined' && figma.ui) {
+      figma.ui.postMessage({ type: 'error', message: error instanceof Error ? error.message : String(error) });
+    }
+    throw error;
+  }
 }
 
 // Helper function to count nodes that should be excluded from the layer count

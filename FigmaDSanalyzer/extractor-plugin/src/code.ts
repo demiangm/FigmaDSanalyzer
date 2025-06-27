@@ -30,6 +30,8 @@ figma.ui.onmessage = async (msg) => {
 };
 
 async function extractDesignSystemData() {
+  await figma.loadAllPagesAsync();
+
   const componentsFile: {
     metadata: { extractedAt: string; fileName: string };
     components: Record<string, { key: string; isHidden?: boolean }>;
@@ -104,17 +106,20 @@ async function extractDesignSystemData() {
   componentsFile.components = componentEntries;
 
   // Extrai estilos
-  for (const style of figma.getLocalPaintStyles()) {
+  const paintStyles = await figma.getLocalPaintStylesAsync();
+  for (const style of paintStyles) {
     stylesFile.colorStyles[style.name] = `Key:${style.key}`;
   }
 
-  for (const style of figma.getLocalTextStyles()) {
+  const textStyles = await figma.getLocalTextStylesAsync();
+  for (const style of textStyles) {
     const cleanId = style.id.replace(/,+$/, '');
     console.log(`TextStyle: ${style.name} => "${cleanId}"`);
     stylesFile.textStyles[style.name] = cleanId;
   }
 
-  for (const style of figma.getLocalEffectStyles()) {
+  const effectStyles = await figma.getLocalEffectStylesAsync();
+  for (const style of effectStyles) {
     const cleanId = style.id.trim().replace(/,+$/, '');
     console.log(`EffectStyle: ${style.name} => "${cleanId}"`);
     stylesFile.effectStyles[style.name] = cleanId;
