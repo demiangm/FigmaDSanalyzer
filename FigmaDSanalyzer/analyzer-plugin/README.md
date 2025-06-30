@@ -74,3 +74,9 @@ A partir de cada frame selecionado, o plugin:
 
 5. **Revise os destaques visuais**<br>
    Elementos que **não utilizam o Prisma** serão destacados com bordas, facilitando a identificação de inconsistências.
+
+## TODO
+
+- Verficar bilbiotecas ativas no arquivo antes da análise
+- Analisar tokens alterados nos componentes do DS (Overrides)
+- Alterar a interface mostrando elementos com problemas (Parecido com o Lint)
