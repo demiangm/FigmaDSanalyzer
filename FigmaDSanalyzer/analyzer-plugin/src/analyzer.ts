@@ -390,6 +390,7 @@ async function analyzeSingleNodeAsync(
       const componentStatus = await isComponentFromDSAsync(node, componentsData);
       // Nova regra: ignorar estilos se descrição do componente do DS contiver palavra-chave
       if (componentStatus.isFromDS && mainComponent && shouldIgnoreStylesByDescription(mainComponent.description)) {
+        console.log('ℹ️ Componente DS aninhado encontrado (não contabilizado):', node);
         return {
           nonCompliantColors: 0,
           nonCompliantFonts: 0,
@@ -402,6 +403,7 @@ async function analyzeSingleNodeAsync(
         };
       }
       if (isExternalLibrary && hasIgnoredPrefix(node.name)) {
+        console.log('➖ Instância de biblioteca externa ignorada por prefixo:', node);
         return {
           nonCompliantColors: 0,
           nonCompliantFonts: 0,
@@ -417,29 +419,43 @@ async function analyzeSingleNodeAsync(
       const isLocalComponent = mainComponent && mainComponent.remote === false && !componentStatus.isFromDS;
       if (componentStatus.isFromDS) {
         if (componentStatus.isHidden) {
+          console.log('ℹ️ Componente oculto encontrado (dentro de componente DS):', node);
           hiddenComponentsUsed = 1;
           if (!isInsideDsComponent) {
             nonDsComponents = 1;
             totalLayers = 1;
+            console.log('➕ Layer contabilizada:', node);
           }
         } else if (!isInsideDsComponent) {
           dsComponentsUsed = 1;
           totalLayers = 1;
+          console.log('✅ Componente do DS encontrado:', node);
+        } else {
+          console.log('ℹ️ Componente DS aninhado encontrado (não contabilizado):', node);
         }
       } else if (isLocalComponent) {
         if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel && hasAppliedStyles(node)) {
           totalLayers = 1;
+          console.log('➕ Layer contabilizada:', node);
+        } else {
+          console.log('➖ Layer não contabilizada:', node);
         }
       } else {
         nonDsComponents = 1;
         if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel) {
           totalLayers = 1;
+          console.log('➕ Layer contabilizada:', node);
+        } else {
+          console.log('➖ Layer não contabilizada:', node);
         }
       }
       // Análise de estilos
       nonCompliantColors = analyzeNodeColors(node, stylesData);
       nonCompliantFonts = analyzeNodeFonts(node, stylesData);
       nonCompliantEffects = analyzeNodeEffects(node, stylesData);
+      if (nonCompliantFonts > 0) {
+        console.log('❌ Fontes não permitidas encontradas:', node);
+      }
     } else {
       const shouldCountAsLayer = !EXCLUDED_NODE_TYPES.includes(node.type) &&
         !isTopLevel &&
@@ -459,13 +475,23 @@ async function analyzeSingleNodeAsync(
           }
           if (isCompliant) {
             dsComponentsUsed = 1;
+            console.log('✅ Texto conforme DS contabilizado como componente do DS', node);
+          } else {
+            console.log('➕ Layer de texto contabilizada (não conforme DS):', node);
           }
+        } else {
+          console.log('➕ Layer contabilizada:', node);
         }
+      } else {
+        console.log('➖ Layer não contabilizada:', node);
       }
       // Análise de estilos
       nonCompliantColors = analyzeNodeColors(node, stylesData);
       nonCompliantFonts = analyzeNodeFonts(node, stylesData);
       nonCompliantEffects = analyzeNodeEffects(node, stylesData);
+      if (nonCompliantFonts > 0) {
+        console.log('❌ Fontes não permitidas encontradas:', node);
+      }
     }
     return {
       nonCompliantColors,
@@ -578,8 +604,8 @@ export async function analyzeFrame(
   try {
     const analysis = await analyzeNodeAsync(frame, componentsData, stylesData, false, true);
     const validLayers = analysis.totalLayers;
-    const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects) > 0
-      ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects)) * 100
+    const coveragePercentage = (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects + analysis.nonDsComponents) > 0
+      ? (analysis.dsComponentsUsed / (validLayers + analysis.nonCompliantColors + analysis.nonCompliantFonts + analysis.nonCompliantEffects + analysis.nonDsComponents)) * 100
       : 0;
     let coverageLevel: { emoji: string; label: string };
     if (coveragePercentage < 50) {
