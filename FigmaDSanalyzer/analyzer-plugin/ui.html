@@ -4,6 +4,49 @@
   <meta charset="utf-8">
   <title>PrismaScope - Design System Compliance Analyzer</title>
   <style>
+    /* Switch customizado */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 28px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 28px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider {
+      background-color: #DF0979;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    .switch .slider {
+      box-shadow: 0 0 2px #aaa;
+    }
     body {
       margin: 0;
       padding: 0;
@@ -43,6 +86,12 @@
       color: #666;
       margin: 0;
     }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      margin: 24px 0;
+      gap: 16px;
+    }    
     .analyze-button {
       width: 100%;
       height: 48px;
@@ -53,8 +102,6 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      margin-top: 24px;
-      margin-bottom: 16px;
       transition: background-color 0.2s;
     }
 
@@ -172,7 +219,18 @@
         <p>Selecione frames ou componentes e execute uma análise para verificar a conformidade com os padrões do nosso design system.</p>
       </div>
 
-      <button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
+    <div class="button-container" style="
+    display: flex;
+    flex-direction: column;
+">
+<button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
+<div style="display: flex;align-items: center;justify-content: space-around;">
+        <label for="renderCardSwitch" style="font-size: 14px; color: #666;font-weight: 500;">Exportar resultados</label>
+        <label class="switch">
+          <input type="checkbox" id="renderCardSwitch" checked="">
+          <span class="slider"></span>
+        </label>
+      </div></div>
 
       <div id="errorMessage" class="error hidden"></div>
       <div id="resultsContainer" class="hidden"></div>
@@ -213,11 +271,12 @@
     // addColor, addFont, addPrefix, removeColor, removeFont, removePrefix e saveConfig
     // foram removidos
     function startAnalysis() {
+      const renderCardSwitch = document.getElementById('renderCardSwitch');
+      const renderCard = renderCardSwitch ? renderCardSwitch.checked : true;
       parent.postMessage({
         pluginMessage: {
-          type: 'analyze-selection'
-          // Você pode incluir a configuração do designSystem aqui se for estática ou carregada de outro lugar
-          // config: designSystem 
+          type: 'analyze-selection',
+          renderCard: renderCard
         }
       }, '*');
 

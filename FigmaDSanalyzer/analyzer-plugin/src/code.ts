@@ -31,17 +31,15 @@ figma.ui.onmessage = async (msg) => {
   try {
   switch (msg.type) {
     case 'analyze-selection':
-      await analyzeSelection();
+      await analyzeSelection(msg.renderCard);
       break;
-    
     case 'get-design-system':
       await loadDesignSystemData();
       break;
-    
     case 'close-plugin':
       figma.closePlugin();
       break;
-    }
+  }
   } catch (error) {
     console.error('Erro na execução:', error);
     figma.ui.postMessage({
@@ -85,7 +83,7 @@ async function loadDesignSystemData() {
   }
 }
 
-async function analyzeSelection() {
+async function analyzeSelection(renderCard: boolean = true) {
   const selection = figma.currentPage.selection;
   
   if (selection.length === 0) {
@@ -107,10 +105,10 @@ async function analyzeSelection() {
     if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
       const report = await analyzeFrame(node as FrameNode, componentsData, stylesData);
       reports.push(report);
-      
-      // Cria card visual no canvas
-      await createAnalysisCard(report, node as FrameNode);
-      
+      // Só cria o card se renderCard for true
+      if (renderCard && node.type === 'FRAME') {
+        await createAnalysisCard(report, node as FrameNode);
+      }
       // Envia dados detalhados para a UI
       console.log('[DEBUG] Enviando para UI:', report);
       figma.ui.postMessage({
