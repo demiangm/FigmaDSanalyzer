@@ -209,7 +209,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   versionTagFrame.opacity = 0.8;
 
   const versionTag = figma.createText();
-  versionTag.characters = "alpha.2";
+  versionTag.characters = "alpha.3";
   versionTag.fontSize = 12;
   versionTag.fontName = { family: "Inter", style: "Bold" };
   versionTag.fills = [{ type: 'SOLID', color: { r: 0.9, g: 0.2, b: 0.6 } }];
