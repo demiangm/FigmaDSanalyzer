@@ -39,10 +39,10 @@ function hasIgnoredPrefix(name: string): boolean {
   return IGNORED_NAME_PREFIXES.some(prefix => name.startsWith(prefix));
 }
 
-function analyzeNodeColors(
+async function analyzeNodeColors(
   node: SceneNode, 
   stylesData: StylesData[]
-): number {
+): Promise<number> {
   let nonCompliantColors = 0;
   
   try {
@@ -59,15 +59,56 @@ function analyzeNodeColors(
           hasStyle: true
         });
         
-        if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
-          nonCompliantColors++;
-          console.log(`  ❌ Cor não conforme encontrada (fill):`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            reason: 'Estilo não encontrado no DS'
-          });
+        // Primeiro verificar se o estilo foi alterado em relação ao componente original
+        const mainNode = await getEquivalentNodeInMain(node);
+        if (mainNode && 'fillStyleId' in mainNode) {
+          const mainStyle = (mainNode as any).fillStyleId;
+          if (mainStyle && mainStyle !== fillStyleId) {
+            // Se ambos os estilos são do DS, é uma alteração permitida mas deve ser contabilizada
+            const bothFromDS = isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData) &&
+                             isStyleInDesignSystem(mainStyle, 'colorStyles', stylesData);
+            if (bothFromDS) {
+              nonCompliantColors++;
+              console.log(`  ⚠️ Alterado para outro estilo do DS (fill):`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                de: mainStyle,
+                para: fillStyleId,
+                reason: 'Estilo alterado mas ambos são do DS'
+              });
+            } else if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+              nonCompliantColors++;
+              console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                reason: 'Estilo não encontrado no DS'
+              });
+            }
+          } else {
+            // O estilo não foi alterado, verificar se é do DS
+            if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+              nonCompliantColors++;
+              console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                reason: 'Estilo não encontrado no DS'
+              });
+            } else {
+              console.log(`  ✅ Cor conforme (fill)`);
+            }
+          }
         } else {
-          console.log(`  ✅ Cor conforme (fill)`);
+          // Não há componente principal para comparar, apenas verificar se o estilo é do DS
+          if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+            nonCompliantColors++;
+            console.log(`  ❌ Cor não conforme encontrada (fill):`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              reason: 'Estilo não encontrado no DS'
+            });
+          } else {
+            console.log(`  ✅ Cor conforme (fill)`);
+          }
         }
       } else if (hasNonImageFills(node)) {
         // If node has non-image fills but no style, count as non-compliant
@@ -91,15 +132,56 @@ function analyzeNodeColors(
           hasStyle: true
         });
         
-        if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
-          nonCompliantColors++;
-          console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            reason: 'Estilo não encontrado no DS'
-          });
+        // Verificar alterações em relação ao componente original para strokes
+        const mainNode = await getEquivalentNodeInMain(node);
+        if (mainNode && 'strokeStyleId' in mainNode) {
+          const mainStyle = (mainNode as any).strokeStyleId;
+          if (mainStyle && mainStyle !== strokeStyleId) {
+            // Se ambos os estilos são do DS, é uma alteração permitida mas deve ser contabilizada
+            const bothFromDS = isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData) &&
+                             isStyleInDesignSystem(mainStyle, 'colorStyles', stylesData);
+            if (bothFromDS) {
+              nonCompliantColors++;
+              console.log(`  ⚠️ Alterado para outro estilo do DS (stroke):`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                de: mainStyle,
+                para: strokeStyleId,
+                reason: 'Estilo alterado mas ambos são do DS'
+              });
+            } else if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+              nonCompliantColors++;
+              console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                reason: 'Estilo não encontrado no DS'
+              });
+            }
+          } else {
+            // O estilo não foi alterado, verificar se é do DS
+            if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+              nonCompliantColors++;
+              console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                reason: 'Estilo não encontrado no DS'
+              });
+            } else {
+              console.log(`  ✅ Cor conforme (stroke)`);
+            }
+          }
         } else {
-          console.log(`  ✅ Cor conforme (stroke)`);
+          // Não há componente principal para comparar, apenas verificar se o estilo é do DS
+          if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+            nonCompliantColors++;
+            console.log(`  ❌ Cor não conforme encontrada (stroke):`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              reason: 'Estilo não encontrado no DS'
+            });
+          } else {
+            console.log(`  ✅ Cor conforme (stroke)`);
+          }
         }
       } else if (hasStrokes(node)) {
         // If node has strokes but no style, count as non-compliant
@@ -146,6 +228,99 @@ function hasStrokes(node: SceneNode): boolean {
     console.error('Erro ao verificar strokes:', error);
   }
   return false;
+}
+
+// Helper function to get equivalent node in main component
+async function getEquivalentNodeInMain(node: SceneNode): Promise<SceneNode | null> {
+  try {
+    // Find all instance parents in the hierarchy
+    let current: BaseNode | null = node;
+    let nodePath: string[] = [];
+    let instances: { instance: InstanceNode; mainComponent: ComponentNode | null; path: string[] }[] = [];
+    
+    while (current && current.parent && current.type !== 'PAGE') {
+      // Collect node names in the path
+      nodePath.unshift(current.name);
+      
+      if (current.type === 'INSTANCE') {
+        const instance = current as InstanceNode;
+        const mainComponent = await instance.getMainComponentAsync();
+        if (mainComponent) {
+          instances.push({
+            instance,
+            mainComponent,
+            path: [...nodePath]
+          });
+        }
+      }
+      current = current.parent;
+    }
+    
+    if (instances.length === 0) return null;
+
+    // Se houver mais de uma instância no caminho, precisamos encontrar o estilo correto
+    // no contexto do componente pai do DS
+    for (let i = instances.length - 1; i >= 0; i--) {
+      const { instance, mainComponent, path } = instances[i];
+      
+      // Apenas logar se mainComponent não for null (já verificamos acima)
+      console.log('Buscando nó equivalente:', {
+        nodeId: node.id,
+        nodeName: node.name,
+        instanceId: instance.id,
+        instanceName: instance.name,
+        mainComponentId: mainComponent?.id || 'unknown',
+        mainComponentName: mainComponent?.name || 'unknown',
+        instanceLevel: i,
+        totalInstances: instances.length,
+        path: path
+      });
+
+      // Remove instance names from path until current instance
+      const relativePath = path.slice(path.indexOf(instance.name) + 1);
+      
+      // Recursive function to find node by name path
+      function findNodeByPath(parent: SceneNode, pathToFind: string[], currentDepth: number = 0): SceneNode | null {
+        if (currentDepth === pathToFind.length) return parent;
+        
+        if ('children' in parent) {
+          const targetName = pathToFind[currentDepth];
+          for (const child of (parent as any).children) {
+            if (child.name === targetName) {
+              const result = findNodeByPath(child, pathToFind, currentDepth + 1);
+              if (result) return result;
+            }
+          }
+        }
+        return null;
+      }
+
+      // Find the equivalent node in the main component
+      // mainComponent não pode ser null aqui pois já verificamos na construção do array instances
+      const target = findNodeByPath(mainComponent as SceneNode, relativePath);
+      
+      if (target) {
+        // Se este é o componente pai do DS, ou se o nó tem estilos definidos,
+        // retornamos este nó como referência
+        if (i === instances.length - 1 || 
+            ('fillStyleId' in target && (target as any).fillStyleId) ||
+            ('strokeStyleId' in target && (target as any).strokeStyleId) ||
+            ('effectStyleId' in target && (target as any).effectStyleId)) {
+          console.log('Nó equivalente encontrado:', {
+            targetId: target.id,
+            targetName: target.name,
+            targetType: target.type,
+            originalPath: relativePath,
+            reason: i === instances.length - 1 ? 'Componente pai do DS' : 'Nó com estilos definidos'
+          });
+          return target;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao buscar nó equivalente no main component:', error);
+  }
+  return null;
 }
 
 function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
@@ -230,7 +405,7 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
   return nonCompliantFonts;
 }
 
-function analyzeNodeEffects(node: SceneNode, stylesData: StylesData[]): number {
+async function analyzeNodeEffects(node: SceneNode, stylesData: StylesData[]): Promise<number> {
   let nonCompliantEffects = 0;
   
   if ('effectStyleId' in node) {
@@ -250,8 +425,25 @@ function analyzeNodeEffects(node: SceneNode, stylesData: StylesData[]): number {
           nodeName: node.name,
           reason: 'Estilo não encontrado no DS'
         });
-    } else {
-        console.log(`  ✅ Efeito conforme`);
+      } else {
+        // Verificar se mantém o estilo do componente original
+        const mainNode = await getEquivalentNodeInMain(node);
+        if (mainNode && 'effectStyleId' in mainNode) {
+          const mainStyle = (mainNode as any).effectStyleId;
+          if (mainStyle && mainStyle !== effectStyleId) {
+            nonCompliantEffects++;
+            console.log(`  ⚠️ Alterado para outro estilo do DS (effect):`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              de: mainStyle,
+              para: effectStyleId
+            });
+          } else {
+            console.log(`  ✅ Efeito conforme`);
+          }
+        } else {
+          console.log(`  ✅ Efeito conforme`);
+        }
       }
     } else if (hasEffects(node)) {
       // If node has effects but no style, count as non-compliant
@@ -315,8 +507,40 @@ async function isComponentFromDSAsync(node: SceneNode, componentsData: Component
   return { isFromDS: false, isHidden: false };
 }
 
-// Helper function to check if a node has any styles applied
-function hasAppliedStyles(node: SceneNode): boolean {
+// Helper function to check if a node has any styles applied or modified
+async function hasAppliedStyles(node: SceneNode): Promise<boolean> {
+  // Check if the node has styles that differ from its main component
+  const mainNode = await getEquivalentNodeInMain(node);
+  
+  if (mainNode) {
+    // Check fill style changes
+    if ('fillStyleId' in node && 'fillStyleId' in mainNode) {
+      const currentFill = (node as any).fillStyleId;
+      const mainFill = (mainNode as any).fillStyleId;
+      if (currentFill && mainFill && currentFill !== mainFill) {
+        return true;
+      }
+    }
+
+    // Check stroke style changes
+    if ('strokeStyleId' in node && 'strokeStyleId' in mainNode) {
+      const currentStroke = (node as any).strokeStyleId;
+      const mainStroke = (mainNode as any).strokeStyleId;
+      if (currentStroke && mainStroke && currentStroke !== mainStroke) {
+        return true;
+      }
+    }
+
+    // Check effect style changes
+    if ('effectStyleId' in node && 'effectStyleId' in mainNode) {
+      const currentEffect = (node as any).effectStyleId;
+      const mainEffect = (mainNode as any).effectStyleId;
+      if (currentEffect && mainEffect && currentEffect !== mainEffect) {
+        return true;
+      }
+    }
+  }
+
   // Check if node has fills
   if ('fills' in node) {
     const fills = (node as any).fills;
@@ -434,7 +658,8 @@ async function analyzeSingleNodeAsync(
           console.log('ℹ️ Componente DS aninhado encontrado (não contabilizado):', node);
         }
       } else if (isLocalComponent) {
-        if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel && hasAppliedStyles(node)) {
+        const hasStyles = await hasAppliedStyles(node);
+        if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel && hasStyles) {
           totalLayers = 1;
           console.log('➕ Layer contabilizada:', node);
         } else {
@@ -450,18 +675,19 @@ async function analyzeSingleNodeAsync(
         }
       }
       // Análise de estilos
-      nonCompliantColors = analyzeNodeColors(node, stylesData);
+      nonCompliantColors = await analyzeNodeColors(node, stylesData);
       nonCompliantFonts = analyzeNodeFonts(node, stylesData);
-      nonCompliantEffects = analyzeNodeEffects(node, stylesData);
+      nonCompliantEffects = await analyzeNodeEffects(node, stylesData);
       if (nonCompliantFonts > 0) {
         console.log('❌ Fontes não permitidas encontradas:', node);
       }
     } else {
+      const hasStyles = await hasAppliedStyles(node);
       const shouldCountAsLayer = !EXCLUDED_NODE_TYPES.includes(node.type) &&
         !isTopLevel &&
         !IGNORED_FRAME_NAMES.includes(node.name) &&
         !isInsideDsComponent &&
-        (node.type !== 'FRAME' || hasAppliedStyles(node));
+        (node.type !== 'FRAME' || hasStyles);
       if (shouldCountAsLayer) {
         totalLayers = 1;
         if (node.type === 'TEXT') {
@@ -486,9 +712,9 @@ async function analyzeSingleNodeAsync(
         console.log('➖ Layer não contabilizada:', node);
       }
       // Análise de estilos
-      nonCompliantColors = analyzeNodeColors(node, stylesData);
+      nonCompliantColors = await analyzeNodeColors(node, stylesData);
       nonCompliantFonts = analyzeNodeFonts(node, stylesData);
-      nonCompliantEffects = analyzeNodeEffects(node, stylesData);
+      nonCompliantEffects = await analyzeNodeEffects(node, stylesData);
       if (nonCompliantFonts > 0) {
         console.log('❌ Fontes não permitidas encontradas:', node);
       }
