@@ -4,6 +4,222 @@
   <meta charset="utf-8">
   <title>PrismaScope - Design System Compliance Analyzer</title>
   <style>
+    /* Instruction Button */
+    .instruction-button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      transition: background-color 0.2s;
+    }
+
+    .instruction-button:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Content Switcher */
+    .content-switcher {
+      display: flex;
+      gap: 2px;
+      background: #f5f5f5;
+      padding: 4px;
+      border-radius: 12px;
+      margin: 16px 0 8px;
+    }
+
+    /* Error Message */
+    .error {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 0 0 16px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-button.active {
+      background: white;
+      color: #333;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .tab-button:hover:not(.active) {
+      background: rgba(255,255,255,0.5);
+    }
+
+    /* Tab Panels */
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* Modal/Bottom Sheet */
+    .modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 20px;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      transform: translateY(100%);
+      transition: transform 0.3s ease-out;
+      z-index: 1000;
+    }
+
+    .modal h4 {
+      margin: 0  ;
+    }
+
+    .modal.show {
+      transform: translateY(0);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+      z-index: 999;
+    }
+
+    .modal-backdrop.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Empty States */
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: #666;
+    }
+
+    .empty-state h3 {
+      font-size: 16px;
+      margin: 0 0 8px;
+      color: #333;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin: 0;
+      color: #666;
+      text-wrap: balance;
+    }
+
+    .animated {
+      animation: fadeInUp 0.7s cubic-bezier(.23,1.01,.32,1) both;
+     }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Issue Cards */
+    .issue-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+
+    .issue-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      color: #666;
+    }
+
+    .issue-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .issue-message {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin: 0;
+    }
+
+    .issue-value {
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 13px;
+      color: #666;
+      margin: 0;
+    }
+
+    .issue-action {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      color: #666;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .issue-action:hover {
+      background: #f5f5f5;
+      border-color: #d5d5d5;
+    }
+
+    .issue-action svg {
+      width: 14px;
+      height: 14px;
+    }
+
     /* Switch customizado */
     .switch {
       position: relative;
@@ -58,6 +274,8 @@
       padding: 16px;
       height: calc(100vh - 32px);
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
     .header {
       display: flex;
@@ -75,7 +293,9 @@
     /* .nav e .nav button foram removidos, pois as abas não existem mais */
     .hero {
       text-align: center;
-      margin: 32px 0;
+      margin: 24px 0;
+      text-wrap: balance;
+      flex: 1;
     }
     .hero h2 {
       font-size: 18px;
@@ -89,7 +309,7 @@
     .button-container {
       display: flex;
       flex-direction: column;
-      margin: 24px 0;
+      margin: 16px 0;
       gap: 16px;
     }    
     .analyze-button {
@@ -211,33 +431,38 @@
         </svg>
       </span>
       <h1 class="title">PrismaScope - Design System Analyzer</h1>
+      <button id="button-instruction" class="instruction-button">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10ZM11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14ZM10 5C9.44772 5 9 5.44772 9 6V10C9 10.5523 9.44772 11 10 11C10.5523 11 11 10.5523 11 10V6C11 5.44772 10.5523 5 10 5Z" fill="#666666"/>
+        </svg>
+      </button>
     </div>
 
-    <div id="analyzePanel">
-      <div class="hero">
+    <div class="content-switcher">
+      <button class="tab-button active" data-tab="home">Home</button>
+      <button class="tab-button" data-tab="data">Dados</button>
+      <button class="tab-button" data-tab="inspect">Inspect</button>
+    </div>
+
+    <div id="errorMessage" class="error hidden"></div>
+
+    <!-- Home Panel -->
+    <div id="homePanel" class="tab-panel active">
+      <div class="hero animated">
+        <svg viewBox="0 0 144 144" fill="none" xmlns="http://www.w3.org/2000/svg" width="100" height="100" data-testid="SvgLupaSpotSpot"><path opacity="0" d="M72 132c-9.703-.068-16.027-4.157-19.557-13.233-1.755-4.515-3.163-9.183-4.413-13.869-.634-2.373-1.613-4.343-3.063-5.865-1.522-1.45-3.492-2.429-5.865-3.063-4.686-1.25-9.354-2.658-13.87-4.413C16.158 88.027 12.069 81.703 12 72c.068-9.703 4.157-16.027 13.233-19.557 4.515-1.755 9.183-3.163 13.869-4.413 2.373-.634 4.343-1.613 5.865-3.063 1.45-1.522 2.429-3.492 3.063-5.865 1.25-4.686 2.658-9.354 4.413-13.87C55.973 16.158 62.297 12.069 72 12c9.703.068 16.027 4.157 19.557 13.233 1.755 4.515 3.163 9.183 4.413 13.869.634 2.373 1.613 4.343 3.063 5.865 1.522 1.45 3.492 2.429 5.865 3.063 4.686 1.25 9.354 2.658 13.869 4.413C127.843 55.973 131.932 62.297 132 72c-.068 9.703-4.157 16.027-13.233 19.557-4.515 1.755-9.183 3.163-13.869 4.413-2.373.634-4.343 1.613-5.865 3.063-1.45 1.522-2.429 3.492-3.063 5.865-1.25 4.686-2.658 9.354-4.413 13.869C88.027 127.843 81.703 131.932 72 132" fill="#767676"></path><path opacity="0.24" d="M118.56 110.546a9.195 9.195 0 0 1-13 .003L77.175 82.191l-.21-.21 13.08-12.952.157.156 28.358 28.358a9.194 9.194 0 0 1 0 13.003" fill="#FF0A8C"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M84.305 35.661q8.17 9.576 8.17 22.34 0 8.004-3.212 14.753l27.102 27.018q3.435 3.426 3.435 8.272c0 4.846-1.145 5.988-3.435 8.272q-3.432 3.421-8.264 3.423-4.834.001-8.266-3.419L72.82 89.336Q66.14 92.5 58 92.5q-15.954 0-26.302-12.158Q23.526 70.765 23.526 58q0-12.766 8.171-22.339 10.35-12.16 26.305-12.161 15.953 0 26.301 12.158zm-3.808 3.24q-8.852-10.4-22.496-10.401-13.645 0-22.497 10.402Q28.525 47.078 28.525 58t6.977 19.097Q44.355 87.5 58 87.5t22.497-10.4q6.978-8.177 6.979-19.1 0-10.922-6.977-19.096zm-3.853 10.76a20.4 20.4 0 0 0-2.032-3.396q-2.559-3.446-6.489-5.515-3.757-1.977-7.827-2.23a20 20 0 0 0-3.96.153q-1.025.139-1.85-.487a2.4 2.4 0 0 1-.963-1.653 2.4 2.4 0 0 1 .488-1.85 2.4 2.4 0 0 1 1.653-.964q7.82-1.062 14.788 2.607 7.176 3.777 10.706 11.184a2.5 2.5 0 0 1 .1 1.911 2.5 2.5 0 0 1-.5.838 2.5 2.5 0 0 1-.782.584 2.5 2.5 0 0 1-.945.24 2.5 2.5 0 0 1-.966-.141 2.5 2.5 0 0 1-.838-.5 2.5 2.5 0 0 1-.583-.78ZM44.096 70.614q.749.87 1.547 1.63Q51.156 77.501 59 77.5t13.358-5.255a23 23 0 0 0 1.546-1.631 2.4 2.4 0 0 1 1.709-.862 2.4 2.4 0 0 1 1.817.598q.784.675.862 1.708a2.4 2.4 0 0 1-.598 1.817Q70.272 82.5 59 82.5q-11.273 0-18.695-8.625a2.4 2.4 0 0 1-.598-1.817 2.4 2.4 0 0 1 .862-1.708q.376-.324.85-.48.471-.156.967-.118a2.48 2.48 0 0 1 1.708.862Zm40.209 9.726a36 36 0 0 0 2.375-3.101l26.155 26.075q1.965 1.96 1.965 4.73 0 2.772-1.966 4.732-1.968 1.962-4.735 1.963-2.766 0-4.735-1.961L77.301 86.744q3.774-2.61 7.004-6.404" fill="#151515"></path></svg>
         <h2>Analisar Conformidade do Design System</h2>
         <p>Selecione frames ou componentes e execute uma análise para verificar a conformidade com os padrões do nosso design system.</p>
       </div>
 
-    <div class="button-container" style="
-    display: flex;
-    flex-direction: column;
-">
-<button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
-<div style="display: flex;align-items: center;justify-content: space-around;">
-        <label for="renderCardSwitch" style="font-size: 14px; color: #666;font-weight: 500;">Exportar resultados</label>
-        <label class="switch">
-          <input type="checkbox" id="renderCardSwitch" checked="">
-          <span class="slider"></span>
-        </label>
-      </div></div>
-
-      <div id="errorMessage" class="error hidden"></div>
-      <div id="resultsContainer" class="hidden"></div>
-
-      <div id="dataSummary" class="hidden" style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px 0;">
-        <h4 style="margin: 0 0 8px; font-size: 12px; color: #0369a1;">Design System Carregado:</h4>
-        <div id="summaryContent" style="font-size: 11px; color: #0369a1;"></div>
+      <div class="button-container">
+        <button class="analyze-button" id="startAnalysis">Iniciar Análise</button>
+        <div style="display: flex; align-items: center; justify-content: space-around;">
+          <label for="renderCardSwitch" style="font-size: 14px; color: #666; font-weight: 500;">Exportar resultados</label>
+          <label class="switch">
+            <input type="checkbox" id="renderCardSwitch" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
 
       <p style="font-size: 12px; color: #666; text-align: center;">
@@ -245,34 +470,137 @@
       </p>
     </div>
 
+    <!-- Data Panel -->
+    <div id="dataPanel" class="tab-panel">
+      <div class="empty-state animated" id="dataEmptyState">
+          <svg width="56" height="48" viewBox="0 0 56 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="28" width="8" height="14" rx="2" fill="#e5e7eb">
+              <animate attributeName="y" values="28;18;28" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="14;24;14" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="20" y="18" width="8" height="24" rx="2" fill="#a5b4fc">
+              <animate attributeName="y" values="18;28;18" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="24;14;24" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="34" y="24" width="8" height="18" rx="2" fill="#60a5fa">
+              <animate attributeName="y" values="24;14;24" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="18;28;18" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="48" y="12" width="8" height="30" rx="2" fill="#38bdf8">
+              <animate attributeName="y" values="12;22;12" dur="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="height" values="30;10;30" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+          </svg>
+        <h3>Dados não disponíveis</h3>
+        <p>Os dados aparecerão aqui quando forem gerados na análise.</p>
+      </div>
+      <div id="resultsContainer" class="hidden"></div>
     </div>
 
+    <!-- Inspect Panel -->
+    <div id="inspectPanel" class="tab-panel">
+      <div class="empty-state animated" id="inspectEmptyState">
+        <svg width="56" height="48" viewBox="0 0 56 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g>
+              <rect x="8" y="8" width="40" height="32" rx="4" fill="#e5e7eb"/>
+              <rect x="14" y="14" width="28" height="8" rx="2" fill="#a5b4fc">
+                <animate attributeName="width" values="28;16;28" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="14" y="26" width="18" height="4" rx="2" fill="#60a5fa">
+                <animate attributeName="width" values="18;8;18" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="34" y="26" width="8" height="4" rx="2" fill="#38bdf8">
+                <animate attributeName="width" values="8;16;8" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="20" y="34" width="16" height="2" rx="1" fill="#bdbdbd">
+                <animate attributeName="width" values="16;8;16" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+            </g>
+            <g>
+              <rect x="44" y="36" width="8" height="8" rx="2" fill="#fbbf24">
+                <animate attributeName="y" values="36;32;36" dur="1.2s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="46" y="38" width="4" height="4" rx="1" fill="#fff"/>
+            </g>
+          </svg>
+        <h3>Nenhuma inspeção realizada</h3>
+        <p>Os itens inspecionados aparecerão aqui após a análise.<br>Utilize a aba Home para rodar a análise.</p>
+      </div>
+      <div id="inspectResults" class="hidden"></div>
+    </div>
+
+    <!-- Bottom Sheet Modal -->
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal" id="instructionsModal">
+      <h4>Sobre o Design System</h4>
+      <div id="modalContent">
+        <!-- Content will be dynamically populated -->
+      </div>
+      <button class="analyze-button" onclick="closeModal()" style="margin-top: 16px;">Fechar</button>
+    </div>
+  </div>
+
   <script>
-    // Estado da aplicação
-    // currentView e designSystem podem ser mantidos ou movidos para o código do plugin se forem configuráveis
+    // State
+    let currentTab = 'home';
     let designSystem = {
       colors: ['#000000', '#FFFFFF', '#F5F5F5', '#007AFF', '#FF3B30'],
       fonts: ['Inter', 'SF Pro Display', 'Roboto'],
       componentPrefixes: ['DS/', 'Component/', 'UI/']
     };
 
-    // Elementos do DOM
-    // analyzeTab, configTab e configPanel foram removidos
+    // DOM Elements
     const startAnalysisBtn = document.getElementById('startAnalysis');
     const errorMessage = document.getElementById('errorMessage');
     const resultsContainer = document.getElementById('resultsContainer');
+    const instructionBtn = document.getElementById('button-instruction');
+    const modal = document.getElementById('instructionsModal');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanels = document.querySelectorAll('.tab-panel');
 
-    // Event listeners
-    // Event listeners para analyzeTab e configTab foram removidos
+    // Event Listeners
     startAnalysisBtn.addEventListener('click', startAnalysis);
+    instructionBtn.addEventListener('click', openModal);
+    modalBackdrop.addEventListener('click', closeModal);
 
-    // Funções
-    // switchView, renderConfig, renderColors, renderFonts, renderPrefixes,
-    // addColor, addFont, addPrefix, removeColor, removeFont, removePrefix e saveConfig
-    // foram removidos
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => switchTab(button.dataset.tab));
+    });
+
+    // Functions
+    function switchTab(tabName) {
+      currentTab = tabName;
+      
+      // Update buttons
+      tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+
+      // Update panels
+      tabPanels.forEach(panel => {
+        if (panel.id === `${tabName}Panel`) {
+          panel.classList.add('active');
+        } else {
+          panel.classList.remove('active');
+        }
+      });
+    }
+
+    function openModal() {
+      modal.classList.add('show');
+      modalBackdrop.classList.add('show');
+    }
+
+    function closeModal() {
+      modal.classList.remove('show');
+      modalBackdrop.classList.remove('show');
+    }
+
     function startAnalysis() {
       const renderCardSwitch = document.getElementById('renderCardSwitch');
       const renderCard = renderCardSwitch ? renderCardSwitch.checked : true;
+      
       parent.postMessage({
         pluginMessage: {
           type: 'analyze-selection',
@@ -293,51 +621,128 @@
       errorMessage.classList.add('hidden');
     }
 
-    // Escutar mensagens do plugin
-    window.addEventListener('message', (event) => {
-      const message = event.data.pluginMessage;
-
-      switch (message.type) {
-        case 'analysis-complete':
-          startAnalysisBtn.textContent = 'Iniciar Análise';
-          startAnalysisBtn.disabled = false;
-          hideError();
-          showResults(message.reports);
-          break;
-
-        case 'analysis-error':
-          startAnalysisBtn.textContent = 'Iniciar Análise';
-          startAnalysisBtn.disabled = false;
-          showError(message.message);
-          break;
-
-        case 'design-system-loaded':
-          if (message.summary) {
-            updateDataSummary(message.summary);
-          }
-          break;
-      }
-    });
-
     function showResults(reports) {
       if (!reports || reports.length === 0) {
         showError('Nenhum resultado encontrado');
         return;
       }
 
+      // Hide empty states
+      document.getElementById('dataEmptyState').classList.add('hidden');
+      document.getElementById('inspectEmptyState').classList.add('hidden');
+
+      // Show results
       resultsContainer.classList.remove('hidden');
       resultsContainer.innerHTML = reports.map(report => createResultCard(report)).join('');
+
+      // Create inspect view results
+      const inspectResults = document.getElementById('inspectResults');
+      inspectResults.classList.remove('hidden');
+      inspectResults.innerHTML = createInspectView(reports);
+
+      // Switch to data tab
+      switchTab('data');
+    }
+
+    function createInspectView(reports) {
+      const allIssues = reports.flatMap(report => {
+        const issues = [];
+        const { frameName, nonCompliantItems } = report;
+
+        // Por enquanto vamos usar nonCompliantItems até termos os detalhes
+        if (nonCompliantItems) {
+          if (nonCompliantItems.colors > 0) {
+            // Placeholder até termos os valores específicos
+            for (let i = 0; i < nonCompliantItems.colors; i++) {
+              issues.push(createIssueCard('color', frameName, '#d9d9d9'));
+            }
+          }
+          if (nonCompliantItems.fonts > 0) {
+            for (let i = 0; i < nonCompliantItems.fonts; i++) {
+              issues.push(createIssueCard('font', frameName, 'Arial'));
+            }
+          }
+          if (nonCompliantItems.effects > 0) {
+            for (let i = 0; i < nonCompliantItems.effects; i++) {
+              issues.push(createIssueCard('effect', frameName, 'Drop Shadow'));
+            }
+          }
+          if (nonCompliantItems.components > 0) {
+            for (let i = 0; i < nonCompliantItems.components; i++) {
+              issues.push(createIssueCard('component', frameName, 'Component'));
+            }
+          }
+        }
+
+        return issues;
+      });
+
+      if (allIssues.length === 0) {
+        return `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44ZM22 14C22 12.8954 22.8954 12 24 12C25.1046 12 26 12.8954 26 14V26C26 27.1046 25.1046 28 24 28C22.8954 28 22 27.1046 22 26V14ZM24 32C22.8954 32 22 32.8954 22 34C22 35.1046 22.8954 36 24 36C25.1046 36 26 35.1046 26 34C26 32.8954 25.1046 32 24 32Z" fill="currentColor"/>
+            </svg>
+            <h3>Nenhum problema encontrado</h3>
+            <p>Todos os elementos estão em conformidade com o Design System.</p>
+          </div>
+        `;
+      }
+
+      return allIssues.join('');
+    }
+
+    function createIssueCard(type, frameName, value) {
+      const icons = {
+        color: '<circle cx="12" cy="12" r="8" fill="currentColor"/>',
+        font: '<text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">T</text>',
+        effect: '<path d="M12 16L16 8H8L12 16Z" fill="currentColor"/>',
+        component: '<rect x="8" y="8" width="8" height="8" fill="currentColor"/>'
+      };
+
+      const messages = {
+        color: 'Estilo de "preenchimento" ausente',
+        font: 'Família de fonte não conforme',
+        effect: 'Efeito não conforme',
+        component: 'Componente não conforme'
+      };
+
+      return `
+        <div class="issue-card">
+          <div class="issue-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              ${icons[type]}
+            </svg>
+          </div>
+          <div class="issue-content">
+            <p class="issue-message">${messages[type]}</p>
+            <p class="issue-value">${value}</p>
+          </div>
+          <button class="issue-action" onclick="focusIssue('${frameName}', '${value}')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2ZM0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8ZM8 6C7.44772 6 7 6.44772 7 7V11C7 11.5523 7.44772 12 8 12C8.55228 12 9 11.5523 9 11V7C9 6.44772 8.55228 6 8 6ZM8 3C7.44772 3 7 3.44772 7 4C7 4.55228 7.44772 5 8 5C8.55228 5 9 4.55228 9 4C9 3.44772 8.55228 3 8 3Z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      `;
     }
 
     function updateDataSummary(summary) {
       const dataSummary = document.getElementById('dataSummary');
       const summaryContent = document.getElementById('summaryContent');
+      const modalContent = document.getElementById('modalContent');
 
-      summaryContent.innerHTML = `
+      const summaryHtml = `
         <div>• ${summary.components} componentes</div>
         <div>• ${summary.colorStyles} estilos de cor</div>
         <div>• ${summary.textStyles} estilos de texto</div>
         <div>• ${summary.effectStyles} estilos de efeito</div>
+      `;
+
+      summaryContent.innerHTML = summaryHtml;
+      modalContent.innerHTML = `
+        <p>Dados carregados do Prisma para análise:</p>
+        ${summaryHtml}
       `;
 
       dataSummary.classList.remove('hidden');
@@ -415,23 +820,55 @@
       `;
     }
 
-    // Inicialização
+    function focusIssue(frameName, value) {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'focus-issue',
+          frameName: frameName,
+          value: value
+        }
+      }, '*');
+    }
+
+    // Initialize
     parent.postMessage({ pluginMessage: { type: 'get-design-system' } }, '*');
 
-    // Handler para mensagens do backend
-    window.onmessage = (event) => {
-      const msg = event.data.pluginMessage;
-      if (!msg) return;
-      if (msg.type === 'error') {
-        const errorDiv = document.getElementById('errorMessage');
-        if (errorDiv) {
-          errorDiv.textContent = 'Erro na análise: ' + msg.message;
-          errorDiv.classList.remove('hidden');
-        } else {
-          alert('Erro na análise: ' + msg.message);
-        }
+    // Plugin message handler
+    window.addEventListener('message', (event) => {
+      const message = event.data.pluginMessage;
+
+      switch (message.type) {
+        case 'analysis-complete':
+          startAnalysisBtn.textContent = 'Iniciar Análise';
+          startAnalysisBtn.disabled = false;
+          hideError();
+          showResults(message.reports);
+          break;
+
+        case 'analysis-error':
+          startAnalysisBtn.textContent = 'Iniciar Análise';
+          startAnalysisBtn.disabled = false;
+          showError(message.message);
+          break;
+
+        case 'design-system-loaded':
+          if (message.summary) {
+            updateDataSummary(message.summary);
+          }
+          break;
       }
-    };
+    });
   </script>
+
+  <!-- Bottom Sheet Modal -->
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal" id="instructionsModal">
+    <h3>Sobre o Design System</h3>
+    <div id="dataSummary" style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px 0;">
+      <h4 style="margin: 0 0 8px; font-size: 12px; color: #0369a1;">Design System Carregado:</h4>
+      <div id="summaryContent" style="font-size: 11px; color: #0369a1;"></div>
+    </div>
+    <button class="analyze-button" onclick="closeModal()" style="margin-top: 16px;">Fechar</button>
+  </div>
 </body>
 </html>
