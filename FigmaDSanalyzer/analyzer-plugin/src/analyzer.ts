@@ -323,7 +323,7 @@ async function getEquivalentNodeInMain(node: SceneNode): Promise<SceneNode | nul
   return null;
 }
 
-function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
+async function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): Promise<number> {
   let nonCompliantFonts = 0;
   
   try {
@@ -346,23 +346,55 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
             reason: 'Nenhum estilo de texto aplicado'
           });
         } else {
-          for (const styleId of styleIds) {
-            console.log(`  Text Style:`, {
-              nodeId: node.id,
-              nodeName: node.name,
-              styleId: styleId,
-              hasStyle: Boolean(styleId)
-            });
-            
-            if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
-              hasNonCompliantSegment = true;
-              console.log(`  ❌ Segmento não conforme encontrado:`, {
+          // Verificar se os estilos foram alterados em relação ao componente principal
+          const mainNode = await getEquivalentNodeInMain(node);
+          if (mainNode && mainNode.type === 'TEXT') {
+            const mainTextNode = mainNode as TextNode;
+            const mainStyleIds = typeof mainTextNode.textStyleId === 'object' 
+              ? Object.values(mainTextNode.textStyleId).filter((id): id is string => typeof id === 'string')
+              : [mainTextNode.textStyleId].filter((id): id is string => typeof id === 'string');
+
+            for (const styleId of styleIds) {
+              console.log(`  Text Style:`, {
                 nodeId: node.id,
                 nodeName: node.name,
-                reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+                styleId: styleId,
+                hasStyle: Boolean(styleId)
               });
-            } else {
-              console.log(`  ✅ Segmento conforme`);
+
+              // Verificar se o estilo foi alterado em relação ao componente principal
+              const mainStyleForSegment = mainStyleIds.find(mainId => mainId && mainId !== styleId);
+              if (mainStyleForSegment && styleId !== mainStyleForSegment) {
+                // Se ambos os estilos são do DS, é uma alteração permitida mas deve ser contabilizada
+                const bothFromDS = isStyleInDesignSystem(styleId, 'textStyles', stylesData) &&
+                                 isStyleInDesignSystem(mainStyleForSegment, 'textStyles', stylesData);
+                if (bothFromDS) {
+                  hasNonCompliantSegment = true;
+                  console.log(`  ⚠️ Alterado para outro estilo do DS:`, {
+                    nodeId: node.id,
+                    nodeName: node.name,
+                    de: mainStyleForSegment,
+                    para: styleId,
+                    reason: 'Estilo alterado mas ambos são do DS'
+                  });
+                } else if (!isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
+                  hasNonCompliantSegment = true;
+                  console.log(`  ❌ Segmento não conforme encontrado:`, {
+                    nodeId: node.id,
+                    nodeName: node.name,
+                    reason: 'Estilo não encontrado no DS'
+                  });
+                }
+              } else if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
+                hasNonCompliantSegment = true;
+                console.log(`  ❌ Segmento não conforme encontrado:`, {
+                  nodeId: node.id,
+                  nodeName: node.name,
+                  reason: !styleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+                });
+              } else {
+                console.log(`  ✅ Segmento conforme`);
+              }
             }
           }
           
@@ -372,7 +404,7 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
             console.log(`  ❌ Texto com múltiplos estilos não conforme:`, {
               nodeId: node.id,
               nodeName: node.name,
-              reason: 'Pelo menos um segmento não usa estilo do DS'
+              reason: 'Pelo menos um segmento não usa estilo do DS ou foi alterado'
             });
           }
         }
@@ -385,16 +417,56 @@ function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): number {
           styleId: textStyleId,
           hasStyle: Boolean(textStyleId)
         });
-        
-        if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
-          nonCompliantFonts = 1;
-          console.log(`  ❌ Fonte não conforme encontrada:`, {
-            nodeId: node.id,
-            nodeName: node.name,
-            reason: !textStyleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
-          });
+
+        // Verificar se o estilo foi alterado em relação ao componente principal
+        const mainNode = await getEquivalentNodeInMain(node);
+        if (mainNode && mainNode.type === 'TEXT') {
+          const mainTextNode = mainNode as TextNode;
+          const mainStyleId = mainTextNode.textStyleId as string;
+          
+          if (mainStyleId && mainStyleId !== textStyleId) {
+            // Se ambos os estilos são do DS, é uma alteração permitida mas deve ser contabilizada
+            const bothFromDS = isStyleInDesignSystem(textStyleId, 'textStyles', stylesData) &&
+                             isStyleInDesignSystem(mainStyleId, 'textStyles', stylesData);
+            if (bothFromDS) {
+              nonCompliantFonts = 1;
+              console.log(`  ⚠️ Alterado para outro estilo do DS:`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                de: mainStyleId,
+                para: textStyleId,
+                reason: 'Estilo alterado mas ambos são do DS'
+              });
+            } else if (!isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
+              nonCompliantFonts = 1;
+              console.log(`  ❌ Fonte não conforme encontrada:`, {
+                nodeId: node.id,
+                nodeName: node.name,
+                reason: 'Estilo não encontrado no DS'
+              });
+            }
+          } else if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
+            nonCompliantFonts = 1;
+            console.log(`  ❌ Fonte não conforme encontrada:`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              reason: !textStyleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+            });
+          } else {
+            console.log(`  ✅ Fonte conforme`);
+          }
         } else {
-          console.log(`  ✅ Fonte conforme`);
+          // Não há componente principal para comparar, apenas verificar se o estilo é do DS
+          if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
+            nonCompliantFonts = 1;
+            console.log(`  ❌ Fonte não conforme encontrada:`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              reason: !textStyleId ? 'Sem estilo vinculado' : 'Estilo não encontrado no DS'
+            });
+          } else {
+            console.log(`  ✅ Fonte conforme`);
+          }
         }
       }
     }
@@ -676,7 +748,7 @@ async function analyzeSingleNodeAsync(
       }
       // Análise de estilos
       nonCompliantColors = await analyzeNodeColors(node, stylesData);
-      nonCompliantFonts = analyzeNodeFonts(node, stylesData);
+      nonCompliantFonts = await analyzeNodeFonts(node, stylesData);
       nonCompliantEffects = await analyzeNodeEffects(node, stylesData);
       if (nonCompliantFonts > 0) {
         console.log('❌ Fontes não permitidas encontradas:', node);
@@ -713,7 +785,7 @@ async function analyzeSingleNodeAsync(
       }
       // Análise de estilos
       nonCompliantColors = await analyzeNodeColors(node, stylesData);
-      nonCompliantFonts = analyzeNodeFonts(node, stylesData);
+      nonCompliantFonts = await analyzeNodeFonts(node, stylesData);
       nonCompliantEffects = await analyzeNodeEffects(node, stylesData);
       if (nonCompliantFonts > 0) {
         console.log('❌ Fontes não permitidas encontradas:', node);

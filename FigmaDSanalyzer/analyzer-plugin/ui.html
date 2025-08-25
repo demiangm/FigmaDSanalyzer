@@ -325,8 +325,13 @@
       transition: background-color 0.2s;
     }
 
-    analyze-button:hover {
+    .analyze-button:hover {
       background: #BE0867;
+    }
+    .analyze-button:disabled {
+      color: rgba(0, 0, 0, 0.16);
+      background: rgba(0, 0, 0, 0.08);
+      cursor: not-allowed;
     }
     .error {
       background: #fee2e2;
