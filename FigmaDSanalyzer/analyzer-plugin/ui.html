@@ -29,7 +29,7 @@
       background: #f5f5f5;
       padding: 4px;
       border-radius: 12px;
-      margin: 16px 0 8px;
+      margin:  8px 0;
     }
 
     /* Error Message */
@@ -154,13 +154,13 @@
     /* Issue Cards */
     .issue-card {
       display: flex;
-      align-items: center;
+      align-items: start;
       gap: 12px;
       padding: 12px;
       background: white;
       border: 1px solid #e5e5e5;
       border-radius: 8px;
-      margin: 8px 0;
+      margin: 16px 0;
     }
 
     .issue-icon {
@@ -196,28 +196,27 @@
       margin: 0;
     }
 
-    .issue-action {
-      padding: 6px 12px;
-      background: transparent;
-      border: 1px solid #e5e5e5;
-      border-radius: 6px;
-      color: #666;
+    .issue-node {
       font-size: 12px;
+      color: #666;
+      margin: 0;
+    }
+
+    .issue-action  {
+      background: transparent;
+      border: none;
       cursor: pointer;
+      padding: 8px;
+      margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
+      justify-content: center;
+      border-radius: 999px;
+      transition: background-color 0.2s;
     }
 
     .issue-action:hover {
-      background: #f5f5f5;
-      border-color: #d5d5d5;
-    }
-
-    .issue-action svg {
-      width: 14px;
-      height: 14px;
+      background: rgba(0, 0, 0, 0.05);
     }
 
     /* Switch customizado */
@@ -282,8 +281,6 @@
       align-items: center;
       justify-content:  flex-start;
       padding: 12px 0;
-      border-bottom: 1px solid #e5e5e5;
-      margin-bottom: 16px;
     }
     .title {
       font-size: 14px;
@@ -311,6 +308,12 @@
       flex-direction: column;
       margin: 16px 0;
       gap: 16px;
+    }
+    .analyze-button:disabled {
+      color: rgba(0, 0, 0, 0.16);
+      background: rgba(0, 0, 0, 0.08) !important;
+      cursor: wait;
+      transition: none;
     }    
     .analyze-button {
       width: 100%;
@@ -324,14 +327,8 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-
     .analyze-button:hover {
       background: #BE0867;
-    }
-    .analyze-button:disabled {
-      color: rgba(0, 0, 0, 0.16);
-      background: rgba(0, 0, 0, 0.08);
-      cursor: not-allowed;
     }
     .error {
       background: #fee2e2;
@@ -548,6 +545,8 @@
   <script>
     // State
     let currentTab = 'home';
+    let lastReports = null;
+    let processedFrameIds = new Set();
     let designSystem = {
       colors: ['#000000', '#FFFFFF', '#F5F5F5', '#007AFF', '#FF3B30'],
       fonts: ['Inter', 'SF Pro Display', 'Roboto'],
@@ -575,6 +574,9 @@
 
     // Functions
     function switchTab(tabName) {
+      if (currentTab === tabName) return; // Não fazer nada se já estiver na aba
+      
+      const oldTab = currentTab;
       currentTab = tabName;
       
       // Update buttons
@@ -586,6 +588,12 @@
       tabPanels.forEach(panel => {
         if (panel.id === `${tabName}Panel`) {
           panel.classList.add('active');
+          // Se estivermos mudando para a aba de inspeção, atualize o conteúdo
+          if (tabName === 'inspect' && lastReports) {
+            const inspectResults = document.getElementById('inspectResults');
+            processedFrameIds.clear(); // Limpa os IDs processados
+            inspectResults.innerHTML = createInspectView(lastReports);
+          }
         } else {
           panel.classList.remove('active');
         }
@@ -627,10 +635,14 @@
     }
 
     function showResults(reports) {
+      console.log('showResults recebeu:', reports);
       if (!reports || reports.length === 0) {
         showError('Nenhum resultado encontrado');
         return;
       }
+      
+      // Armazena os reports para uso posterior
+      lastReports = reports;
 
       // Hide empty states
       document.getElementById('dataEmptyState').classList.add('hidden');
@@ -640,44 +652,115 @@
       resultsContainer.classList.remove('hidden');
       resultsContainer.innerHTML = reports.map(report => createResultCard(report)).join('');
 
-      // Create inspect view results
+      // Prepare inspect results container
       const inspectResults = document.getElementById('inspectResults');
       inspectResults.classList.remove('hidden');
-      inspectResults.innerHTML = createInspectView(reports);
+      inspectResults.innerHTML = ''; // Clear previous results
+      
+      // Switch to data tab without triggering inspect view update
+      const oldTab = currentTab;
+      currentTab = 'data';
+      
+      // Update buttons
+      tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === 'data');
+      });
 
-      // Switch to data tab
-      switchTab('data');
+      // Update panels
+      tabPanels.forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'dataPanel');
+      });
     }
 
     function createInspectView(reports) {
-      const allIssues = reports.flatMap(report => {
+      console.log('createInspectView recebeu:', reports);
+      // Primeiro deduplica os reports por frameId
+      const uniqueReports = reports.reduce((acc, report) => {
+        if (!acc.has(report.frameId)) {
+          acc.set(report.frameId, report);
+        }
+        return acc;
+      }, new Map());
+      
+      const allIssues = Array.from(uniqueReports.values()).flatMap(report => {
+        console.log('Processando report:', report);
         const issues = [];
         const { frameName, nonCompliantItems } = report;
 
-        // Por enquanto vamos usar nonCompliantItems até termos os detalhes
-        if (nonCompliantItems) {
-          if (nonCompliantItems.colors > 0) {
-            // Placeholder até termos os valores específicos
-            for (let i = 0; i < nonCompliantItems.colors; i++) {
-              issues.push(createIssueCard('color', frameName, '#d9d9d9'));
+        if (!nonCompliantItems?.details) {
+          console.warn('Report sem details:', frameName);
+          return issues;
+        }
+
+        // Garante que todos os arrays de detalhes existem, mesmo que vazios
+        const details = {
+          colors: nonCompliantItems.details.colors || [],
+          fonts: nonCompliantItems.details.fonts || [],
+          effects: nonCompliantItems.details.effects || []
+        };
+
+        const { colors, fonts, effects } = details;
+
+          // Cores
+          colors.forEach(issue => {
+            const value = issue.currentStyle || issue.value || '#d9d9d9';
+            let message = 'Estilo de preenchimento';
+            if (issue.type === 'changed') {
+              message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+            } else if (issue.type === 'missing') {
+              message = `Estilo não vinculado (${issue.reason || 'fill'})`;
+            } else if (issue.type === 'invalid') {
+              message = 'Estilo não encontrado no DS';
             }
-          }
-          if (nonCompliantItems.fonts > 0) {
-            for (let i = 0; i < nonCompliantItems.fonts; i++) {
-              issues.push(createIssueCard('font', frameName, 'Arial'));
+            issues.push(createIssueCard('color', frameName, value, message, issue.nodeName, issue));
+          });
+
+          // Fontes
+          fonts.forEach(issue => {
+            const value = issue.currentStyle || issue.value || 'Fonte não especificada';
+            let message = 'Estilo de texto';
+            if (issue.type === 'changed') {
+              message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+            } else if (issue.type === 'missing') {
+              message = issue.reason || 'Estilo não vinculado';
+            } else if (issue.type === 'invalid') {
+              message = 'Estilo não encontrado no DS';
             }
-          }
-          if (nonCompliantItems.effects > 0) {
-            for (let i = 0; i < nonCompliantItems.effects; i++) {
-              issues.push(createIssueCard('effect', frameName, 'Drop Shadow'));
+            let displayValue = value;
+            if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+              try {
+                const parsedValue = JSON.parse(value);
+                displayValue = parsedValue.family || 'Fonte não especificada';
+              } catch (e) {
+                console.warn('Failed to parse font value as JSON:', value, e);
+                displayValue = value;
+              }
+            } else if (typeof value === 'object') {
+              displayValue = value.family || 'Fonte não especificada';
             }
-          }
+            issues.push(createIssueCard('font', frameName, displayValue, message, issue.nodeName, issue));
+          });
+
+          // Efeitos
+          effects.forEach(issue => {
+            const value = issue.currentStyle || issue.value || 'Efeito não especificado';
+            let message = 'Estilo de efeito';
+            if (issue.type === 'changed') {
+              message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+            } else if (issue.type === 'missing') {
+              message = 'Estilo não vinculado';
+            } else if (issue.type === 'invalid') {
+              message = 'Estilo não encontrado no DS';
+            }
+            issues.push(createIssueCard('effect', frameName, value, message, issue.nodeName, issue));
+          });
+
+          // Componentes não-DS
           if (nonCompliantItems.components > 0) {
             for (let i = 0; i < nonCompliantItems.components; i++) {
-              issues.push(createIssueCard('component', frameName, 'Component'));
+              issues.push(createIssueCard('component', frameName, 'Não conforme com DS', 'Componente fora do Design System'));
             }
           }
-        }
 
         return issues;
       });
@@ -697,20 +780,15 @@
       return allIssues.join('');
     }
 
-    function createIssueCard(type, frameName, value) {
+    function createIssueCard(type, frameName, value, message, nodeName = '', issue = null) {
       const icons = {
-        color: '<circle cx="12" cy="12" r="8" fill="currentColor"/>',
+        color: '<path d="M12.6324 4.07389C12.5426 4.00975 12.4714 3.96035 12.4219 3.92651C12.4046 3.91036 12.3854 3.89896 12.3666 3.88772C12.3582 3.88272 12.3498 3.87775 12.3417 3.87241C12.1332 3.73524 11.8632 3.73524 11.6547 3.87241C11.6277 3.89016 11.6011 3.9083 11.5745 3.92651C11.525 3.96035 11.4538 4.00975 11.364 4.07389C11.1844 4.20213 10.93 4.38958 10.6257 4.62972C10.0179 5.10922 9.20601 5.80281 8.39198 6.65851C6.78843 8.34415 5.06641 10.7737 5.06641 13.5044C5.06641 17.3327 8.16988 20.4362 11.9982 20.4362C15.8266 20.4362 18.9301 17.3327 18.9301 13.5044C18.9301 10.7737 17.208 8.34415 15.6045 6.65851C14.7904 5.80281 13.9785 5.10922 13.3708 4.62972C13.0664 4.38958 12.812 4.20213 12.6324 4.07389Z" fill="currentColor"/>',
         font: '<text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">T</text>',
         effect: '<path d="M12 16L16 8H8L12 16Z" fill="currentColor"/>',
         component: '<rect x="8" y="8" width="8" height="8" fill="currentColor"/>'
       };
 
-      const messages = {
-        color: 'Estilo de "preenchimento" ausente',
-        font: 'Família de fonte não conforme',
-        effect: 'Efeito não conforme',
-        component: 'Componente não conforme'
-      };
+      const nodeId = issue && issue.nodeId ? issue.nodeId : (nodeName || value);
 
       return `
         <div class="issue-card">
@@ -720,13 +798,12 @@
             </svg>
           </div>
           <div class="issue-content">
-            <p class="issue-message">${messages[type]}</p>
+            <p class="issue-message">${message}</p>
+            ${nodeName ? `<p class="issue-node">Em: ${nodeName}</p>` : ''}
             <p class="issue-value">${value}</p>
           </div>
-          <button class="issue-action" onclick="focusIssue('${frameName}', '${value}')">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2ZM0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8ZM8 6C7.44772 6 7 6.44772 7 7V11C7 11.5523 7.44772 12 8 12C8.55228 12 9 11.5523 9 11V7C9 6.44772 8.55228 6 8 6ZM8 3C7.44772 3 7 3.44772 7 4C7 4.55228 7.44772 5 8 5C8.55228 5 9 4.55228 9 4C9 3.44772 8.55228 3 8 3Z" fill="currentColor"/>
-            </svg>
+          <button class="issue-action" onclick="focusIssue('${frameName}', '${nodeId}')">
+            <svg viewBox="0 0 24 24" fill="#767676" xmlns="http://www.w3.org/2000/svg" width="16" height="16" data-testid="SvgTargetIcon"><path d="M10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6 12a6 6 0 1 1 12 0 6 6 0 0 1-12 0m6-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0"></path></svg>
           </button>
         </div>
       `;
@@ -847,13 +924,34 @@
           startAnalysisBtn.textContent = 'Iniciar Análise';
           startAnalysisBtn.disabled = false;
           hideError();
-          showResults(message.reports);
+          if (!window.lastReports || JSON.stringify(window.lastReports) !== JSON.stringify(message.reports)) {
+            showResults(message.reports);
+          }
           break;
 
         case 'analysis-error':
           startAnalysisBtn.textContent = 'Iniciar Análise';
           startAnalysisBtn.disabled = false;
           showError(message.message);
+          break;
+
+        case 'frame-analyzed':
+          // Atualizar a UI com os resultados do frame individual
+          if (message.report && message.report.frameId && !processedFrameIds.has(message.report.frameId)) {
+            processedFrameIds.add(message.report.frameId);
+            const inspectResults = document.getElementById('inspectResults');
+            if (!inspectResults.innerHTML) {
+              inspectResults.classList.remove('hidden');
+              inspectResults.innerHTML = '';
+              document.getElementById('inspectEmptyState').classList.add('hidden');
+            }
+            if (message.report.nonCompliantItems?.details) {
+              const frameIssues = createInspectView([message.report]);
+              if (frameIssues) {
+                inspectResults.innerHTML += frameIssues;
+              }
+            }
+          }
           break;
 
         case 'design-system-loaded':

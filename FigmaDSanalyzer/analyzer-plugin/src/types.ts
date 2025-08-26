@@ -55,6 +55,24 @@ export interface AnalysisResult {
   totalLayers: number;
   dsComponentsUsed: number;
   hiddenComponentsUsed: number;
+  details: NonCompliantDetails;
+}
+
+export interface StyleIssue {
+  nodeId: string;
+  nodeName: string;
+  styleId?: string;
+  currentStyle?: string;
+  originalStyle?: string;
+  type: 'changed' | 'missing' | 'invalid';
+  reason: string;
+  value?: string; // Para cores hex, nomes de fonte, etc
+}
+
+export interface NonCompliantDetails {
+  colors: StyleIssue[];
+  fonts: StyleIssue[];
+  effects: StyleIssue[];
 }
 
 export interface ComplianceReport {
@@ -70,5 +88,6 @@ export interface ComplianceReport {
     fonts: number;
     effects: number;
     components: number;
+    details: NonCompliantDetails;
   };
 }

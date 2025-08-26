@@ -36,6 +36,9 @@ figma.ui.onmessage = async (msg) => {
     case 'get-design-system':
       await loadDesignSystemData();
       break;
+    case 'focus-issue':
+      await focusIssue(msg.frameName, msg.value);
+      break;
     case 'close-plugin':
       figma.closePlugin();
       break;
@@ -113,20 +116,7 @@ async function analyzeSelection(renderCard: boolean = true) {
       console.log('[DEBUG] Enviando para UI:', report);
       figma.ui.postMessage({
         type: 'frame-analyzed',
-        report: {
-          ...report,
-          details: {
-            name: node.name,
-            type: node.type,
-            totalLayers: report.totalLayers,
-            dsComponents: report.dsComponentsUsed,
-            coverage: {
-              percentage: report.coveragePercentage,
-              level: report.coverageLevel
-            },
-            nonCompliant: report.nonCompliantItems
-          }
-        }
+        report
       });
       // Log das métricas principais
       console.log(`[MÉTRICAS] Frame: ${node.name} | Camadas: ${report.totalLayers} | DS Components: ${report.dsComponentsUsed} | Cobertura: ${report.coveragePercentage}% (${report.coverageLevel.label})`);
@@ -553,6 +543,99 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
     // Em caso de erro, mantém o card original
     figma.currentPage.selection = [card];
   }
+}
+
+async function focusIssue(frameName: string, value: string) {
+  try {
+    // Se o value parece ser um nodeId (contém ':'), tentar buscar diretamente
+    if (value.includes(':')) {
+      try {
+        const node = await figma.getNodeByIdAsync(value);
+        if (node && node.type !== 'DOCUMENT' && node.type !== 'PAGE') {
+          // Selecionar e focar no nó
+          figma.currentPage.selection = [node as SceneNode];
+          figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+          console.log(`Focado no nó por ID: ${node.name} (${node.id})`);
+          return;
+        }
+      } catch (nodeError) {
+        console.warn(`Nó não encontrado por ID: ${value}`, nodeError);
+      }
+    }
+
+    // Buscar o frame pelo nome
+    const frame = findFrameByName(frameName);
+    if (!frame) {
+      console.warn(`Frame não encontrado: ${frameName}`);
+      return;
+    }
+
+    // Buscar o nó com problema pelo valor ou nome
+    const problematicNode = findNodeByValue(frame, value);
+    if (!problematicNode) {
+      console.warn(`Nó com problema não encontrado: ${value}`);
+      return;
+    }
+
+    // Selecionar e focar no nó
+    figma.currentPage.selection = [problematicNode];
+    figma.viewport.scrollAndZoomIntoView([problematicNode]);
+    
+    console.log(`Focado no nó: ${problematicNode.name} (${problematicNode.id})`);
+  } catch (error) {
+    console.error('Erro ao focar no problema:', error);
+  }
+}
+
+function findFrameByName(frameName: string): FrameNode | null {
+  // Buscar em todas as páginas
+  for (const page of figma.root.children) {
+    // Buscar frames na página atual
+    const frame = findFrameRecursively(page, frameName);
+    if (frame) return frame;
+  }
+  return null;
+}
+
+function findFrameRecursively(node: BaseNode, frameName: string): FrameNode | null {
+  // Se o nó atual é o frame que estamos procurando
+  if (node.type === 'FRAME' && node.name === frameName) {
+    return node as FrameNode;
+  }
+
+  // Se o nó tem filhos, buscar recursivamente
+  if ('children' in node) {
+    for (const child of node.children) {
+      const result = findFrameRecursively(child, frameName);
+      if (result) return result;
+    }
+  }
+
+  return null;
+}
+
+function findNodeByValue(frame: FrameNode, value: string): SceneNode | null {
+  // Buscar recursivamente no frame
+  return findNodeRecursively(frame, value);
+}
+
+function findNodeRecursively(node: SceneNode, value: string): SceneNode | null {
+  // Verificar se o nó atual tem o valor ou nome que estamos procurando
+  if (node.name === value || 
+      (node.type === 'TEXT' && (node as TextNode).characters.includes(value)) ||
+      (node.type === 'VECTOR' && node.name.toLowerCase().includes(value.toLowerCase()))) {
+    return node;
+  }
+
+  // Se o nó tem filhos, buscar recursivamente
+  if ('children' in node) {
+    for (const child of node.children) {
+      const result = findNodeRecursively(child, value);
+      if (result) return result;
+    }
+  }
+
+  return null;
 }
 
 // Initialize the plugin
