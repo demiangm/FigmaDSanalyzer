@@ -219,6 +219,61 @@
       background: rgba(0, 0, 0, 0.05);
     }
 
+    /* Grouped Issue Cards */
+    .issue-card.grouped {
+      border-left: 4px solid #DF0979;
+    }
+
+    .issue-count {
+      font-size: 11px;
+      color: #DF0979;
+      font-weight: 600;
+      margin: 4px 0;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .issue-count:hover {
+      color: #BE0867;
+    }
+
+    .nodes-list {
+      margin-top: 8px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .nodes-list.hidden {
+      display: none;
+    }
+
+    .node-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      margin: 2px 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .node-item:hover {
+      background: #e9ecef;
+    }
+
+    .node-item span {
+      font-size: 12px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .node-item small {
+      font-size: 10px;
+      color: #666;
+    }
+
     /* Switch customizado */
     .switch {
       position: relative;
@@ -673,97 +728,124 @@
     }
 
     function createInspectView(reports) {
-      console.log('createInspectView recebeu:', reports);
-      // Primeiro deduplica os reports por frameId
-      const uniqueReports = reports.reduce((acc, report) => {
-        if (!acc.has(report.frameId)) {
-          acc.set(report.frameId, report);
-        }
-        return acc;
-      }, new Map());
+      const groupedIssues = new Map();
       
-      const allIssues = Array.from(uniqueReports.values()).flatMap(report => {
-        console.log('Processando report:', report);
-        const issues = [];
+      // Agrupar issues por tipo e valor
+      reports.forEach(report => {
         const { frameName, nonCompliantItems } = report;
+        const { colors = [], fonts = [], effects = [] } = nonCompliantItems.details || {};
 
-        if (!nonCompliantItems?.details) {
-          console.warn('Report sem details:', frameName);
-          return issues;
-        }
-
-        // Garante que todos os arrays de detalhes existem, mesmo que vazios
-        const details = {
-          colors: nonCompliantItems.details.colors || [],
-          fonts: nonCompliantItems.details.fonts || [],
-          effects: nonCompliantItems.details.effects || []
-        };
-
-        const { colors, fonts, effects } = details;
-
-          // Cores
-          colors.forEach(issue => {
-            const value = issue.currentStyle || issue.value || '#d9d9d9';
-            let message = 'Estilo de preenchimento';
-            if (issue.type === 'changed') {
-              message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
-            } else if (issue.type === 'missing') {
-              message = `Estilo não vinculado (${issue.reason || 'fill'})`;
-            } else if (issue.type === 'invalid') {
-              message = 'Estilo não encontrado no DS';
-            }
-            issues.push(createIssueCard('color', frameName, value, message, issue.nodeName, issue));
-          });
-
-          // Fontes
-          fonts.forEach(issue => {
-            const value = issue.currentStyle || issue.value || 'Fonte não especificada';
-            let message = 'Estilo de texto';
-            if (issue.type === 'changed') {
-              message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
-            } else if (issue.type === 'missing') {
-              message = issue.reason || 'Estilo não vinculado';
-            } else if (issue.type === 'invalid') {
-              message = 'Estilo não encontrado no DS';
-            }
-            let displayValue = value;
-            if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
-              try {
-                const parsedValue = JSON.parse(value);
-                displayValue = parsedValue.family || 'Fonte não especificada';
-              } catch (e) {
-                console.warn('Failed to parse font value as JSON:', value, e);
-                displayValue = value;
-              }
-            } else if (typeof value === 'object') {
-              displayValue = value.family || 'Fonte não especificada';
-            }
-            issues.push(createIssueCard('font', frameName, displayValue, message, issue.nodeName, issue));
-          });
-
-          // Efeitos
-          effects.forEach(issue => {
-            const value = issue.currentStyle || issue.value || 'Efeito não especificado';
-            let message = 'Estilo de efeito';
-            if (issue.type === 'changed') {
-              message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
-            } else if (issue.type === 'missing') {
-              message = 'Estilo não vinculado';
-            } else if (issue.type === 'invalid') {
-              message = 'Estilo não encontrado no DS';
-            }
-            issues.push(createIssueCard('effect', frameName, value, message, issue.nodeName, issue));
-          });
-
-          // Componentes não-DS
-          if (nonCompliantItems.components > 0) {
-            for (let i = 0; i < nonCompliantItems.components; i++) {
-              issues.push(createIssueCard('component', frameName, 'Não conforme com DS', 'Componente fora do Design System'));
-            }
+        // Cores
+        colors.forEach(issue => {
+          const value = issue.currentStyle || issue.value || '#d9d9d9';
+          let message = 'Estilo de preenchimento';
+          if (issue.type === 'changed') {
+            message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+          } else if (issue.type === 'missing') {
+            message = `Estilo não vinculado (${issue.reason || 'fill'})`;
+          } else if (issue.type === 'invalid') {
+            message = 'Estilo não encontrado no DS';
           }
+          
+          // Criar chave mais específica incluindo frame para evitar agrupamentos incorretos
+          const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : value;
+          const key = `color-${message}-${contextKey}-${frameName}`;
+          if (!groupedIssues.has(key)) {
+            groupedIssues.set(key, {
+              type: 'color',
+              value,
+              message,
+              nodes: []
+            });
+          }
+          groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
+        });
 
-        return issues;
+        // Fontes
+        fonts.forEach(issue => {
+          const value = issue.currentStyle || issue.value || 'Fonte não especificada';
+          let message = 'Estilo de texto';
+          if (issue.type === 'changed') {
+            message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+          } else if (issue.type === 'missing') {
+            message = issue.reason || 'Estilo não vinculado';
+          } else if (issue.type === 'invalid') {
+            message = 'Estilo não encontrado no DS';
+          }
+          
+          let displayValue = value;
+          if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+            try {
+              const parsedValue = JSON.parse(value);
+              displayValue = parsedValue.family || 'Fonte não especificada';
+            } catch (e) {
+              displayValue = value;
+            }
+          } else if (typeof value === 'object') {
+            displayValue = value.family || 'Fonte não especificada';
+          }
+          
+          // Criar chave mais específica incluindo frame para evitar agrupamentos incorretos
+          const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : displayValue;
+          const key = `font-${message}-${contextKey}-${frameName}`;
+          if (!groupedIssues.has(key)) {
+            groupedIssues.set(key, {
+              type: 'font',
+              value: displayValue,
+              message,
+              nodes: []
+            });
+          }
+          groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
+        });
+
+        // Efeitos
+        effects.forEach(issue => {
+          const value = issue.currentStyle || issue.value || 'Efeito não especificado';
+          let message = 'Estilo de efeito';
+          if (issue.type === 'changed') {
+            message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+          } else if (issue.type === 'missing') {
+            message = 'Estilo não vinculado';
+          } else if (issue.type === 'invalid') {
+            message = 'Estilo não encontrado no DS';
+          }
+          
+          // Criar chave mais específica incluindo frame para evitar agrupamentos incorretos
+          const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : value;
+          const key = `effect-${message}-${contextKey}-${frameName}`;
+          if (!groupedIssues.has(key)) {
+            groupedIssues.set(key, {
+              type: 'effect',
+              value,
+              message,
+              nodes: []
+            });
+          }
+          groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
+        });
+
+        // Componentes não-DS - buscar nos detalhes de cores por componentes não-DS
+        if (colors.some(issue => issue.reason === 'Componente fora do Design System')) {
+          const componentIssues = colors.filter(issue => issue.reason === 'Componente fora do Design System');
+          componentIssues.forEach(issue => {
+            const key = `component-Componente fora do Design System-${frameName}-${issue.nodeId}`;
+            if (!groupedIssues.has(key)) {
+              groupedIssues.set(key, {
+                type: 'component',
+                value: 'Não conforme com DS',
+                message: 'Componente fora do Design System',
+                nodes: []
+              });
+            }
+            groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
+          });
+        }
       });
+      
+      const allIssues = Array.from(groupedIssues.values()).map(group => 
+        createGroupedIssueCard(group.type, group.value, group.message, group.nodes)
+      );
 
       if (allIssues.length === 0) {
         return `
@@ -780,7 +862,7 @@
       return allIssues.join('');
     }
 
-    function createIssueCard(type, frameName, value, message, nodeName = '', issue = null) {
+    function createGroupedIssueCard(type, value, message, nodes) {
       const icons = {
         color: '<path d="M12.6324 4.07389C12.5426 4.00975 12.4714 3.96035 12.4219 3.92651C12.4046 3.91036 12.3854 3.89896 12.3666 3.88772C12.3582 3.88272 12.3498 3.87775 12.3417 3.87241C12.1332 3.73524 11.8632 3.73524 11.6547 3.87241C11.6277 3.89016 11.6011 3.9083 11.5745 3.92651C11.525 3.96035 11.4538 4.00975 11.364 4.07389C11.1844 4.20213 10.93 4.38958 10.6257 4.62972C10.0179 5.10922 9.20601 5.80281 8.39198 6.65851C6.78843 8.34415 5.06641 10.7737 5.06641 13.5044C5.06641 17.3327 8.16988 20.4362 11.9982 20.4362C15.8266 20.4362 18.9301 17.3327 18.9301 13.5044C18.9301 10.7737 17.208 8.34415 15.6045 6.65851C14.7904 5.80281 13.9785 5.10922 13.3708 4.62972C13.0664 4.38958 12.812 4.20213 12.6324 4.07389Z" fill="currentColor"/>',
         font: '<text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">T</text>',
@@ -788,10 +870,19 @@
         component: '<rect x="8" y="8" width="8" height="8" fill="currentColor"/>'
       };
 
-      const nodeId = issue && issue.nodeId ? issue.nodeId : (nodeName || value);
+      const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
+      const nodesList = nodes.map(node => 
+        `<div class="node-item" onclick="focusIssue('${node.frameName}', '${node.nodeId}')">
+          <span>${node.nodeName || 'Elemento'}</span>
+          <small>${node.frameName}</small>
+        </div>`
+      ).join('');
+
+      const validNodeIds = nodes.map(n => n.nodeId).filter(id => id && id.includes(':'));
+      const isSingleOccurrence = nodes.length === 1;
 
       return `
-        <div class="issue-card">
+        <div class="issue-card grouped">
           <div class="issue-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               ${icons[type]}
@@ -799,10 +890,15 @@
           </div>
           <div class="issue-content">
             <p class="issue-message">${message}</p>
-            ${nodeName ? `<p class="issue-node">Em: ${nodeName}</p>` : ''}
             <p class="issue-value">${value}</p>
+            ${!isSingleOccurrence ? `<a href="#" class="issue-count" onclick="toggleNodesList('${cardId}'); return false;">
+              ${nodes.length} ocorrências
+            </a>` : ''}
+            <div class="nodes-list ${isSingleOccurrence ? '' : 'hidden'}" id="${cardId}">
+              ${nodesList}
+            </div>
           </div>
-          <button class="issue-action" onclick="focusIssue('${frameName}', '${nodeId}')">
+          <button class="issue-action" onclick="focusAllIssues('${validNodeIds.join(',')}')">
             <svg viewBox="0 0 24 24" fill="#767676" xmlns="http://www.w3.org/2000/svg" width="16" height="16" data-testid="SvgTargetIcon"><path d="M10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6 12a6 6 0 1 1 12 0 6 6 0 0 1-12 0m6-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0"></path></svg>
           </button>
         </div>
@@ -903,13 +999,37 @@
     }
 
     function focusIssue(frameName, value) {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'focus-issue',
-          frameName: frameName,
-          value: value
-        }
-      }, '*');
+      // Se o value é um nodeId válido, usar focus-all-issues para melhor compatibilidade
+      if (value && value.includes(':')) {
+        focusAllIssues([value]);
+      } else {
+        parent.postMessage({
+          pluginMessage: {
+            type: 'focus-issue',
+            frameName: frameName,
+            value: value
+          }
+        }, '*');
+      }
+    }
+
+    function focusAllIssues(nodeIds) {
+      const ids = Array.isArray(nodeIds) ? nodeIds : nodeIds.split(',').filter(id => id && id.includes(':'));
+      if (ids.length > 0) {
+        parent.postMessage({
+          pluginMessage: {
+            type: 'focus-all-issues',
+            nodeIds: ids
+          }
+        }, '*');
+      } else {
+        console.warn('Nenhum nodeId válido fornecido para foco');
+      }
+    }
+
+    function toggleNodesList(cardId) {
+      const nodesList = document.getElementById(cardId);
+      nodesList.classList.toggle('hidden');
     }
 
     // Initialize

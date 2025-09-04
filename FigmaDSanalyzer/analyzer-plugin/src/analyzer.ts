@@ -7,8 +7,6 @@ const processedNodes = new Set<string>();
 // Set to track processed issues and avoid duplicates in details
 const processedIssues = new Set<string>();
 
-// List of node types to exclude from layer counting
-
 // Constants
 const EXCLUDED_NODE_TYPES = [
   'SECTION',
@@ -38,6 +36,7 @@ const IGNORED_NAME_PREFIXES = [
 const IGNORE_STYLE_KEYWORDS = [
   'ignore-ds-styles',
   'ilustração',
+  'Brand'
   // Adicione outras palavras-chave aqui
 ];
 
@@ -47,7 +46,8 @@ function hasIgnoredPrefix(name: string): boolean {
 
 async function analyzeNodeColors(
   node: SceneNode, 
-  stylesData: StylesData[]
+  stylesData: StylesData[],
+  componentsData: ComponentData[]
 ): Promise<{ count: number; issues: StyleIssue[] }> {
   let nonCompliantColors = 0;
   const issues: StyleIssue[] = [];
@@ -66,74 +66,171 @@ async function analyzeNodeColors(
           hasStyle: true
         });
         
-        // Primeiro verificar se o estilo foi alterado em relação ao componente original
-        const mainNode = await getEquivalentNodeInMain(node);
-        if (mainNode && 'fillStyleId' in mainNode) {
-          const mainStyle = (mainNode as any).fillStyleId;
-          if (mainStyle && mainStyle !== fillStyleId) {
-            // Se ambos os estilos são do DS, é uma alteração não conforme e deve ser contabilizada
-            const bothFromDS = isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData) &&
-                             isStyleInDesignSystem(mainStyle, 'colorStyles', stylesData);
-            if (bothFromDS) {
-              nonCompliantColors++;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: fillStyleId,
-                currentStyle: (await figma.getStyleByIdAsync(fillStyleId))?.name,
-                originalStyle: (await figma.getStyleByIdAsync(mainStyle))?.name,
-                type: 'changed',
-                reason: 'Alterado para outro estilo do DS (fill)'
-              };
-              issues.push(issue);
-              console.log(`  ⚠️ Alterado para outro estilo do DS (fill):`, issue);
-            } else if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
-              nonCompliantColors++;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: fillStyleId,
-                currentStyle: await figma.getStyleById(fillStyleId)?.name,
-                type: 'invalid',
-                reason: 'Estilo não encontrado no DS (fill)'
-              };
-              issues.push(issue);
-              console.log(`  ❌ Cor não conforme encontrada (fill):`, issue);
-            }
-          } else {
-            // O estilo não foi alterado, verificar se é do DS
-            if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
-              nonCompliantColors++;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: fillStyleId,
-                currentStyle: await figma.getStyleById(fillStyleId)?.name,
-                type: 'invalid',
-                reason: 'Estilo não encontrado no DS (fill)'
-              };
-              issues.push(issue);
-              console.log(`  ❌ Cor não conforme encontrada (fill):`, issue);
-            } else {
-              console.log(`  ✅ Cor conforme (fill)`);
+        // Verificar mudanças de estilo sempre no contexto do componente DS raiz
+        let hasStyleChange = false;
+        
+        // Buscar o componente DS raiz (mais distante na hierarquia)
+        let rootDSInstance: InstanceNode | null = null;
+        let currentParent = node.parent;
+        
+        // Percorrer toda a hierarquia para encontrar o componente DS raiz
+        while (currentParent && currentParent.type !== 'PAGE') {
+          if (currentParent.type === 'INSTANCE') {
+            const componentStatus = await isComponentFromDSAsync(currentParent as InstanceNode, componentsData);
+            if (componentStatus.isFromDS) {
+              rootDSInstance = currentParent as InstanceNode; // Sempre atualizar para o mais distante
             }
           }
-        } else {
-          // Não há componente principal para comparar, apenas verificar se o estilo é do DS
-          if (!isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+          currentParent = currentParent.parent;
+        }
+        
+        // Se o próprio nó é instância DS e não há pai DS, usar ele
+        if (!rootDSInstance && node.type === 'INSTANCE') {
+          const componentStatus = await isComponentFromDSAsync(node as InstanceNode, componentsData);
+          if (componentStatus.isFromDS) {
+            rootDSInstance = node as InstanceNode;
+          }
+        }
+        
+        if (rootDSInstance) {
+          try {
+            const mainComponent = await rootDSInstance.getMainComponentAsync();
+            if (mainComponent) {
+              console.log(`  🔍 Componente standalone: ${mainComponent.name}`);
+              
+              // Construir caminho relativo do nó dentro do componente DS
+              function buildNodePath(targetNode: SceneNode, rootInstance: InstanceNode): string[] {
+                const path: string[] = [];
+                let current = targetNode;
+                
+                while (current && current !== rootInstance) {
+                  path.unshift(current.name);
+                  current = current.parent as SceneNode;
+                }
+                return path;
+              }
+              
+              // Navegar pelo caminho no componente principal
+              function findByPath(parent: BaseNode, path: string[]): SceneNode | null {
+                if (path.length === 0) return parent as SceneNode;
+                
+                if ('children' in parent) {
+                  for (const child of parent.children) {
+                    if (child.name === path[0]) {
+                      if (path.length === 1) {
+                        return child as SceneNode;
+                      } else {
+                        return findByPath(child, path.slice(1));
+                      }
+                    }
+                  }
+                }
+                return null;
+              }
+              
+              const nodePath = buildNodePath(node, rootDSInstance);
+              console.log(`  🗺️ Caminho: ${nodePath.join(' > ')}`);
+              let contextNode = findByPath(mainComponent, nodePath);
+              
+              // Se não encontrou por nome exato, tentar por posição estrutural
+              if (!contextNode && nodePath.length > 0) {
+                function findByStructuralPosition(parent: BaseNode, path: string[], index: number = 0): SceneNode | null {
+                  if (index >= path.length) return parent as SceneNode;
+                  
+                  if ('children' in parent) {
+                    // Buscar por nome primeiro
+                    for (const child of parent.children) {
+                      if (child.name === path[index]) {
+                        return findByStructuralPosition(child, path, index + 1);
+                      }
+                    }
+                    
+                    // Se não encontrou por nome, buscar na mesma posição estrutural
+                    if (index < path.length) {
+                      // Continuar navegando pela estrutura mesmo com nomes diferentes
+                      for (const child of parent.children) {
+                        if ('children' in child || (index === path.length - 1 && 'fillStyleId' in child)) {
+                          const result = findByStructuralPosition(child, path, index + 1);
+                          if (result) {
+                            if (index === path.length - 1) {
+                              console.log(`  🔄 Usando nó estruturalmente equivalente: ${child.name} (era ${path[index]})`);
+                            }
+                            return result;
+                          }
+                        }
+                      }
+                    }
+                  }
+                  return null;
+                }
+                
+                contextNode = findByStructuralPosition(mainComponent, nodePath);
+              }
+              
+              if (contextNode && 'fillStyleId' in contextNode) {
+                const contextStyleId = (contextNode as any).fillStyleId;
+                console.log(`  🎨 Estilos: atual=${fillStyleId} vs original=${contextStyleId}`);
+                
+                if (contextStyleId && contextStyleId !== fillStyleId) {
+                  hasStyleChange = true;
+                  const currentFromDS = isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData);
+                  const contextFromDS = isStyleInDesignSystem(contextStyleId, 'colorStyles', stylesData);
+                  
+                  if (currentFromDS && contextFromDS) {
+                    nonCompliantColors++;
+                    const issue: StyleIssue = {
+                      nodeId: node.id,
+                      nodeName: node.name,
+                      styleId: fillStyleId,
+                      currentStyle: (await figma.getStyleByIdAsync(fillStyleId))?.name,
+                      originalStyle: (await figma.getStyleByIdAsync(contextStyleId))?.name,
+                      type: 'changed',
+                      reason: 'Estilo alterado no componente (fill)',
+                      frameName: findFrameName(node)
+                    };
+                    issues.push(issue);
+                    console.log(`  ⚠️ Estilo alterado no componente:`, issue);
+                  } else if (!currentFromDS) {
+                    nonCompliantColors++;
+                    const issue: StyleIssue = {
+                      nodeId: node.id,
+                      nodeName: node.name,
+                      styleId: fillStyleId,
+                      currentStyle: (await figma.getStyleByIdAsync(fillStyleId))?.name,
+                      type: 'invalid',
+                      reason: 'Estilo não encontrado no DS (fill)',
+                      frameName: findFrameName(node)
+                    };
+                    issues.push(issue);
+                    console.log(`  ❌ Estilo inválido:`, issue);
+                  }
+                }
+              } else {
+                console.log(`  ⚠️ Nó equivalente não encontrado`);
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao comparar no contexto DS:', error);
+          }
+        }
+        
+        // Se não houve mudança de estilo, apenas verificar se é do DS
+        if (!hasStyleChange) {
+          if (isStyleInDesignSystem(fillStyleId, 'colorStyles', stylesData)) {
+            console.log(`  ✅ Cor conforme (fill)`);
+          } else {
             nonCompliantColors++;
             const issue: StyleIssue = {
               nodeId: node.id,
               nodeName: node.name,
               styleId: fillStyleId,
-              currentStyle: await figma.getStyleById(fillStyleId)?.name,
+              currentStyle: (await figma.getStyleByIdAsync(fillStyleId))?.name,
               type: 'invalid',
-              reason: 'Estilo não encontrado no DS (fill)'
+              reason: 'Estilo não encontrado no DS (fill)',
+              frameName: findFrameName(node)
             };
             issues.push(issue);
             console.log(`  ❌ Cor não conforme encontrada (fill):`, issue);
-          } else {
-            console.log(`  ✅ Cor conforme (fill)`);
           }
         }
       } else if (hasNonImageFills(node)) {
@@ -150,7 +247,8 @@ async function analyzeNodeColors(
           reason: 'Sem estilo vinculado (fill)',
           value: solidColor 
             ? `#${Math.round(solidColor.r * 255).toString(16).padStart(2, '0')}${Math.round(solidColor.g * 255).toString(16).padStart(2, '0')}${Math.round(solidColor.b * 255).toString(16).padStart(2, '0')}`
-            : undefined
+            : undefined,
+          frameName: findFrameName(node)
         };
         issues.push(issue);
         console.log(`  ❌ Cor não conforme encontrada (fill):`, issue);
@@ -168,74 +266,171 @@ async function analyzeNodeColors(
           hasStyle: true
         });
         
-        // Verificar alterações em relação ao componente original para strokes
-        const mainNode = await getEquivalentNodeInMain(node);
-        if (mainNode && 'strokeStyleId' in mainNode) {
-          const mainStyle = (mainNode as any).strokeStyleId;
-          if (mainStyle && mainStyle !== strokeStyleId) {
-            // Se ambos os estilos são do DS, é uma alteração não conforme e deve ser contabilizada
-            const bothFromDS = isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData) &&
-                             isStyleInDesignSystem(mainStyle, 'colorStyles', stylesData);
-            if (bothFromDS) {
-              nonCompliantColors++;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: strokeStyleId,
-                currentStyle: await figma.getStyleById(strokeStyleId)?.name,
-                originalStyle: await figma.getStyleById(mainStyle)?.name,
-                type: 'changed',
-                reason: 'Alterado para outro estilo do DS (stroke)'
-              };
-              issues.push(issue);
-              console.log(`  ⚠️ Alterado para outro estilo do DS (stroke):`, issue);
-            } else if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
-              nonCompliantColors++;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: strokeStyleId,
-                currentStyle: await figma.getStyleById(strokeStyleId)?.name,
-                type: 'invalid',
-                reason: 'Estilo não encontrado no DS (stroke)'
-              };
-              issues.push(issue);
-              console.log(`  ❌ Cor não conforme encontrada (stroke):`, issue);
-            }
-          } else {
-            // O estilo não foi alterado, verificar se é do DS
-            if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
-              nonCompliantColors++;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: strokeStyleId,
-                currentStyle: await figma.getStyleById(strokeStyleId)?.name,
-                type: 'invalid',
-                reason: 'Estilo não encontrado no DS (stroke)'
-              };
-              issues.push(issue);
-              console.log(`  ❌ Cor não conforme encontrada (stroke):`, issue);
-            } else {
-              console.log(`  ✅ Cor conforme (stroke)`);
+        // Verificar mudanças de estilo sempre no contexto do componente DS raiz
+        let hasStyleChange = false;
+        
+        // Buscar o componente DS raiz (mais distante na hierarquia)
+        let rootDSInstance: InstanceNode | null = null;
+        let currentParent = node.parent;
+        
+        // Percorrer toda a hierarquia para encontrar o componente DS raiz
+        while (currentParent && currentParent.type !== 'PAGE') {
+          if (currentParent.type === 'INSTANCE') {
+            const componentStatus = await isComponentFromDSAsync(currentParent as InstanceNode, componentsData);
+            if (componentStatus.isFromDS) {
+              rootDSInstance = currentParent as InstanceNode; // Sempre atualizar para o mais distante
             }
           }
-        } else {
-          // Não há componente principal para comparar, apenas verificar se o estilo é do DS
-          if (!isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+          currentParent = currentParent.parent;
+        }
+        
+        // Se o próprio nó é instância DS e não há pai DS, usar ele
+        if (!rootDSInstance && node.type === 'INSTANCE') {
+          const componentStatus = await isComponentFromDSAsync(node as InstanceNode, componentsData);
+          if (componentStatus.isFromDS) {
+            rootDSInstance = node as InstanceNode;
+          }
+        }
+        
+        if (rootDSInstance) {
+          try {
+            const mainComponent = await rootDSInstance.getMainComponentAsync();
+            if (mainComponent) {
+              console.log(`  🔍 Componente standalone: ${mainComponent.name}`);
+              
+              // Construir caminho relativo do nó dentro do componente DS
+              function buildNodePath(targetNode: SceneNode, rootInstance: InstanceNode): string[] {
+                const path: string[] = [];
+                let current = targetNode;
+                
+                while (current && current !== rootInstance) {
+                  path.unshift(current.name);
+                  current = current.parent as SceneNode;
+                }
+                return path;
+              }
+              
+              // Navegar pelo caminho no componente principal
+              function findByPath(parent: BaseNode, path: string[]): SceneNode | null {
+                if (path.length === 0) return parent as SceneNode;
+                
+                if ('children' in parent) {
+                  for (const child of parent.children) {
+                    if (child.name === path[0]) {
+                      if (path.length === 1) {
+                        return child as SceneNode;
+                      } else {
+                        return findByPath(child, path.slice(1));
+                      }
+                    }
+                  }
+                }
+                return null;
+              }
+              
+              const nodePath = buildNodePath(node, rootDSInstance);
+              console.log(`  🗺️ Caminho: ${nodePath.join(' > ')}`);
+              let contextNode = findByPath(mainComponent, nodePath);
+              
+              // Se não encontrou por nome exato, tentar por posição estrutural
+              if (!contextNode && nodePath.length > 0) {
+                function findByStructuralPosition(parent: BaseNode, path: string[], index: number = 0): SceneNode | null {
+                  if (index >= path.length) return parent as SceneNode;
+                  
+                  if ('children' in parent) {
+                    // Buscar por nome primeiro
+                    for (const child of parent.children) {
+                      if (child.name === path[index]) {
+                        return findByStructuralPosition(child, path, index + 1);
+                      }
+                    }
+                    
+                    // Se não encontrou por nome, buscar na mesma posição estrutural
+                    if (index < path.length) {
+                      // Continuar navegando pela estrutura mesmo com nomes diferentes
+                      for (const child of parent.children) {
+                        if ('children' in child || (index === path.length - 1 && 'strokeStyleId' in child)) {
+                          const result = findByStructuralPosition(child, path, index + 1);
+                          if (result) {
+                            if (index === path.length - 1) {
+                              console.log(`  🔄 Usando nó estruturalmente equivalente: ${child.name} (era ${path[index]})`);
+                            }
+                            return result;
+                          }
+                        }
+                      }
+                    }
+                  }
+                  return null;
+                }
+                
+                contextNode = findByStructuralPosition(mainComponent, nodePath);
+              }
+              
+              if (contextNode && 'strokeStyleId' in contextNode) {
+                const contextStyleId = (contextNode as any).strokeStyleId;
+                console.log(`  🎨 Estilos: atual=${strokeStyleId} vs original=${contextStyleId}`);
+                
+                if (contextStyleId && contextStyleId !== strokeStyleId) {
+                  hasStyleChange = true;
+                  const currentFromDS = isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData);
+                  const contextFromDS = isStyleInDesignSystem(contextStyleId, 'colorStyles', stylesData);
+                  
+                  if (currentFromDS && contextFromDS) {
+                    nonCompliantColors++;
+                    const issue: StyleIssue = {
+                      nodeId: node.id,
+                      nodeName: node.name,
+                      styleId: strokeStyleId,
+                      currentStyle: (await figma.getStyleByIdAsync(strokeStyleId))?.name,
+                      originalStyle: (await figma.getStyleByIdAsync(contextStyleId))?.name,
+                      type: 'changed',
+                      reason: 'Estilo alterado no componente (stroke)',
+                      frameName: findFrameName(node)
+                    };
+                    issues.push(issue);
+                    console.log(`  ⚠️ Estilo alterado no componente:`, issue);
+                  } else if (!currentFromDS) {
+                    nonCompliantColors++;
+                    const issue: StyleIssue = {
+                      nodeId: node.id,
+                      nodeName: node.name,
+                      styleId: strokeStyleId,
+                      currentStyle: (await figma.getStyleByIdAsync(strokeStyleId))?.name,
+                      type: 'invalid',
+                      reason: 'Estilo não encontrado no DS (stroke)',
+                      frameName: findFrameName(node)
+                    };
+                    issues.push(issue);
+                    console.log(`  ❌ Estilo inválido:`, issue);
+                  }
+                }
+              } else {
+                console.log(`  ⚠️ Nó equivalente não encontrado`);
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao comparar no contexto DS:', error);
+          }
+        }
+        
+        // Se não houve mudança de estilo, apenas verificar se é do DS
+        if (!hasStyleChange) {
+          if (isStyleInDesignSystem(strokeStyleId, 'colorStyles', stylesData)) {
+            console.log(`  ✅ Cor conforme (stroke)`);
+          } else {
             nonCompliantColors++;
             const issue: StyleIssue = {
               nodeId: node.id,
               nodeName: node.name,
               styleId: strokeStyleId,
-              currentStyle: await figma.getStyleById(strokeStyleId)?.name,
+              currentStyle: (await figma.getStyleByIdAsync(strokeStyleId))?.name,
               type: 'invalid',
-              reason: 'Estilo não encontrado no DS (stroke)'
+              reason: 'Estilo não encontrado no DS (stroke)',
+              frameName: findFrameName(node)
             };
             issues.push(issue);
             console.log(`  ❌ Cor não conforme encontrada (stroke):`, issue);
-          } else {
-            console.log(`  ✅ Cor conforme (stroke)`);
           }
         }
       } else if (hasStrokes(node)) {
@@ -252,7 +447,8 @@ async function analyzeNodeColors(
           reason: 'Sem estilo vinculado (stroke)',
           value: solidColor 
             ? `#${Math.round(solidColor.r * 255).toString(16).padStart(2, '0')}${Math.round(solidColor.g * 255).toString(16).padStart(2, '0')}${Math.round(solidColor.b * 255).toString(16).padStart(2, '0')}`
-            : undefined
+            : undefined,
+          frameName: findFrameName(node)
         };
         issues.push(issue);
         console.log(`  ❌ Cor não conforme encontrada (stroke):`, issue);
@@ -267,101 +463,6 @@ async function analyzeNodeColors(
     count: nonCompliantColors, 
     issues: issues || [] 
   };
-}
-
-
-
-// Helper function to get equivalent node in main component
-async function getEquivalentNodeInMain(node: SceneNode): Promise<SceneNode | null> {
-  try {
-    // Find all instance parents in the hierarchy
-    let current: BaseNode | null = node;
-    let nodePath: string[] = [];
-    let instances: { instance: InstanceNode; mainComponent: ComponentNode | null; path: string[] }[] = [];
-    
-    while (current && current.parent && current.type !== 'PAGE') {
-      // Collect node names in the path
-      nodePath.unshift(current.name);
-      
-      if (current.type === 'INSTANCE') {
-        const instance = current as InstanceNode;
-        const mainComponent = await instance.getMainComponentAsync();
-        if (mainComponent) {
-          instances.push({
-            instance,
-            mainComponent,
-            path: [...nodePath]
-          });
-        }
-      }
-      current = current.parent;
-    }
-    
-    if (instances.length === 0) return null;
-
-    // Se houver mais de uma instância no caminho, precisamos encontrar o estilo correto
-    // no contexto do componente pai do DS
-    for (let i = instances.length - 1; i >= 0; i--) {
-      const { instance, mainComponent, path } = instances[i];
-      
-      // Apenas logar se mainComponent não for null (já verificamos acima)
-      console.log('Buscando nó equivalente:', {
-        nodeId: node.id,
-        nodeName: node.name,
-        instanceId: instance.id,
-        instanceName: instance.name,
-        mainComponentId: mainComponent?.id || 'unknown',
-        mainComponentName: mainComponent?.name || 'unknown',
-        instanceLevel: i,
-        totalInstances: instances.length,
-        path: path
-      });
-
-      // Remove instance names from path until current instance
-      const relativePath = path.slice(path.indexOf(instance.name) + 1);
-      
-      // Recursive function to find node by name path
-      function findNodeByPath(parent: SceneNode, pathToFind: string[], currentDepth: number = 0): SceneNode | null {
-        if (currentDepth === pathToFind.length) return parent;
-        
-        if ('children' in parent) {
-          const targetName = pathToFind[currentDepth];
-          for (const child of (parent as any).children) {
-            if (child.name === targetName) {
-              const result = findNodeByPath(child, pathToFind, currentDepth + 1);
-              if (result) return result;
-            }
-          }
-        }
-        return null;
-      }
-
-      // Find the equivalent node in the main component
-      // mainComponent não pode ser null aqui pois já verificamos na construção do array instances
-      const target = findNodeByPath(mainComponent as SceneNode, relativePath);
-      
-      if (target) {
-        // Se este é o componente pai do DS, ou se o nó tem estilos definidos,
-        // retornamos este nó como referência
-        if (i === instances.length - 1 || 
-            ('fillStyleId' in target && (target as any).fillStyleId) ||
-            ('strokeStyleId' in target && (target as any).strokeStyleId) ||
-            ('effectStyleId' in target && (target as any).effectStyleId)) {
-          console.log('Nó equivalente encontrado:', {
-            targetId: target.id,
-            targetName: target.name,
-            targetType: target.type,
-            originalPath: relativePath,
-            reason: i === instances.length - 1 ? 'Componente pai do DS' : 'Nó com estilos definidos'
-          });
-          return target;
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao buscar nó equivalente no main component:', error);
-  }
-  return null;
 }
 
 async function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): Promise<{ count: number; issues: StyleIssue[] }> {
@@ -387,73 +488,35 @@ async function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): Prom
             nodeName: node.name,
             type: 'missing',
             reason: 'Texto com múltiplos estilos - Nenhum estilo de texto aplicado',
-            value: typeof textNode.fontName === 'symbol' ? undefined : JSON.stringify(textNode.fontName)
+            value: typeof textNode.fontName === 'symbol' ? undefined : JSON.stringify(textNode.fontName),
+            frameName: findFrameName(node)
           };
           issues.push(issue);
           console.log(`  ❌ Texto com múltiplos estilos não conforme:`, issue);
         } else {
-          // Verificar se os estilos foram alterados em relação ao componente principal
-          const mainNode = await getEquivalentNodeInMain(node);
-          if (mainNode && mainNode.type === 'TEXT') {
-            const mainTextNode = mainNode as TextNode;
-            const mainStyleIds = typeof mainTextNode.textStyleId === 'object' 
-              ? Object.values(mainTextNode.textStyleId).filter((id): id is string => typeof id === 'string')
-              : [mainTextNode.textStyleId].filter((id): id is string => typeof id === 'string');
+          // Apenas verificar se os estilos são do DS, sem comparar alterações
+          for (const styleId of styleIds) {
+            console.log(`  Text Style:`, {
+              nodeId: node.id,
+              nodeName: node.name,
+              styleId: styleId,
+              hasStyle: Boolean(styleId)
+            });
 
-            for (const styleId of styleIds) {
-              console.log(`  Text Style:`, {
+            if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
+              hasNonCompliantSegment = true;
+              const issue: StyleIssue = {
                 nodeId: node.id,
                 nodeName: node.name,
-                styleId: styleId,
-                hasStyle: Boolean(styleId)
-              });
-
-              // Verificar se o estilo foi alterado em relação ao componente principal
-              const mainStyleForSegment = mainStyleIds.find(mainId => mainId && mainId !== styleId);
-              if (mainStyleForSegment && styleId !== mainStyleForSegment) {
-                // Se ambos os estilos são do DS, é uma alteração não conforme e deve ser contabilizada
-                const bothFromDS = isStyleInDesignSystem(styleId, 'textStyles', stylesData) &&
-                                 isStyleInDesignSystem(mainStyleForSegment, 'textStyles', stylesData);
-                if (bothFromDS) {
-                  hasNonCompliantSegment = true;
-                  const issue: StyleIssue = {
-                    nodeId: node.id,
-                    nodeName: node.name,
-                    styleId: styleId,
-                    currentStyle: await figma.getStyleById(styleId)?.name,
-                    originalStyle: await figma.getStyleById(mainStyleForSegment)?.name,
-                    type: 'changed',
-                    reason: 'Texto alterado para outro estilo do DS'
-                  };
-                  issues.push(issue);
-                  console.log(`  ⚠️ Alterado para outro estilo do DS:`, issue);
-                } else if (!isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
-                  hasNonCompliantSegment = true;
-                  const issue: StyleIssue = {
-                    nodeId: node.id,
-                    nodeName: node.name,
-                    styleId: styleId,
-                    currentStyle: await figma.getStyleById(styleId)?.name,
-                    type: 'invalid',
-                    reason: 'Segmento com estilo não encontrado no DS'
-                  };
-                  issues.push(issue);
-                  console.log(`  ❌ Segmento não conforme encontrado:`, issue);
-                }
-              } else if (!styleId || !isStyleInDesignSystem(styleId, 'textStyles', stylesData)) {
-                hasNonCompliantSegment = true;
-                const issue: StyleIssue = {
-                  nodeId: node.id,
-                  nodeName: node.name,
-                  type: 'missing',
-                  reason: !styleId ? 'Segmento sem estilo vinculado' : 'Segmento com estilo não encontrado no DS',
-                  value: typeof textNode.fontName === 'symbol' ? undefined : JSON.stringify(textNode.fontName)
-                };
-                issues.push(issue);
-                console.log(`  ❌ Segmento não conforme encontrado:`, issue);
-              } else {
-                console.log(`  ✅ Segmento conforme`);
-              }
+                type: 'missing',
+                reason: !styleId ? 'Segmento sem estilo vinculado' : 'Segmento com estilo não encontrado no DS',
+                value: typeof textNode.fontName === 'symbol' ? undefined : JSON.stringify(textNode.fontName),
+                frameName: findFrameName(node)
+              };
+              issues.push(issue);
+              console.log(`  ❌ Segmento não conforme encontrado:`, issue);
+            } else {
+              console.log(`  ✅ Segmento conforme`);
             }
           }
           
@@ -471,58 +534,11 @@ async function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): Prom
           hasStyle: Boolean(textStyleId)
         });
 
-        // Verificar se o estilo foi alterado em relação ao componente principal
-        const mainNode = await getEquivalentNodeInMain(node);
-        if (mainNode && mainNode.type === 'TEXT') {
-          const mainTextNode = mainNode as TextNode;
-          const mainStyleId = mainTextNode.textStyleId as string;
-          
-          if (mainStyleId && mainStyleId !== textStyleId) {
-            // Se ambos os estilos são do DS, é uma alteração não conforme e deve ser contabilizada
-            const bothFromDS = isStyleInDesignSystem(textStyleId, 'textStyles', stylesData) &&
-                             isStyleInDesignSystem(mainStyleId, 'textStyles', stylesData);
-            if (bothFromDS) {
-              nonCompliantFonts = 1;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: textStyleId,
-                currentStyle: await figma.getStyleById(textStyleId)?.name,
-                originalStyle: await figma.getStyleById(mainStyleId)?.name,
-                type: 'changed',
-                reason: 'Texto alterado para outro estilo do DS'
-              };
-              issues.push(issue);
-              console.log(`  ⚠️ Alterado para outro estilo do DS:`, issue);
-            } else if (!isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
-              nonCompliantFonts = 1;
-              const issue: StyleIssue = {
-                nodeId: node.id,
-                nodeName: node.name,
-                styleId: textStyleId,
-                currentStyle: await figma.getStyleById(textStyleId)?.name,
-                type: 'invalid',
-                reason: 'Estilo não encontrado no DS'
-              };
-              issues.push(issue);
-              console.log(`  ❌ Fonte não conforme encontrada:`, issue);
-            }
-          } else if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
-            nonCompliantFonts = 1;
-            const issue: StyleIssue = {
-              nodeId: node.id,
-              nodeName: node.name,
-              type: 'missing',
-              reason: !textStyleId ? 'Texto sem estilo vinculado' : 'Estilo não encontrado no DS',
-              value: formatFontName(textNode.fontName)
-            };
-            issues.push(issue);
-            console.log(`  ❌ Fonte não conforme encontrada:`, issue);
-          } else {
-            console.log(`  ✅ Fonte conforme`);
-          }
-        } else {
-          // Não há componente principal para comparar, apenas verificar se o estilo é do DS
+        // Não verificar alterações para texto simples - apenas validar se é do DS
+        let hasStyleChange = false;
+        
+        // Se não houve mudança de estilo, apenas verificar se é do DS
+        if (!hasStyleChange) {
           if (!textStyleId || !isStyleInDesignSystem(textStyleId, 'textStyles', stylesData)) {
             nonCompliantFonts = 1;
             const issue: StyleIssue = {
@@ -530,7 +546,8 @@ async function analyzeNodeFonts(node: SceneNode, stylesData: StylesData[]): Prom
               nodeName: node.name,
               type: 'missing',
               reason: !textStyleId ? 'Texto sem estilo vinculado' : 'Estilo não encontrado no DS',
-              value: formatFontName(textNode.fontName)
+              value: formatFontName(textNode.fontName),
+              frameName: findFrameName(node)
             };
             issues.push(issue);
             console.log(`  ❌ Fonte não conforme encontrada:`, issue);
@@ -561,69 +578,69 @@ async function analyzeNodeEffects(node: SceneNode, stylesData: StylesData[]): Pr
         hasStyle: true
     });
     
-      // Verificar se mantém o estilo do componente original
-      const mainNode = await getEquivalentNodeInMain(node);
-      if (mainNode && 'effectStyleId' in mainNode) {
-        const mainStyle = (mainNode as any).effectStyleId;
-        if (mainStyle && mainStyle !== effectStyleId) {
-          // Se ambos os estilos são do DS, é uma alteração não conforme e deve ser contabilizada
-          const bothFromDS = isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData) &&
-                           isStyleInDesignSystem(mainStyle, 'effectStyles', stylesData);
-          if (bothFromDS) {
-            nonCompliantEffects++;
-            const issue: StyleIssue = {
-              nodeId: node.id,
-              nodeName: node.name,
-              styleId: effectStyleId,
-              currentStyle: await figma.getStyleById(effectStyleId)?.name,
-              originalStyle: await figma.getStyleById(mainStyle)?.name,
-              type: 'changed',
-              reason: 'Alterado para outro estilo do DS (effect)'
-            };
-            issues.push(issue);
-            console.log(`  ⚠️ Alterado para outro estilo do DS (effect):`, issue);
-          } else if (!isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData)) {
-            nonCompliantEffects++;
-            const issue: StyleIssue = {
-              nodeId: node.id,
-              nodeName: node.name,
-              styleId: effectStyleId,
-              currentStyle: await figma.getStyleById(effectStyleId)?.name,
-              type: 'invalid',
-              reason: 'Estilo não encontrado no DS (effect)'
-            };
-            issues.push(issue);
-            console.log(`  ❌ Efeito não conforme encontrado:`, issue);
+      // Verificar alterações para efeitos apenas se for instância
+      let hasStyleChange = false;
+      if (node.type === 'INSTANCE') {
+        const instance = node as InstanceNode;
+        try {
+          const mainComponent = await instance.getMainComponentAsync();
+          if (mainComponent) {
+            const mainNode = mainComponent.findOne(n => n.name === node.name && n.type === node.type);
+            if (mainNode && 'effectStyleId' in mainNode) {
+              const mainStyle = (mainNode as any).effectStyleId;
+              if (mainStyle && mainStyle !== effectStyleId) {
+                hasStyleChange = true;
+                // Se ambos os estilos são do DS, é uma alteração não conforme e deve ser contabilizada
+                const bothFromDS = isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData) &&
+                                 isStyleInDesignSystem(mainStyle, 'effectStyles', stylesData);
+                if (bothFromDS) {
+                  nonCompliantEffects++;
+                  const issue: StyleIssue = {
+                    nodeId: node.id,
+                    nodeName: node.name,
+                    styleId: effectStyleId,
+                    currentStyle: (await figma.getStyleByIdAsync(effectStyleId))?.name,
+                    originalStyle: (await figma.getStyleByIdAsync(mainStyle))?.name,
+                    type: 'changed',
+                    reason: 'Alterado para outro estilo do DS (effect)',
+                    frameName: findFrameName(node)
+                  };
+                  issues.push(issue);
+                  console.log(`  ⚠️ Alterado para outro estilo do DS (effect):`, issue);
+                } else if (!isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData)) {
+                  nonCompliantEffects++;
+                  const issue: StyleIssue = {
+                    nodeId: node.id,
+                    nodeName: node.name,
+                    styleId: effectStyleId,
+                    currentStyle: (await figma.getStyleByIdAsync(effectStyleId))?.name,
+                    type: 'invalid',
+                    reason: 'Estilo não encontrado no DS (effect)',
+                    frameName: findFrameName(node)
+                  };
+                  issues.push(issue);
+                  console.log(`  ❌ Efeito não conforme encontrado:`, issue);
+                }
+              }
+            }
           }
-        } else {
-          // O estilo não foi alterado, verificar se é do DS
-          if (!isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData)) {
-            nonCompliantEffects++;
-            const issue: StyleIssue = {
-              nodeId: node.id,
-              nodeName: node.name,
-              styleId: effectStyleId,
-              currentStyle: await figma.getStyleById(effectStyleId)?.name,
-              type: 'invalid',
-              reason: 'Estilo não encontrado no DS (effect)'
-            };
-            issues.push(issue);
-            console.log(`  ❌ Efeito não conforme encontrado:`, issue);
-          } else {
-            console.log(`  ✅ Efeito conforme`);
-          }
+        } catch (error) {
+          console.error('Erro ao buscar componente principal:', error);
         }
-      } else {
-        // Não há componente principal para comparar, apenas verificar se o estilo é do DS
+      }
+      
+      // Se não houve mudança de estilo, apenas verificar se é do DS
+      if (!hasStyleChange) {
         if (!isStyleInDesignSystem(effectStyleId, 'effectStyles', stylesData)) {
           nonCompliantEffects++;
           const issue: StyleIssue = {
             nodeId: node.id,
             nodeName: node.name,
             styleId: effectStyleId,
-            currentStyle: await figma.getStyleById(effectStyleId)?.name,
+            currentStyle: (await figma.getStyleByIdAsync(effectStyleId))?.name,
             type: 'invalid',
-            reason: 'Estilo não encontrado no DS (effect)'
+            reason: 'Estilo não encontrado no DS (effect)',
+            frameName: findFrameName(node)
           };
           issues.push(issue);
           console.log(`  ❌ Efeito não conforme encontrado:`, issue);
@@ -643,7 +660,8 @@ async function analyzeNodeEffects(node: SceneNode, stylesData: StylesData[]): Pr
         nodeName: node.name,
         type: 'missing',
         reason: 'Sem estilo vinculado',
-        value: effectsValue
+        value: effectsValue,
+        frameName: findFrameName(node)
       };
       issues.push(issue);
       console.log(`  ❌ Efeito não conforme encontrado:`, issue);
@@ -703,8 +721,8 @@ async function isComponentFromDSAsync(node: SceneNode, componentsData: Component
 
 // Helper function to check if a node has any styles applied or modified
 async function hasAppliedStyles(node: SceneNode): Promise<boolean> {
-  // Check if the node has styles that differ from its main component
-  const mainNode = await getEquivalentNodeInMain(node);
+  // Não verificar alterações de estilos
+  const mainNode = null;
   
   if (mainNode) {
     // Check fill style changes
@@ -776,9 +794,6 @@ function formatFontName(fontName: FontName | typeof figma.mixed): string | undef
   if (typeof fontName === 'symbol') return undefined;
   return `${fontName.family} ${fontName.style}`;
 }
-
-// Versão assíncrona de analyzeSingleNode
-
 
 async function analyzeSingleNodeAsync(
   node: SceneNode,
@@ -902,9 +917,19 @@ async function analyzeSingleNodeAsync(
         } else {
           console.log('➖ Layer não contabilizada:', node);
         }
+        
+        // Criar issue para componente não-DS com informações completas
+        const componentIssue: StyleIssue = {
+          nodeId: node.id,
+          nodeName: node.name,
+          type: 'invalid',
+          reason: 'Componente fora do Design System',
+          frameName: findFrameName(node)
+        };
+        (details.colors as StyleIssue[]).push(componentIssue); // Adicionar aos detalhes de cores por conveniência
       }
       // Análise de estilos
-      const colorResults = await analyzeNodeColors(node, stylesData);
+      const colorResults = await analyzeNodeColors(node, stylesData, componentsData);
       const fontResults = await analyzeNodeFonts(node, stylesData);
       const effectResults = await analyzeNodeEffects(node, stylesData);
       
@@ -912,11 +937,9 @@ async function analyzeSingleNodeAsync(
       nonCompliantFonts = fontResults?.count || 0;
       nonCompliantEffects = effectResults?.count || 0;
 
-      Object.assign(details, {
-        colors: deduplicateIssues(colorResults.issues),
-        fonts: deduplicateIssues(fontResults.issues),
-        effects: deduplicateIssues(effectResults.issues)
-      });
+      (details.colors as StyleIssue[]).push(...deduplicateIssues(colorResults.issues));
+      (details.fonts as StyleIssue[]).push(...deduplicateIssues(fontResults.issues));
+      (details.effects as StyleIssue[]).push(...deduplicateIssues(effectResults.issues));
       
       if (nonCompliantFonts > 0) {
         console.log('❌ Fontes não permitidas encontradas:', node);
@@ -952,15 +975,13 @@ async function analyzeSingleNodeAsync(
         console.log('➖ Layer não contabilizada:', node);
       }
       // Análise de estilos
-      const colorResults = await analyzeNodeColors(node, stylesData);
+      const colorResults = await analyzeNodeColors(node, stylesData, componentsData);
       const fontResults = await analyzeNodeFonts(node, stylesData);
       const effectResults = await analyzeNodeEffects(node, stylesData);
 
-      Object.assign(details, {
-        colors: deduplicateIssues(colorResults?.issues || []),
-        fonts: deduplicateIssues(fontResults?.issues || []),
-        effects: deduplicateIssues(effectResults?.issues || [])
-      });
+      (details.colors as StyleIssue[]).push(...deduplicateIssues(colorResults?.issues || []));
+      (details.fonts as StyleIssue[]).push(...deduplicateIssues(fontResults?.issues || []));
+      (details.effects as StyleIssue[]).push(...deduplicateIssues(effectResults?.issues || []));
       
       nonCompliantColors = colorResults?.count || 0;
       nonCompliantFonts = fontResults?.count || 0;
@@ -1077,7 +1098,6 @@ export async function analyzeNodeAsync(
   }
 }
 
-
 // Versão assíncrona de analyzeFrame
 export async function analyzeFrame(
   frame: FrameNode,
@@ -1157,6 +1177,18 @@ export async function analyzeFrame(
     }
     throw error;
   }
+}
+
+// Helper function to find the frame name for a node
+function findFrameName(node: SceneNode): string {
+  let current = node.parent;
+  while (current && current.type !== 'PAGE') {
+    if (current.type === 'FRAME') {
+      return current.name;
+    }
+    current = current.parent;
+  }
+  return 'Unknown Frame';
 }
 
 // Helper function to count nodes that should be excluded from the layer count

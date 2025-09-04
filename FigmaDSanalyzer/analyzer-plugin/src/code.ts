@@ -39,6 +39,9 @@ figma.ui.onmessage = async (msg) => {
     case 'focus-issue':
       await focusIssue(msg.frameName, msg.value);
       break;
+    case 'focus-all-issues':
+      await focusAllIssues(msg.nodeIds);
+      break;
     case 'close-plugin':
       figma.closePlugin();
       break;
@@ -564,7 +567,7 @@ async function focusIssue(frameName: string, value: string) {
     }
 
     // Buscar o frame pelo nome
-    const frame = findFrameByName(frameName);
+    const frame = await findFrameByName(frameName);
     if (!frame) {
       console.warn(`Frame não encontrado: ${frameName}`);
       return;
@@ -587,12 +590,51 @@ async function focusIssue(frameName: string, value: string) {
   }
 }
 
-function findFrameByName(frameName: string): FrameNode | null {
-  // Buscar em todas as páginas
-  for (const page of figma.root.children) {
-    // Buscar frames na página atual
-    const frame = findFrameRecursively(page, frameName);
-    if (frame) return frame;
+async function focusAllIssues(nodeIds: string[]) {
+  try {
+    const nodes: SceneNode[] = [];
+    
+    for (const nodeId of nodeIds) {
+      if (nodeId && nodeId.includes(':')) {
+        try {
+          const node = await figma.getNodeByIdAsync(nodeId);
+          if (node && node.type !== 'DOCUMENT' && node.type !== 'PAGE') {
+            nodes.push(node as SceneNode);
+          }
+        } catch (nodeError) {
+          console.warn(`Nó não encontrado por ID: ${nodeId}`, nodeError);
+        }
+      }
+    }
+    
+    if (nodes.length > 0) {
+      figma.currentPage.selection = nodes;
+      figma.viewport.scrollAndZoomIntoView(nodes);
+      console.log(`Selecionados ${nodes.length} nós com o mesmo problema`);
+    } else {
+      console.warn('Nenhum nó válido encontrado para seleção múltipla');
+    }
+  } catch (error) {
+    console.error('Erro ao focar em múltiplos problemas:', error);
+  }
+}
+
+async function findFrameByName(frameName: string): Promise<FrameNode | null> {
+  // Buscar primeiro na página atual
+  const currentPageFrame = findFrameRecursively(figma.currentPage, frameName);
+  if (currentPageFrame) return currentPageFrame;
+  
+  // Se não encontrou, buscar em todas as páginas
+  try {
+    await figma.loadAllPagesAsync();
+    for (const page of figma.root.children) {
+      if (page.type === 'PAGE') {
+        const frame = findFrameRecursively(page, frameName);
+        if (frame) return frame;
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar páginas:', error);
   }
   return null;
 }

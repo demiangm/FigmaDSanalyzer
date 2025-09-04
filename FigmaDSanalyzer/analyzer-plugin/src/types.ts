@@ -67,6 +67,7 @@ export interface StyleIssue {
   type: 'changed' | 'missing' | 'invalid';
   reason: string;
   value?: string; // Para cores hex, nomes de fonte, etc
+  frameName?: string; // Nome do frame onde o issue ocorre
 }
 
 export interface NonCompliantDetails {
