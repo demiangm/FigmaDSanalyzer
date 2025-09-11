@@ -112,7 +112,7 @@ async function analyzeSelection(renderCard: boolean = true) {
       const report = await analyzeFrame(node as FrameNode, componentsData, stylesData);
       reports.push(report);
       // Só cria o card se renderCard for true
-      if (renderCard && node.type === 'FRAME') {
+      if (renderCard && (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT')) {
         await createAnalysisCard(report, node as FrameNode);
       }
       // Envia dados detalhados para a UI
@@ -132,6 +132,23 @@ async function analyzeSelection(renderCard: boolean = true) {
   });
 }
 
+// Helper function to get absolute coordinates on canvas
+function getAbsolutePosition(node: SceneNode): { x: number; y: number } {
+  let absoluteX = node.x;
+  let absoluteY = node.y;
+  let parent = node.parent;
+  
+  while (parent && parent.type !== 'PAGE') {
+    if ('x' in parent && 'y' in parent) {
+      absoluteX += parent.x;
+      absoluteY += parent.y;
+    }
+    parent = parent.parent;
+  }
+  
+  return { x: absoluteX, y: absoluteY };
+}
+
 async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   // Carrega todas as fontes necessárias
   await Promise.all([
@@ -146,8 +163,11 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   // Cria o frame principal do card
   const card = figma.createFrame();
   card.name = `Analysis: ${frame.name}`;
-  card.x = frame.x + frame.width + 50;
-  card.y = frame.y;
+  
+  // Calcular posição absoluta no canvas
+  const absolutePos = getAbsolutePosition(frame);
+  card.x = absolutePos.x + frame.width + 50;
+  card.y = absolutePos.y;
   card.resize(480, 471);
   card.fills = [{
     type: 'SOLID',

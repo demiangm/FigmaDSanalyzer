@@ -74,6 +74,7 @@ export interface NonCompliantDetails {
   colors: StyleIssue[];
   fonts: StyleIssue[];
   effects: StyleIssue[];
+  components: StyleIssue[];
 }
 
 export interface ComplianceReport {

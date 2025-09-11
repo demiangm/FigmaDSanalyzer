@@ -187,13 +187,32 @@
       font-weight: 500;
       color: #333;
       margin: 0;
+      line-height: 1.4;
+    }
+    
+    .issue-message strong {
+      font-weight: 600;
+      color: #222;
+      display: block;
+      margin-bottom: 4px;
     }
 
     .issue-value {
-      font-family: 'SF Mono', 'Consolas', monospace;
-      font-size: 13px;
+      font-size: 12px;
       color: #666;
       margin: 0;
+      line-height: 1.4;
+    }
+    
+    .issue-value strong {
+      font-weight: 600;
+      color: #333;
+      font-size: 10px;
+    }
+
+    .issue-value span {
+      padding-top: 8px;
+      display: block;
     }
 
     .issue-node {
@@ -217,11 +236,6 @@
 
     .issue-action:hover {
       background: rgba(0, 0, 0, 0.05);
-    }
-
-    /* Grouped Issue Cards */
-    .issue-card.grouped {
-      border-left: 4px solid #DF0979;
     }
 
     .issue-count {
@@ -733,14 +747,20 @@
       // Agrupar issues por tipo e valor
       reports.forEach(report => {
         const { frameName, nonCompliantItems } = report;
-        const { colors = [], fonts = [], effects = [] } = nonCompliantItems.details || {};
+        const { colors = [], fonts = [], effects = [], components: componentIssues = [] } = nonCompliantItems.details || {};
+        
+        console.log(`[DEBUG] Processando frame: ${frameName}`);
+        console.log(`[DEBUG] Components issues:`, componentIssues);
 
         // Cores
         colors.forEach(issue => {
-          const value = issue.currentStyle || issue.value || '#d9d9d9';
+          const value = issue.type === 'changed' && issue.value ? issue.value : (issue.currentStyle || issue.value || '#d9d9d9');
           let message = 'Estilo de preenchimento';
+          let detailValue = value;
+          
           if (issue.type === 'changed') {
-            message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+            message = 'Estilo de cor alterado:';
+            detailValue = `De:|${issue.originalStyle}|Para:|${value}`;
           } else if (issue.type === 'missing') {
             message = `Estilo não vinculado (${issue.reason || 'fill'})`;
           } else if (issue.type === 'invalid') {
@@ -753,7 +773,7 @@
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
               type: 'color',
-              value,
+              value: detailValue,
               message,
               nodes: []
             });
@@ -765,8 +785,11 @@
         fonts.forEach(issue => {
           const value = issue.currentStyle || issue.value || 'Fonte não especificada';
           let message = 'Estilo de texto';
+          let detailValue = value;
+          
           if (issue.type === 'changed') {
-            message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
+            message = 'Estilo de texto alterado:';
+            detailValue = `De:|${issue.originalStyle}|Para:|${issue.currentStyle}`;
           } else if (issue.type === 'missing') {
             message = issue.reason || 'Estilo não vinculado';
           } else if (issue.type === 'invalid') {
@@ -791,7 +814,7 @@
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
               type: 'font',
-              value: displayValue,
+              value: detailValue,
               message,
               nodes: []
             });
@@ -825,7 +848,21 @@
           groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
         });
 
-        // Componentes não-DS - buscar nos detalhes de cores por componentes não-DS
+        // Componentes não-DS - buscar nos detalhes de componentes
+        componentIssues.forEach(issue => {
+          const key = `component-Componente fora do Design System-${frameName}-${issue.nodeId}`;
+          if (!groupedIssues.has(key)) {
+            groupedIssues.set(key, {
+              type: 'component',
+              value: 'Não conforme com DS',
+              message: 'Componente fora do Design System',
+              nodes: []
+            });
+          }
+          groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
+        });
+        
+        // Também buscar nos detalhes de cores por componentes não-DS (fallback)
         if (colors.some(issue => issue.reason === 'Componente fora do Design System')) {
           const componentIssues = colors.filter(issue => issue.reason === 'Componente fora do Design System');
           componentIssues.forEach(issue => {
@@ -867,7 +904,7 @@
         color: '<path d="M12.6324 4.07389C12.5426 4.00975 12.4714 3.96035 12.4219 3.92651C12.4046 3.91036 12.3854 3.89896 12.3666 3.88772C12.3582 3.88272 12.3498 3.87775 12.3417 3.87241C12.1332 3.73524 11.8632 3.73524 11.6547 3.87241C11.6277 3.89016 11.6011 3.9083 11.5745 3.92651C11.525 3.96035 11.4538 4.00975 11.364 4.07389C11.1844 4.20213 10.93 4.38958 10.6257 4.62972C10.0179 5.10922 9.20601 5.80281 8.39198 6.65851C6.78843 8.34415 5.06641 10.7737 5.06641 13.5044C5.06641 17.3327 8.16988 20.4362 11.9982 20.4362C15.8266 20.4362 18.9301 17.3327 18.9301 13.5044C18.9301 10.7737 17.208 8.34415 15.6045 6.65851C14.7904 5.80281 13.9785 5.10922 13.3708 4.62972C13.0664 4.38958 12.812 4.20213 12.6324 4.07389Z" fill="currentColor"/>',
         font: '<text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">T</text>',
         effect: '<path d="M12 16L16 8H8L12 16Z" fill="currentColor"/>',
-        component: '<rect x="8" y="8" width="8" height="8" fill="currentColor"/>'
+        component: '<path d="M8 8h8v8H8V8zm2 2v4h4v-4h-4z" fill="currentColor"/>'
       };
 
       const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
@@ -881,6 +918,13 @@
       const validNodeIds = nodes.map(n => n.nodeId).filter(id => id && id.includes(':'));
       const isSingleOccurrence = nodes.length === 1;
 
+      // Processar valor para formato estruturado
+      let valueContent = value;
+      if (value.includes('De:|') && value.includes('Para:|')) {
+        const parts = value.split('|');
+        valueContent = `<strong>${parts[0]}</strong><br>${parts[1]}<br><span><strong>${parts[2]}</strong><br>${parts[3]}</span>`;
+      }
+      
       return `
         <div class="issue-card grouped">
           <div class="issue-icon">
@@ -889,8 +933,8 @@
             </svg>
           </div>
           <div class="issue-content">
-            <p class="issue-message">${message}</p>
-            <p class="issue-value">${value}</p>
+            <p class="issue-message"><strong>${message}</strong></p>
+            <p class="issue-value">${valueContent}</p>
             ${!isSingleOccurrence ? `<a href="#" class="issue-count" onclick="toggleNodesList('${cardId}'); return false;">
               ${nodes.length} ocorrências
             </a>` : ''}

@@ -59,6 +59,7 @@ export function createEmptyDetails() {
   return {
     colors: [],
     fonts: [],
-    effects: []
+    effects: [],
+    components: []
   };
 }
