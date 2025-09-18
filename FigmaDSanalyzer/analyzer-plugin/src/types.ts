@@ -64,10 +64,11 @@ export interface StyleIssue {
   styleId?: string;
   currentStyle?: string;
   originalStyle?: string;
-  type: 'changed' | 'missing' | 'invalid';
+  type: 'changed' | 'missing' | 'invalid' | 'outdated';
   reason: string;
   value?: string; // Para cores hex, nomes de fonte, etc
   frameName?: string; // Nome do frame onde o issue ocorre
+  componentName?: string; // Nome do componente para agrupamento
 }
 
 export interface NonCompliantDetails {

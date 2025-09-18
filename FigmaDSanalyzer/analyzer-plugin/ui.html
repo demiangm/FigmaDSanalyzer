@@ -58,7 +58,7 @@
 
     .tab-button.active {
       background: white;
-      color: #333;
+      color: #DF0979;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
 
@@ -213,6 +213,53 @@
     .issue-value span {
       padding-top: 8px;
       display: block;
+    }
+
+    /* Filter Tags */
+    .filter-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 8px 0 0 0;
+    }
+
+    .pill-divider {
+    display: inline-block;
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 10px;
+    line-height: 14px;
+    padding: 4px;
+    color: #e5e5e5;
+    }
+
+    .filter-tag {
+      padding: 4px 10px;
+      border: 1px solid #e5e5e5;
+      background: white;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-tag:hover {
+      border-color:  hsl(329deg 92% 45% / 0%);
+      background-color: hsl(329deg 92% 45% / 24%);
+      color: #DF0979;
+    }
+
+    .filter-tag.active {
+      background: #DF0979;
+      border-color:  hsl(329deg 92% 45% / 0%);
+      color: white;
+    }
+
+    .issue-card.filtered {
+      display: none;
     }
 
     .issue-node {
@@ -597,6 +644,16 @@
         <h3>Nenhuma inspeção realizada</h3>
         <p>Os itens inspecionados aparecerão aqui após a análise.<br>Utilize a aba Home para rodar a análise.</p>
       </div>
+      <div id="inspectFilters" class="hidden" style="margin-bottom: 16px;">
+        <div class="filter-tags">
+          <button class="filter-tag active" data-filter="all">Todos</button>
+          <span class="pill-divider">|</span>
+          <button class="filter-tag" data-filter="color">Cores</button>
+          <button class="filter-tag" data-filter="font">Fontes</button>
+          <button class="filter-tag" data-filter="effect">Efeitos</button>
+          <button class="filter-tag" data-filter="component">Componentes</button>
+        </div>
+      </div>
       <div id="inspectResults" class="hidden"></div>
     </div>
 
@@ -616,6 +673,7 @@
     let currentTab = 'home';
     let lastReports = null;
     let processedFrameIds = new Set();
+    let currentFilter = 'all';
     let designSystem = {
       colors: ['#000000', '#FFFFFF', '#F5F5F5', '#007AFF', '#FF3B30'],
       fonts: ['Inter', 'SF Pro Display', 'Roboto'],
@@ -641,6 +699,14 @@
       button.addEventListener('click', () => switchTab(button.dataset.tab));
     });
 
+    // Filter event listeners
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-tag')) {
+        const filter = e.target.dataset.filter;
+        setActiveFilter(filter);
+      }
+    });
+
     // Functions
     function switchTab(tabName) {
       if (currentTab === tabName) return; // Não fazer nada se já estiver na aba
@@ -662,6 +728,8 @@
             const inspectResults = document.getElementById('inspectResults');
             processedFrameIds.clear(); // Limpa os IDs processados
             inspectResults.innerHTML = createInspectView(lastReports);
+            // Aplicar filtro atual
+            setTimeout(() => setActiveFilter(currentFilter), 50);
           }
         } else {
           panel.classList.remove('active');
@@ -723,7 +791,9 @@
 
       // Prepare inspect results container
       const inspectResults = document.getElementById('inspectResults');
+      const inspectFilters = document.getElementById('inspectFilters');
       inspectResults.classList.remove('hidden');
+      inspectFilters.classList.remove('hidden');
       inspectResults.innerHTML = ''; // Clear previous results
       
       // Switch to data tab without triggering inspect view update
@@ -749,12 +819,11 @@
         const { frameName, nonCompliantItems } = report;
         const { colors = [], fonts = [], effects = [], components: componentIssues = [] } = nonCompliantItems.details || {};
         
-        console.log(`[DEBUG] Processando frame: ${frameName}`);
-        console.log(`[DEBUG] Components issues:`, componentIssues);
+
 
         // Cores
         colors.forEach(issue => {
-          const value = issue.type === 'changed' && issue.value ? issue.value : (issue.currentStyle || issue.value || '#d9d9d9');
+          const value = issue.value || issue.currentStyle || '#d9d9d9';
           let message = 'Estilo de preenchimento';
           let detailValue = value;
           
@@ -762,14 +831,14 @@
             message = 'Estilo de cor alterado:';
             detailValue = `De:|${issue.originalStyle}|Para:|${value}`;
           } else if (issue.type === 'missing') {
-            message = `Estilo não vinculado (${issue.reason || 'fill'})`;
+            message = issue.reason || 'Sem estilo vinculado (fill)';
           } else if (issue.type === 'invalid') {
             message = 'Estilo não encontrado no DS';
           }
           
-          // Criar chave mais específica incluindo frame para evitar agrupamentos incorretos
+          // Criar chave global para agrupar entre frames
           const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : value;
-          const key = `color-${message}-${contextKey}-${frameName}`;
+          const key = `color-${message}-${contextKey}`;
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
               type: 'color',
@@ -791,9 +860,11 @@
             message = 'Estilo de texto alterado:';
             detailValue = `De:|${issue.originalStyle}|Para:|${issue.currentStyle}`;
           } else if (issue.type === 'missing') {
-            message = issue.reason || 'Estilo não vinculado';
+            message = issue.reason || 'Sem estilo vinculado (text)';
           } else if (issue.type === 'invalid') {
             message = 'Estilo não encontrado no DS';
+          } else if (issue.type === 'outdated') {
+            message = 'Estilo de texto desatualizado';
           }
           
           let displayValue = value;
@@ -808,9 +879,9 @@
             displayValue = value.family || 'Fonte não especificada';
           }
           
-          // Criar chave mais específica incluindo frame para evitar agrupamentos incorretos
+          // Criar chave global para agrupar entre frames
           const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : displayValue;
-          const key = `font-${message}-${contextKey}-${frameName}`;
+          const key = `font-${message}-${contextKey}`;
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
               type: 'font',
@@ -829,14 +900,14 @@
           if (issue.type === 'changed') {
             message = `Estilo alterado de "${issue.originalStyle}" para "${issue.currentStyle}"`;
           } else if (issue.type === 'missing') {
-            message = 'Estilo não vinculado';
+            message = 'Sem estilo vinculado (effect)';
           } else if (issue.type === 'invalid') {
             message = 'Estilo não encontrado no DS';
           }
           
-          // Criar chave mais específica incluindo frame para evitar agrupamentos incorretos
+          // Criar chave global para agrupar entre frames
           const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : value;
-          const key = `effect-${message}-${contextKey}-${frameName}`;
+          const key = `effect-${message}-${contextKey}`;
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
               type: 'effect',
@@ -848,14 +919,24 @@
           groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
         });
 
-        // Componentes não-DS - buscar nos detalhes de componentes
+        // Componentes - buscar nos detalhes de componentes
         componentIssues.forEach(issue => {
-          const key = `component-Componente fora do Design System-${frameName}-${issue.nodeId}`;
+
+          const componentName = issue.componentName || issue.nodeName || 'Componente desconhecido';
+          let message = 'Componente fora do Design System';
+          
+          if (issue.reason === 'Componente DS desatualizado') {
+            message = 'Componente DS desatualizado';
+          } else if (issue.reason === 'Componente interno DS utilizado') {
+            message = 'Componente interno DS utilizado';
+          }
+          
+          const key = `component-${componentName}-${issue.reason}`;
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
               type: 'component',
-              value: 'Não conforme com DS',
-              message: 'Componente fora do Design System',
+              value: componentName,
+              message: message,
               nodes: []
             });
           }
@@ -866,7 +947,7 @@
         if (colors.some(issue => issue.reason === 'Componente fora do Design System')) {
           const componentIssues = colors.filter(issue => issue.reason === 'Componente fora do Design System');
           componentIssues.forEach(issue => {
-            const key = `component-Componente fora do Design System-${frameName}-${issue.nodeId}`;
+            const key = `component-Componente fora do Design System`;
             if (!groupedIssues.has(key)) {
               groupedIssues.set(key, {
                 type: 'component',
@@ -878,6 +959,8 @@
             groupedIssues.get(key).nodes.push({ frameName, nodeName: issue.nodeName, nodeId: issue.nodeId });
           });
         }
+        
+
       });
       
       const allIssues = Array.from(groupedIssues.values()).map(group => 
@@ -896,15 +979,18 @@
         `;
       }
 
+      // Atualizar filtros baseado nos tipos de issues encontrados
+      updateFilters(groupedIssues);
+
       return allIssues.join('');
     }
 
     function createGroupedIssueCard(type, value, message, nodes) {
       const icons = {
         color: '<path d="M12.6324 4.07389C12.5426 4.00975 12.4714 3.96035 12.4219 3.92651C12.4046 3.91036 12.3854 3.89896 12.3666 3.88772C12.3582 3.88272 12.3498 3.87775 12.3417 3.87241C12.1332 3.73524 11.8632 3.73524 11.6547 3.87241C11.6277 3.89016 11.6011 3.9083 11.5745 3.92651C11.525 3.96035 11.4538 4.00975 11.364 4.07389C11.1844 4.20213 10.93 4.38958 10.6257 4.62972C10.0179 5.10922 9.20601 5.80281 8.39198 6.65851C6.78843 8.34415 5.06641 10.7737 5.06641 13.5044C5.06641 17.3327 8.16988 20.4362 11.9982 20.4362C15.8266 20.4362 18.9301 17.3327 18.9301 13.5044C18.9301 10.7737 17.208 8.34415 15.6045 6.65851C14.7904 5.80281 13.9785 5.10922 13.3708 4.62972C13.0664 4.38958 12.812 4.20213 12.6324 4.07389Z" fill="currentColor"/>',
-        font: '<text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">T</text>',
+        font: '<path d="M18 9.60017H16.8005V7.20033H12.6002V16.8005H14.3998V18H9.60017V16.8005H11.3998V7.20033H7.20033V9.60017H6V6H18V9.60017Z" fill="currentColor"/>',
         effect: '<path d="M12 16L16 8H8L12 16Z" fill="currentColor"/>',
-        component: '<path d="M8 8h8v8H8V8zm2 2v4h4v-4h-4z" fill="currentColor"/>'
+        component: '<path fill-rule="evenodd" clip-rule="evenodd" d="M8.50045 7.50045L12 11L15.4995 7.50045L12 4L8.50045 7.50045ZM8.50045 16.4995L12 20L15.4995 16.5005L12 13L8.50045 16.4995ZM4 12L7.50045 8.50045L11 12L7.50045 15.4995L4 12ZM13 12L16.4995 15.4995L20 12L16.5005 8.50045L13 12Z" fill="currentColor"/>'
       };
 
       const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
@@ -926,7 +1012,7 @@
       }
       
       return `
-        <div class="issue-card grouped">
+        <div class="issue-card grouped" data-type="${type}">
           <div class="issue-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               ${icons[type]}
@@ -1013,28 +1099,36 @@
           
           <div class="metric-row">
             <span class="metric-label">Componentes</span>
-            <span class="metric-value ${report.nonCompliantItems.components > 0 ? 'metric-error' : 'metric-good'}">
+            <span class="metric-value ${report.nonCompliantItems.components > 0 ? 'metric-error' : 'metric-good'}" 
+                  onclick="${report.nonCompliantItems.components > 0 ? `switchToInspectWithFilter('component')` : ''}" 
+                  style="${report.nonCompliantItems.components > 0 ? 'cursor: pointer; text-decoration: underline;' : ''}">
               ${report.nonCompliantItems.components}
             </span>
           </div>
 
           <div class="metric-row">
             <span class="metric-label">Cores</span>
-            <span class="metric-value ${report.nonCompliantItems.colors > 0 ? 'metric-error' : 'metric-good'}">
+            <span class="metric-value ${report.nonCompliantItems.colors > 0 ? 'metric-error' : 'metric-good'}" 
+                  onclick="${report.nonCompliantItems.colors > 0 ? `switchToInspectWithFilter('color')` : ''}" 
+                  style="${report.nonCompliantItems.colors > 0 ? 'cursor: pointer; text-decoration: underline;' : ''}">
               ${report.nonCompliantItems.colors}
             </span>
           </div>
 
           <div class="metric-row">
             <span class="metric-label">Fontes</span>
-            <span class="metric-value ${report.nonCompliantItems.fonts > 0 ? 'metric-error' : 'metric-good'}">
+            <span class="metric-value ${report.nonCompliantItems.fonts > 0 ? 'metric-error' : 'metric-good'}" 
+                  onclick="${report.nonCompliantItems.fonts > 0 ? `switchToInspectWithFilter('font')` : ''}" 
+                  style="${report.nonCompliantItems.fonts > 0 ? 'cursor: pointer; text-decoration: underline;' : ''}">
               ${report.nonCompliantItems.fonts}
             </span>
           </div>
 
           <div class="metric-row">
             <span class="metric-label">Efeitos</span>
-            <span class="metric-value ${report.nonCompliantItems.effects > 0 ? 'metric-error' : 'metric-good'}">
+            <span class="metric-value ${report.nonCompliantItems.effects > 0 ? 'metric-error' : 'metric-good'}" 
+                  onclick="${report.nonCompliantItems.effects > 0 ? `switchToInspectWithFilter('effect')` : ''}" 
+                  style="${report.nonCompliantItems.effects > 0 ? 'cursor: pointer; text-decoration: underline;' : ''}">
               ${report.nonCompliantItems.effects}
             </span>
           </div>
@@ -1074,6 +1168,51 @@
     function toggleNodesList(cardId) {
       const nodesList = document.getElementById(cardId);
       nodesList.classList.toggle('hidden');
+    }
+
+    function setActiveFilter(filter) {
+      currentFilter = filter;
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-tag').forEach(tag => {
+        tag.classList.toggle('active', tag.dataset.filter === filter);
+      });
+      
+      // Filter cards
+      document.querySelectorAll('.issue-card').forEach(card => {
+        if (filter === 'all' || card.dataset.type === filter) {
+          card.classList.remove('filtered');
+        } else {
+          card.classList.add('filtered');
+        }
+      });
+    }
+
+    function switchToInspectWithFilter(filter) {
+      switchTab('inspect');
+      setTimeout(() => {
+        setActiveFilter(filter);
+      }, 100);
+    }
+
+    function updateFilters(groupedIssues) {
+      const availableTypes = new Set(['all']);
+      
+      // Identificar tipos de issues presentes
+      for (const [key, group] of groupedIssues) {
+        availableTypes.add(group.type);
+      }
+      
+      // Atualizar visibilidade dos filtros
+      const filterTags = document.querySelectorAll('.filter-tag');
+      filterTags.forEach(tag => {
+        const filter = tag.dataset.filter;
+        if (availableTypes.has(filter)) {
+          tag.style.display = 'inline-block';
+        } else {
+          tag.style.display = 'none';
+        }
+      });
     }
 
     // Initialize
