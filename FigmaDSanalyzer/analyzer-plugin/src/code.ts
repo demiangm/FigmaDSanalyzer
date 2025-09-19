@@ -31,17 +31,21 @@ figma.ui.onmessage = async (msg) => {
   try {
   switch (msg.type) {
     case 'analyze-selection':
-      await analyzeSelection();
+      await analyzeSelection(msg.renderCard);
       break;
-    
     case 'get-design-system':
       await loadDesignSystemData();
       break;
-    
+    case 'focus-issue':
+      await focusIssue(msg.frameName, msg.value);
+      break;
+    case 'focus-all-issues':
+      await focusAllIssues(msg.nodeIds);
+      break;
     case 'close-plugin':
       figma.closePlugin();
       break;
-    }
+  }
   } catch (error) {
     console.error('Erro na execução:', error);
     figma.ui.postMessage({
@@ -85,7 +89,7 @@ async function loadDesignSystemData() {
   }
 }
 
-async function analyzeSelection() {
+async function analyzeSelection(renderCard: boolean = true) {
   const selection = figma.currentPage.selection;
   
   if (selection.length === 0) {
@@ -107,28 +111,15 @@ async function analyzeSelection() {
     if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
       const report = await analyzeFrame(node as FrameNode, componentsData, stylesData);
       reports.push(report);
-      
-      // Cria card visual no canvas
-      await createAnalysisCard(report, node as FrameNode);
-      
+      // Só cria o card se renderCard for true
+      if (renderCard && (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT')) {
+        await createAnalysisCard(report, node as FrameNode);
+      }
       // Envia dados detalhados para a UI
       console.log('[DEBUG] Enviando para UI:', report);
       figma.ui.postMessage({
         type: 'frame-analyzed',
-        report: {
-          ...report,
-          details: {
-            name: node.name,
-            type: node.type,
-            totalLayers: report.totalLayers,
-            dsComponents: report.dsComponentsUsed,
-            coverage: {
-              percentage: report.coveragePercentage,
-              level: report.coverageLevel
-            },
-            nonCompliant: report.nonCompliantItems
-          }
-        }
+        report
       });
       // Log das métricas principais
       console.log(`[MÉTRICAS] Frame: ${node.name} | Camadas: ${report.totalLayers} | DS Components: ${report.dsComponentsUsed} | Cobertura: ${report.coveragePercentage}% (${report.coverageLevel.label})`);
@@ -139,6 +130,23 @@ async function analyzeSelection() {
     type: 'analysis-complete',
     reports
   });
+}
+
+// Helper function to get absolute coordinates on canvas
+function getAbsolutePosition(node: SceneNode): { x: number; y: number } {
+  let absoluteX = node.x;
+  let absoluteY = node.y;
+  let parent = node.parent;
+  
+  while (parent && parent.type !== 'PAGE') {
+    if ('x' in parent && 'y' in parent) {
+      absoluteX += parent.x;
+      absoluteY += parent.y;
+    }
+    parent = parent.parent;
+  }
+  
+  return { x: absoluteX, y: absoluteY };
 }
 
 async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
@@ -155,8 +163,11 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   // Cria o frame principal do card
   const card = figma.createFrame();
   card.name = `Analysis: ${frame.name}`;
-  card.x = frame.x + frame.width + 50;
-  card.y = frame.y;
+  
+  // Calcular posição absoluta no canvas
+  const absolutePos = getAbsolutePosition(frame);
+  card.x = absolutePos.x + frame.width + 50;
+  card.y = absolutePos.y;
   card.resize(480, 471);
   card.fills = [{
     type: 'SOLID',
@@ -211,7 +222,7 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
   versionTagFrame.opacity = 0.8;
 
   const versionTag = figma.createText();
-  versionTag.characters = "alpha.2";
+  versionTag.characters = "alpha.3";
   versionTag.fontSize = 12;
   versionTag.fontName = { family: "Inter", style: "Bold" };
   versionTag.fills = [{ type: 'SOLID', color: { r: 0.9, g: 0.2, b: 0.6 } }];
@@ -555,6 +566,138 @@ async function createAnalysisCard(report: ComplianceReport, frame: FrameNode) {
     // Em caso de erro, mantém o card original
     figma.currentPage.selection = [card];
   }
+}
+
+async function focusIssue(frameName: string, value: string) {
+  try {
+    // Se o value parece ser um nodeId (contém ':'), tentar buscar diretamente
+    if (value.includes(':')) {
+      try {
+        const node = await figma.getNodeByIdAsync(value);
+        if (node && node.type !== 'DOCUMENT' && node.type !== 'PAGE') {
+          // Selecionar e focar no nó
+          figma.currentPage.selection = [node as SceneNode];
+          figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+          console.log(`Focado no nó por ID: ${node.name} (${node.id})`);
+          return;
+        }
+      } catch (nodeError) {
+        console.warn(`Nó não encontrado por ID: ${value}`, nodeError);
+      }
+    }
+
+    // Buscar o frame pelo nome
+    const frame = await findFrameByName(frameName);
+    if (!frame) {
+      console.warn(`Frame não encontrado: ${frameName}`);
+      return;
+    }
+
+    // Buscar o nó com problema pelo valor ou nome
+    const problematicNode = findNodeByValue(frame, value);
+    if (!problematicNode) {
+      console.warn(`Nó com problema não encontrado: ${value}`);
+      return;
+    }
+
+    // Selecionar e focar no nó
+    figma.currentPage.selection = [problematicNode];
+    figma.viewport.scrollAndZoomIntoView([problematicNode]);
+    
+    console.log(`Focado no nó: ${problematicNode.name} (${problematicNode.id})`);
+  } catch (error) {
+    console.error('Erro ao focar no problema:', error);
+  }
+}
+
+async function focusAllIssues(nodeIds: string[]) {
+  try {
+    const nodes: SceneNode[] = [];
+    
+    for (const nodeId of nodeIds) {
+      if (nodeId && nodeId.includes(':')) {
+        try {
+          const node = await figma.getNodeByIdAsync(nodeId);
+          if (node && node.type !== 'DOCUMENT' && node.type !== 'PAGE') {
+            nodes.push(node as SceneNode);
+          }
+        } catch (nodeError) {
+          console.warn(`Nó não encontrado por ID: ${nodeId}`, nodeError);
+        }
+      }
+    }
+    
+    if (nodes.length > 0) {
+      figma.currentPage.selection = nodes;
+      figma.viewport.scrollAndZoomIntoView(nodes);
+      console.log(`Selecionados ${nodes.length} nós com o mesmo problema`);
+    } else {
+      console.warn('Nenhum nó válido encontrado para seleção múltipla');
+    }
+  } catch (error) {
+    console.error('Erro ao focar em múltiplos problemas:', error);
+  }
+}
+
+async function findFrameByName(frameName: string): Promise<FrameNode | null> {
+  // Buscar primeiro na página atual
+  const currentPageFrame = findFrameRecursively(figma.currentPage, frameName);
+  if (currentPageFrame) return currentPageFrame;
+  
+  // Se não encontrou, buscar em todas as páginas
+  try {
+    await figma.loadAllPagesAsync();
+    for (const page of figma.root.children) {
+      if (page.type === 'PAGE') {
+        const frame = findFrameRecursively(page, frameName);
+        if (frame) return frame;
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar páginas:', error);
+  }
+  return null;
+}
+
+function findFrameRecursively(node: BaseNode, frameName: string): FrameNode | null {
+  // Se o nó atual é o frame que estamos procurando
+  if (node.type === 'FRAME' && node.name === frameName) {
+    return node as FrameNode;
+  }
+
+  // Se o nó tem filhos, buscar recursivamente
+  if ('children' in node) {
+    for (const child of node.children) {
+      const result = findFrameRecursively(child, frameName);
+      if (result) return result;
+    }
+  }
+
+  return null;
+}
+
+function findNodeByValue(frame: FrameNode, value: string): SceneNode | null {
+  // Buscar recursivamente no frame
+  return findNodeRecursively(frame, value);
+}
+
+function findNodeRecursively(node: SceneNode, value: string): SceneNode | null {
+  // Verificar se o nó atual tem o valor ou nome que estamos procurando
+  if (node.name === value || 
+      (node.type === 'TEXT' && (node as TextNode).characters.includes(value)) ||
+      (node.type === 'VECTOR' && node.name.toLowerCase().includes(value.toLowerCase()))) {
+    return node;
+  }
+
+  // Se o nó tem filhos, buscar recursivamente
+  if ('children' in node) {
+    for (const child of node.children) {
+      const result = findNodeRecursively(child, value);
+      if (result) return result;
+    }
+  }
+
+  return null;
 }
 
 // Initialize the plugin

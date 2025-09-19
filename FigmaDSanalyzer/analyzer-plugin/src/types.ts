@@ -55,6 +55,27 @@ export interface AnalysisResult {
   totalLayers: number;
   dsComponentsUsed: number;
   hiddenComponentsUsed: number;
+  details: NonCompliantDetails;
+}
+
+export interface StyleIssue {
+  nodeId: string;
+  nodeName: string;
+  styleId?: string;
+  currentStyle?: string;
+  originalStyle?: string;
+  type: 'changed' | 'missing' | 'invalid' | 'outdated';
+  reason: string;
+  value?: string; // Para cores hex, nomes de fonte, etc
+  frameName?: string; // Nome do frame onde o issue ocorre
+  componentName?: string; // Nome do componente para agrupamento
+}
+
+export interface NonCompliantDetails {
+  colors: StyleIssue[];
+  fonts: StyleIssue[];
+  effects: StyleIssue[];
+  components: StyleIssue[];
 }
 
 export interface ComplianceReport {
@@ -70,5 +91,6 @@ export interface ComplianceReport {
     fonts: number;
     effects: number;
     components: number;
+    details: NonCompliantDetails;
   };
 }

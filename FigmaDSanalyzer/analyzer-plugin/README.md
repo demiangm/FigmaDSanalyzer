@@ -77,8 +77,8 @@ A partir de cada frame selecionado, o plugin:
 
 ## TODO
 
-- Verficar bilbiotecas ativas no arquivo antes da análise
+- ~~❌Verficar bilbiotecas ativas no arquivo antes da análise~~
 - Analisar tokens alterados nos componentes do DS (Overrides)
 - Alterar a interface mostrando elementos com problemas (Parecido com o Lint)
-- Itentificar componentes desatualizados
-- Desativar a rendereização do card.
+- ~~❌Itentificar componentes desatualizados~~
+- ~~✅Desativar a rendereização do card.~~
