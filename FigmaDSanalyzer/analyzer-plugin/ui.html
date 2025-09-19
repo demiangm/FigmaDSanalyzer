@@ -823,21 +823,23 @@
 
         // Cores
         colors.forEach(issue => {
-          const value = issue.value || issue.currentStyle || '#d9d9d9';
+          const currentValue = issue.value || issue.currentStyle || '#d9d9d9';
           let message = 'Estilo de preenchimento';
-          let detailValue = value;
+          let detailValue = currentValue;
           
           if (issue.type === 'changed') {
             message = 'Estilo de cor alterado:';
-            detailValue = `De:|${issue.originalStyle}|Para:|${value}`;
+            detailValue = `De:|${issue.originalStyle}|Para:|${currentValue}`;
           } else if (issue.type === 'missing') {
             message = issue.reason || 'Sem estilo vinculado (fill)';
           } else if (issue.type === 'invalid') {
             message = 'Estilo não encontrado no DS';
           }
           
-          // Criar chave global para agrupar entre frames
-          const contextKey = issue.originalStyle ? `${issue.currentStyle}-to-${issue.originalStyle}` : value;
+          // Criar chave única para cada combinação específica
+          const contextKey = issue.type === 'changed' 
+            ? `${issue.originalStyle}-to-${currentValue}` 
+            : `${issue.nodeName}-${currentValue}`;
           const key = `color-${message}-${contextKey}`;
           if (!groupedIssues.has(key)) {
             groupedIssues.set(key, {
