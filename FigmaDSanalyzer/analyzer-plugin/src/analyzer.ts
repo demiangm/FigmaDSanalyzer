@@ -24,7 +24,8 @@ const EXCLUDED_NODE_TYPES = [
 // List of frame names to ignore in layer counting
 const IGNORED_FRAME_NAMES = [
   'Grid',
-  'Overlay'
+  'Overlay',
+  'Placeholder'
 ];
 
 // Lista de prefixos de nomes a ignorar
@@ -32,14 +33,17 @@ const IGNORED_NAME_PREFIXES = [
   'Native/',
   'iOS/',
   'Android/',
-  'Assets.'
+  'Assets.',
+  'Placeholder'
 ];
 
 // Palavras-chave para ignorar análise de estilos em componentes do DS
 const IGNORE_STYLE_KEYWORDS = [
   'ignore-ds-styles',
   'ilustração',
-  'Brand'
+  'Brand',
+  'TokensSpace',
+  'PlaceholderDS'
   // Adicione outras palavras-chave aqui
 ];
 
@@ -1153,10 +1157,41 @@ async function analyzeSingleNodeAsync(
       // Lógica de análise para instâncias
       const isLocalComponent = mainComponent && mainComponent.remote === false && !componentStatus.isFromDS;
       
-      // Verificar se é um componente oculto usado diretamente no nível superior
-      if (componentStatus.isFromDS && componentStatus.isHidden && isTopLevel) {
+      // Verificar se está dentro de um componente DS navegando pela hierarquia de pais
+      let isInsideAnyDsComponent = isInsideDsComponent;
+      if (!isInsideAnyDsComponent && componentStatus.isHidden) {
+        let parent = node.parent;
+        console.log(`🔍 Verificando hierarquia para ${node.name}:`);
+        while (parent && parent.type !== 'PAGE') {
+          console.log(`  - Parent: ${parent.name} | Type: ${parent.type}`);
+          if (parent.type === 'INSTANCE') {
+            const parentStatus = await isComponentFromDSAsync(parent, componentsData);
+            console.log(`    - isFromDS: ${parentStatus.isFromDS} | isHidden: ${parentStatus.isHidden}`);
+            
+            // Log da chave do componente pai para debug
+            try {
+              const parentMain = await (parent as InstanceNode).getMainComponentAsync();
+              if (parentMain) {
+                console.log(`    - Parent Key: ${parentMain.key}`);
+              }
+            } catch (e) {}
+            
+            if (parentStatus.isFromDS && !parentStatus.isHidden) {
+              isInsideAnyDsComponent = true;
+              console.log(`    ✅ Encontrou componente DS pai!`);
+              break;
+            }
+          }
+          parent = parent.parent;
+        }
+      }
+      
+      // Verificar se é um componente oculto usado fora de componentes DS
+      if (componentStatus.isFromDS && componentStatus.isHidden && !isInsideAnyDsComponent) {
+        console.log(`⚠️ Componente oculto fora de DS: ${node.name} | isInsideDsComponent: ${isInsideDsComponent} | isInsideAnyDsComponent: ${isInsideAnyDsComponent}`);
         nonDsComponents = 1;
         totalLayers = 1;
+        hiddenComponentsUsed = 1;
         
         // Adicionar aos detalhes como componente interno usado incorretamente
         let componentName = node.name;
@@ -1225,38 +1260,8 @@ async function analyzeSingleNodeAsync(
         }
         
         if (componentStatus.isHidden) {
+          // Componentes ocultos só são contabilizados, não são erro quando dentro de DS
           hiddenComponentsUsed = 1;
-          if (!isInsideDsComponent) {
-            // Componentes ocultos usados fora de componente DS são um erro
-            nonDsComponents = 1;
-            totalLayers = 1;
-            
-            // Adicionar aos detalhes como componente interno usado incorretamente
-            let componentName = node.name;
-            if (node.type === 'INSTANCE') {
-              try {
-                const mainComponent = await (node as InstanceNode).getMainComponentAsync();
-                if (mainComponent) {
-                  if (mainComponent.parent && mainComponent.parent.type === 'COMPONENT_SET') {
-                    componentName = mainComponent.parent.name;
-                  } else {
-                    componentName = mainComponent.name;
-                  }
-                }
-              } catch (e) {
-                // Usar o nome da instância se não conseguir obter o componente principal
-              }
-            }
-            
-            (details.components as StyleIssue[]).push({
-              nodeId: node.id,
-              nodeName: node.name,
-              type: 'invalid',
-              reason: 'Componente interno DS utilizado',
-              componentName: componentName,
-              frameName: findFrameName(node)
-            });
-          }
         } else if (!isInsideDsComponent) {
           dsComponentsUsed = 1;
           totalLayers = 1;
@@ -1277,6 +1282,7 @@ async function analyzeSingleNodeAsync(
           totalLayers = 1;
         }
       } else {
+        console.log(`🔍 Componente não-DS detectado: ${node.name} | isTopLevel: ${isTopLevel}`);
         nonDsComponents = 1;
         if (!IGNORED_FRAME_NAMES.includes(node.name) && !isTopLevel) {
           totalLayers = 1;
@@ -1410,11 +1416,18 @@ export async function analyzeNodeAsync(
       if (dsComponentCache.size > 1000) dsComponentCache.clear();
       if (styleCache.size > 1000) styleCache.clear();
     }
+    
+    // Verificar se o nó atual é um componente DS ANTES de processar
+    let isDsComponent = false;
+    if (node.type === 'INSTANCE') {
+      const componentStatus = await isComponentFromDSAsync(node, componentsData);
+      isDsComponent = componentStatus.isFromDS && !componentStatus.isHidden;
+    }
+    
     const result = await analyzeSingleNodeAsync(node, componentsData, stylesData, isTopLevel, isInsideDsComponent, depth);
     if (result.shouldSkipChildren) {
       return result;
     }
-    const isDsComponent = result.dsComponentsUsed > 0;
     if ('children' in node && node.children) {
       for (const child of node.children) {
         try {

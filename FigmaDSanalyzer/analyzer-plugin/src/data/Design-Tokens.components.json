@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "extractedAt": "2025-06-25T20:19:05.078Z",
+    "extractedAt": "2025-10-10T13:43:50.337Z",
     "fileName": "Design Tokens"
   },
   "components": {
@@ -78,10 +78,6 @@
     },
     "Opacities/.Semi Opaque": {
       "key": "4a15499f164bba6b3e626ee00d58831abee20d08",
-      "isHidden": true
-    },
-    "Icons/.Keylines 24": {
-      "key": "6ec8b54ddda4507537f33691eeb8f9b305d6c527",
       "isHidden": true
     },
     "Color Accessibility Matrix/.Data": {
@@ -540,11 +536,11 @@
       "key": "7bd32dd93d5ed01055df042517af500bed4830af",
       "isHidden": false
     },
-    "Icons/Hipercard": {
+    "Icons/🛑 DEPRECIADO - Hipercard": {
       "key": "d3cef9595f0e3453372ec60ae43e914f36ca4849",
       "isHidden": false
     },
-    "Icons/HipercardAlt": {
+    "Icons/🛑 DEPRECIADO - HipercardAlt": {
       "key": "3483a9d5af7cbf3aee2252ecc6e5bb65461ab3f0",
       "isHidden": false
     },
@@ -600,12 +596,28 @@
       "key": "3aba497914738c127ebe6aa60949c82b4eef1389",
       "isHidden": false
     },
-    "Icons/ClickToPlay": {
+    "Icons/ClickToPay": {
       "key": "ad24f6a7a2e8f9bd4217f04725205e815ebd22c7",
       "isHidden": false
     },
-    "Icons/ClickToPlayAlt": {
+    "Icons/ClickToPayAlt": {
       "key": "7fe2f01d5033c0aa536b132511aa185fe3e17e1f",
+      "isHidden": false
+    },
+    "Icons/gpay": {
+      "key": "1b8c132baa0fc8cd0897bd714f9d5cadf38398b6",
+      "isHidden": false
+    },
+    "Icons/gpay alt": {
+      "key": "9bcb730ac88bb433586d0252185118bf75c3b687",
+      "isHidden": false
+    },
+    "Icons/Applepay": {
+      "key": "702170c24b4c3b6ae4a1f1574ce69fbd11eb6e66",
+      "isHidden": false
+    },
+    "Icons/Applepay alt": {
+      "key": "1003aef91538a612d3912222ecb79935024eca0b",
       "isHidden": false
     },
     "Icons/Facebook": {
@@ -2976,6 +2988,10 @@
       "key": "1b865b5488919620b656d12f2aa80b6ce41f3847",
       "isHidden": false
     },
+    "Spots Illustrations/PontosViramDinheiroAutomatico": {
+      "key": "1cdaf4dddc55abd88241605ea438082f6d0d7b59",
+      "isHidden": false
+    },
     "Spots Illustrations/PontosViramDinheiro": {
       "key": "c38f118490b0ac59142c8358d90b239008978c4b",
       "isHidden": false
@@ -2984,8 +3000,28 @@
       "key": "54b73d51a11f8ef30b17a4d8776c6753fa224dce",
       "isHidden": false
     },
-    "Spots Illustrations/PontosViramDinheiroAutomatico": {
-      "key": "1cdaf4dddc55abd88241605ea438082f6d0d7b59",
+    "Spots Illustrations/Facebook": {
+      "key": "00ab163ead09cbc9b3d01a20a05e8d8cf0a496e7",
+      "isHidden": false
+    },
+    "Spots Illustrations/Instagram": {
+      "key": "72a4d99129fce71a1bc19aca0109a600b29c32bd",
+      "isHidden": false
+    },
+    "Spots Illustrations/Telegram": {
+      "key": "363a7ce3b48011cce5fd3d0f37d46c9c9eef0472",
+      "isHidden": false
+    },
+    "Spots Illustrations/Tiktok": {
+      "key": "04e0cae1bc7740a8187d803412ab3afa2ebba78a",
+      "isHidden": false
+    },
+    "Spots Illustrations/Whatsapp": {
+      "key": "b6f50126707a7041625aad955433e916418c4fc9",
+      "isHidden": false
+    },
+    "Spots Illustrations/Youtube": {
+      "key": "ea19bbaaaa5f881f8b23b208988c9310356398a8",
       "isHidden": false
     },
     "Brand colors/.Accessibility.Level": {

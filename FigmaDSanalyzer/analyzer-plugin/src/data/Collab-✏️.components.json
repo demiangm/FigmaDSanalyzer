@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "extractedAt": "2025-10-10T13:37:39.117Z",
+    "fileName": "Collab ✏️"
+  },
+  "components": {
+    "✅ Card.vertical/.footer.buttons": {
+      "key": "94f0093b4e367776c73c1664cd1a0aa73410010f",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.Disabled/footer.buttons": {
+      "key": "3b7929324de6365be3ce392bda11aa2fc97bd7a7",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.Media": {
+      "key": "785d14ad698e386dd4a159f22edb20b7aa2a11e8",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.Disabled/Media": {
+      "key": "bbdc39bb72ec369bdf08be3f383a585de2c1bdd1",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.hover": {
+      "key": "a8ffa54733d5822979d635d7f39961b0489f487c",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.Ratio": {
+      "key": "392d1a7e4288445585562b6aba622cb316364f4c",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.Footer.card": {
+      "key": "577e4e4359db36e7aff9158f5e3ad80e5db1d666",
+      "isHidden": true
+    },
+    "✅ Card.vertical/.Disabled/Footer.card": {
+      "key": "8d10efd7ac61925c7c12e1fb8a9e23687ea4d7d7",
+      "isHidden": true
+    },
+    "✅ Card.vertical/Card": {
+      "key": "f18a0b93bfe5e8ca2ea9490b38e08905dcfcfcac",
+      "isHidden": false
+    }
+  }
+}

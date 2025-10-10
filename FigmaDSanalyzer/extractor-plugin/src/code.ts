@@ -62,6 +62,28 @@ async function extractDesignSystemData() {
   const isHiddenComponent = (name: string): boolean =>
     name.startsWith('.') || name.startsWith('_');
 
+  // Lista de prefixos de sections a serem ignoradas
+  const IGNORED_SECTION_PREFIXES = ['exemplos', 'exemplo', 'wip', 'testes', 'ignore', 'ignorar', 'deprecated', 'Locais', 'documentações', 'documentação', 'Interação', 'Interações'];
+
+  // Função para verificar se um componente está dentro de uma section ignorada
+  const isInIgnoredSection = (node: BaseNode): boolean => {
+    let parent = node.parent;
+    while (parent && parent.type !== 'PAGE') {
+      if (parent.type === 'SECTION') {
+        const sectionNameLower = parent.name.toLowerCase();
+        const shouldIgnore = IGNORED_SECTION_PREFIXES.some(prefix => 
+          sectionNameLower.startsWith(prefix)
+        );
+        if (shouldIgnore) {
+          console.log(`⚠️ Componente ${node.name} ignorado - está em section: ${parent.name}`);
+          return true;
+        }
+      }
+      parent = parent.parent;
+    }
+    return false;
+  };
+
   const componentEntries: Record<string, { key: string; isHidden?: boolean }> = {};
 
   // Encontra todos os componentes, incluindo os ocultos
@@ -85,6 +107,11 @@ async function extractDesignSystemData() {
 
   // Adiciona componentes independentes
   for (const component of components) {
+    // Pular componentes dentro de sections ignoradas
+    if (isInIgnoredSection(component)) {
+      continue;
+    }
+    
     const pageName = getPageName(component);
     const uniqueName = `${pageName}/${component.name}`;
     componentEntries[uniqueName] = {
@@ -95,6 +122,11 @@ async function extractDesignSystemData() {
 
   // Adiciona component sets
   for (const set of componentSets) {
+    // Pular component sets dentro de sections ignoradas
+    if (isInIgnoredSection(set)) {
+      continue;
+    }
+    
     const pageName = getPageName(set);
     const uniqueName = `${pageName}/${set.name}`;
     componentEntries[uniqueName] = {
